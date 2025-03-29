@@ -44,3 +44,42 @@ df = get_hist_data(
     end_date="2024-03-31"
 )
 ```
+
+### `get_realtime_data(source="eastmoney", symbol=None)`
+
+获取股票实时行情数据
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+| symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票 |
+
+#### 返回值
+
+返回标准化的DataFrame，包含以下列：
+
+- symbol: 股票代码
+- price: 最新价
+- change: 涨跌额
+- pct_change: 涨跌幅(%)
+- timestamp: 时间戳(UTC时区)
+- volume: 成交量(手)
+- amount: 成交额(元)
+- open: 今开
+- high: 最高
+- low: 最低
+- prev_close: 昨收
+
+#### 示例
+
+```python
+from akshare_one import get_realtime_data
+
+# 获取所有股票实时数据
+df_all = get_realtime_data()
+
+# 获取单只股票实时数据
+df_single = get_realtime_data(symbol="600000")
+```

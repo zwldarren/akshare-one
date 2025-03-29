@@ -1,3 +1,4 @@
+from typing import Optional
 import pandas as pd
 import akshare as ak
 
@@ -55,14 +56,22 @@ class EastMoneyAdapter:
             period=period,  # daily/weekly/monthly
             start_date=start_date,
             end_date=end_date,
-            adjust=adjust,
+            adjust=adjust if adjust != "none" else "",
         )
 
         # Standardize the data format
         return self._clean_data(raw_df)
 
+    def get_realtime_data(self, symbol: Optional[str] = None) -> pd.DataFrame:
+        """获取沪深京A股实时行情数据"""
+        raw_df = ak.stock_zh_a_spot_em()
+        df = self._clean_spot_data(raw_df)
+        if symbol:
+            df = df[df["symbol"] == symbol]
+        return df
+
     def _clean_data(self, raw_df: pd.DataFrame, adjust: str = "none") -> pd.DataFrame:
-        """清理和标准化数据格式
+        """清理和标准化历史数据格式
 
         Args:
             raw_df: Raw DataFrame from EastMoney API
@@ -122,3 +131,42 @@ class EastMoneyAdapter:
             "is_adjusted",
         ]
         return df[[col for col in standard_columns if col in df.columns]]
+
+    def _clean_spot_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
+        """清理和标准化实时行情数据"""
+
+        column_mapping = {
+            "代码": "symbol",
+            "最新价": "price",
+            "涨跌额": "change",
+            "涨跌幅": "pct_change",
+            "成交量": "volume",
+            "成交额": "amount",
+            "今开": "open",
+            "最高": "high",
+            "最低": "low",
+            "昨收": "prev_close",
+        }
+
+        df = raw_df.rename(columns=column_mapping)
+
+        # Change time to UTC
+        df = df.assign(
+            timestamp=lambda x: pd.Timestamp.now(tz="Asia/Shanghai")
+            .tz_convert("UTC")
+        )
+
+        required_columns = [
+            "symbol",
+            "price",
+            "change",
+            "pct_change",
+            "timestamp",
+            "volume",
+            "amount",
+            "open",
+            "high",
+            "low",
+            "prev_close",
+        ]
+        return df[required_columns]

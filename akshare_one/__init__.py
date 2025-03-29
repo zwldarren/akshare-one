@@ -6,11 +6,16 @@ Provides standardized access to various financial data sources with:
 - Cleaned and normalized outputs
 
 Example:
-    >>> from akshare_one import get_hist_data
+    >>> from akshare_one import get_hist_data, get_realtime_data
     >>> df = get_hist_data("600000", interval="day")
     >>> print(df.head())
+    >>> # 获取单只股票实时数据
+    >>> df = get_realtime_data(symbol="600000")
+    >>> # 获取所有股票实时数据
+    >>> df = get_realtime_data()
 """
 
+from typing import Optional
 import pandas as pd
 from .adapters import EastMoneyAdapter
 
@@ -47,4 +52,28 @@ def get_hist_data(
             end_date=end_date,
             adjust=adjust,
         )
+    raise ValueError(f"Unsupported data source: {source}")
+
+
+def get_realtime_data(
+    source: str = "eastmoney", symbol: Optional[str] = None
+) -> "pd.DataFrame":
+    """Get real-time market quotes
+
+    Returns:
+        DataFrame:
+        - symbol: 股票代码
+        - price: 最新价
+        - change: 涨跌额
+        - pct_change: 涨跌幅(%)
+        - timestamp: 时间戳
+        - volume: 成交量(手)
+        - amount: 成交额(元)
+        - open: 今开
+        - high: 最高
+        - low: 最低
+        - prev_close: 昨收
+    """
+    if source == "eastmoney":
+        return EastMoneyAdapter().get_realtime_data(symbol=symbol)
     raise ValueError(f"Unsupported data source: {source}")
