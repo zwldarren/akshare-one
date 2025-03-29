@@ -45,7 +45,7 @@ df = get_hist_data(
 )
 ```
 
-### `get_realtime_data(source="eastmoney", symbol=None)`
+### `get_realtime_data(symbol=None)`
 
 获取股票实时行情数据
 
@@ -82,4 +82,36 @@ df_all = get_realtime_data()
 
 # 获取单只股票实时数据
 df_single = get_realtime_data(symbol="600000")
+```
+
+### `get_news_data(symbol)`
+
+获取个股新闻数据
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "300059") |
+| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+
+#### 返回值
+
+返回标准化的DataFrame，包含以下列：
+
+- keyword: 关键词
+- title: 新闻标题
+- content: 新闻内容
+- publish_time: 发布时间(UTC时区)
+- source: 文章来源
+- url: 新闻链接
+
+#### 示例
+
+```python
+from akshare_one import get_news_data
+
+# 获取个股新闻数据
+df = get_news_data(symbol="300059")
+print(df[["title", "publish_time", "source"]].head())
 ```

@@ -77,3 +77,24 @@ def get_realtime_data(
     if source == "eastmoney":
         return EastMoneyAdapter().get_realtime_data(symbol=symbol)
     raise ValueError(f"Unsupported data source: {source}")
+
+
+def get_news_data(symbol: str, source: str = "eastmoney") -> "pd.DataFrame":
+    """获取个股新闻数据
+
+    Args:
+        symbol: 股票代码 (如 "300059")
+        source: 数据源 (目前仅支持 "eastmoney")
+
+    Returns:
+        DataFrame 包含:
+        - keyword: 关键词
+        - title: 新闻标题
+        - content: 新闻内容
+        - publish_time: 发布时间
+        - source: 文章来源
+        - url: 新闻链接
+    """
+    if source == "eastmoney":
+        return EastMoneyAdapter().get_news_data(symbol=symbol)
+    raise ValueError(f"Unsupported data source: {source}")
