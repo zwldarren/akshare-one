@@ -20,6 +20,7 @@ AKShare One希望通过统一封装，提供：
 - 历史数据 (`get_hist_data`)
 - 实时行情 (`get_realtime_data`) 
 - 个股新闻 (`get_news_data`)
+- 财务数据 (资产负债表/利润表/现金流量表)
 
 ### 标准化处理
 - 统一时间戳为UTC

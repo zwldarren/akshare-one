@@ -1,10 +1,13 @@
 import pandas as pd
 import akshare as ak
+from cachetools import cached
+from .cache.cache import CACHE_CONFIG
 
 
 class SinaAdapter:
     """Adapter for Sina financial report API"""
 
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
     def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
         """获取资产负债表数据
 
@@ -18,6 +21,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
     def get_income_statement(self, symbol: str) -> pd.DataFrame:
         """获取利润表数据
 
@@ -31,6 +35,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
     def get_cash_flow(self, symbol: str) -> pd.DataFrame:
         """获取现金流量表数据
 

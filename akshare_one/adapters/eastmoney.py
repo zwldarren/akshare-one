@@ -1,11 +1,23 @@
 from typing import Optional
 import pandas as pd
 import akshare as ak
+from cachetools import cached
+from .cache.cache import CACHE_CONFIG
 
 
 class EastMoneyAdapter:
     """Adapter for EastMoney historical stock data API"""
 
+    @cached(
+        CACHE_CONFIG["hist_data_cache"],
+        key=lambda self,
+        symbol,
+        interval,
+        interval_multiplier,
+        start_date,
+        end_date,
+        adjust: (symbol, interval, interval_multiplier, start_date, end_date, adjust),
+    )
     def get_hist_data(
         self,
         symbol: str,
@@ -62,6 +74,7 @@ class EastMoneyAdapter:
         # Standardize the data format
         return self._clean_data(raw_df)
 
+    @cached(CACHE_CONFIG["realtime_cache"], key=lambda self, symbol=None: symbol)
     def get_realtime_data(self, symbol: Optional[str] = None) -> pd.DataFrame:
         """获取沪深京A股实时行情数据"""
         raw_df = ak.stock_zh_a_spot_em()
@@ -132,6 +145,7 @@ class EastMoneyAdapter:
         ]
         return df[[col for col in standard_columns if col in df.columns]]
 
+    @cached(CACHE_CONFIG["news_cache"], key=lambda self, symbol: symbol)
     def get_news_data(self, symbol: str) -> pd.DataFrame:
         """获取东方财富个股新闻数据"""
         raw_df = ak.stock_news_em(symbol=symbol)
