@@ -32,16 +32,23 @@ def get_hist_data(
     """Get historical market data
 
     Args:
-        symbol: Unified symbol format (e.g. '600000')
-        interval: Time granularity ('second','minute','hour','day','week','month','year')
-        interval_multiplier: Interval multiplier (e.g. 5 for 5 minutes)
-        start_date: Start date (YYYY-MM-DD)
-        end_date: End date (YYYY-MM-DD)
-        adjust: Adjustment type ('none','qfq','hfq')
-        source: Data source ('eastmoney')
+        symbol: 股票代码 (e.g. '600000')
+        interval: 时间间隔 ('second','minute','hour','day','week','month','year')
+        interval_multiplier: 时间间隔倍数 (e.g. 5 for 5 minutes)
+        start_date: 开始日期 (YYYY-MM-DD)
+        end_date: 结束日期 (YYYY-MM-DD)
+        adjust: 复权类型 ('none','qfq','hfq')
+        source: 数据源 ('eastmoney')
 
     Returns:
-        Standardized DataFrame with OHLCV data
+        pd.DataFrame:
+        - timestamp: 时间戳(UTC时区)
+        - open: 开盘价
+        - high: 最高价
+        - low: 最低价
+        - close: 收盘价
+        - volume: 成交量
+        - is_adjusted: 是否复权
     """
     if source == "eastmoney":
         return EastMoneyAdapter().get_hist_data(
@@ -60,8 +67,12 @@ def get_realtime_data(
 ) -> "pd.DataFrame":
     """Get real-time market quotes
 
+    Args:
+        symbol: 股票代码 (如 "600000")
+        source: 数据源 ('eastmoney')
+
     Returns:
-        DataFrame:
+        pd.DataFrame:
         - symbol: 股票代码
         - price: 最新价
         - change: 涨跌额
@@ -84,10 +95,10 @@ def get_news_data(symbol: str, source: str = "eastmoney") -> "pd.DataFrame":
 
     Args:
         symbol: 股票代码 (如 "300059")
-        source: 数据源 (目前仅支持 "eastmoney")
+        source: 数据源 ('eastmoney')
 
     Returns:
-        DataFrame 包含:
+        pd.DataFrame:
         - keyword: 关键词
         - title: 新闻标题
         - content: 新闻内容
@@ -105,10 +116,10 @@ def get_balance_sheet(symbol: str, source: str = "sina") -> "pd.DataFrame":
 
     Args:
         symbol: 股票代码 (如 "600600")
-        source: 数据源 (目前支持 "sina")
+        source: 数据源 ("sina")
 
     Returns:
-        DataFrame 包含标准化后的资产负债表数据，包含以下列：
+        pd.DataFrame:
         - report_date: 报告日期
         - report_period: 报告期
         - period: 期间
@@ -153,7 +164,7 @@ def get_income_statement(symbol: str, source: str = "sina") -> "pd.DataFrame":
         source: 数据源 (目前支持 "sina")
 
     Returns:
-        DataFrame 包含标准化后的利润表数据，包含以下列：
+        pd.DataFrame:
         - report_date: 报告日期
         - report_period: 报告期
         - period: 期间
@@ -187,7 +198,7 @@ def get_cash_flow(symbol: str, source: str = "sina") -> "pd.DataFrame":
         source: 数据源 (目前支持 "sina")
 
     Returns:
-        DataFrame 包含标准化后的现金流量表数据，包含以下列：
+        pd.DataFrame:
         - report_date: 报告日期
         - report_period: 报告期
         - period: 期间
