@@ -38,7 +38,7 @@ def get_hist_data(
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
         adjust: 复权类型 ('none','qfq','hfq')
-        source: 数据源 ('eastmoney')
+        source: 数据源 ('eastmoney', 'sina')
 
     Returns:
         pd.DataFrame:
@@ -52,6 +52,15 @@ def get_hist_data(
     """
     if source == "eastmoney":
         return EastMoneyAdapter().get_hist_data(
+            symbol=symbol,
+            interval=interval,
+            interval_multiplier=interval_multiplier,
+            start_date=start_date,
+            end_date=end_date,
+            adjust=adjust,
+        )
+    elif source == "sina":
+        return SinaAdapter().get_hist_data(
             symbol=symbol,
             interval=interval,
             interval_multiplier=interval_multiplier,

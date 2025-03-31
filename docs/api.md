@@ -16,7 +16,7 @@
 | start_date | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
 | end_date | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
 | adjust | str | 否 | "none" | 复权类型("none","qfq","hfq") |
-| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney","sina") |
 
 #### 返回值
 

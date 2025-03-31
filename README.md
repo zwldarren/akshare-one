@@ -21,6 +21,7 @@ AKShare One希望通过统一封装，提供：
 - 实时行情 (`get_realtime_data`) 
 - 个股新闻 (`get_news_data`)
 - 财务数据 (资产负债表/利润表/现金流量表)
+- 内部交易 (`get_inner_trade_data`)
 
 ### 标准化处理
 - 统一时间戳为UTC
@@ -49,10 +50,6 @@ df_hist = get_hist_data(
 # 获取实时数据
 df_realtime = get_realtime_data(symbol="600000")
 ```
-
-## 支持数据源
-- 东方财富(eastmoney) - A股历史行情、实时行情、新闻数据
-- 更多数据源持续接入中...
 
 ## API文档
 详细API说明请参考 [docs/api.md](docs/api.md)

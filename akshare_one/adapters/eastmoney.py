@@ -52,7 +52,7 @@ class EastMoneyAdapter:
             period = "monthly"
         elif interval == "year":
             period = "monthly"  # use monthly for yearly data
-            interval_multiplier *= 12
+            interval_multiplier = 12 * interval_multiplier  # 确保年间隔使用乘数
         else:
             raise ValueError(
                 f"Unsupported interval: {interval}. For minute/hour data, please use other APIs"
@@ -71,6 +71,9 @@ class EastMoneyAdapter:
             adjust=adjust if adjust != "none" else "",
         )
 
+        if interval_multiplier > 1:
+            raw_df = self._resample_data(raw_df, interval, interval_multiplier)
+
         # Standardize the data format
         return self._clean_data(raw_df)
 
@@ -82,6 +85,32 @@ class EastMoneyAdapter:
         if symbol:
             df = df[df["symbol"] == symbol]
         return df
+
+    def _resample_data(
+        self, df: pd.DataFrame, interval: str, multiplier: int
+    ) -> pd.DataFrame:
+        """Resample the data based on the given interval and multiplier"""
+        if interval == "day":
+            freq = f"{multiplier}D"
+        elif interval == "week":
+            freq = f"{multiplier}W-MON"
+        elif interval == "month":
+            freq = f"{multiplier}MS"
+        elif interval == "year":
+            freq = f"{multiplier}AS-JAN"
+
+        df["日期"] = pd.to_datetime(df["日期"])
+        df = df.set_index("日期")
+        resampled = df.resample(freq).agg(
+            {
+                "开盘": "first",
+                "最高": "max",
+                "最低": "min",
+                "收盘": "last",
+                "成交量": "sum",
+            }
+        )
+        return resampled.reset_index()
 
     def _clean_data(self, raw_df: pd.DataFrame, adjust: str = "none") -> pd.DataFrame:
         """清理和标准化历史数据格式

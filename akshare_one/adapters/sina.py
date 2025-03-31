@@ -5,7 +5,12 @@ from .cache.cache import CACHE_CONFIG
 
 
 class SinaAdapter:
-    """Adapter for Sina financial report API"""
+    """Adapter for Sina financial data API
+
+    Includes:
+    - Financial reports (balance sheet, income statement, cash flow)
+    - Historical market data
+    """
 
     @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
     def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
@@ -213,6 +218,135 @@ class SinaAdapter:
         # Filter columns
         available_columns = [col for col in required_columns if col in raw_df.columns]
         return raw_df[available_columns]
+
+    @cached(
+        CACHE_CONFIG["hist_data_cache"],
+        key=lambda self,
+        symbol,
+        interval,
+        interval_multiplier,
+        start_date,
+        end_date,
+        adjust: (symbol, interval, interval_multiplier, start_date, end_date, adjust),
+    )
+    def get_hist_data(
+        self,
+        symbol: str,
+        interval: str = "day",
+        interval_multiplier: int = 1,
+        start_date: str = "1970-01-01",
+        end_date: str = "2030-12-31",
+        adjust: str = "none",
+    ) -> pd.DataFrame:
+        """获取新浪历史行情数据
+
+        Args:
+            symbol: 股票代码 (如 "600000")
+            interval: 时间粒度
+            interval_multiplier: 时间间隔倍数
+            start_date: 开始日期 (YYYY-MM-DD)
+            end_date: 结束日期 (YYYY-MM-DD)
+            adjust: 复权类型 ('none','qfq','hfq','qfq-factor','hfq-factor')
+
+        Returns:
+            Standardized DataFrame with OHLCV data
+        """
+        # Map standard interval to supported periods
+        interval = interval.lower()
+        if interval not in ["day", "week", "month", "year"]:
+            raise ValueError("Sina only supports day/week/month/year intervals")
+
+        # Convert date format from YYYY-MM-DD to YYYYMMDD
+        start_date = start_date.replace("-", "") if "-" in start_date else start_date
+        end_date = end_date.replace("-", "") if "-" in end_date else end_date
+
+        stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
+
+        raw_df = ak.stock_zh_a_daily(
+            symbol=stock,
+            start_date=start_date,
+            end_date=end_date,
+            adjust=adjust if adjust != "none" else "",
+        )
+
+        if interval_multiplier > 1:
+            raw_df = self._resample_data(raw_df, interval, interval_multiplier)
+
+        return self._clean_hist_data(raw_df, adjust)
+
+    def _resample_data(
+        self, df: pd.DataFrame, interval: str, multiplier: int
+    ) -> pd.DataFrame:
+        if interval == "day":
+            freq = f"{multiplier}D"
+        elif interval == "week":
+            freq = f"{multiplier}W-MON"
+        elif interval == "month":
+            freq = f"{multiplier}MS"
+        elif interval == "year":
+            freq = f"{multiplier}AS-JAN"
+
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.set_index("date")
+        resampled = df.resample(freq).agg(
+            {
+                "open": "first",
+                "high": "max",
+                "low": "min",
+                "close": "last",
+                "volume": "sum",
+            }
+        )
+        return resampled.reset_index()
+
+    def _clean_hist_data(self, raw_df: pd.DataFrame, adjust: str) -> pd.DataFrame:
+        """清理和标准化历史行情数据
+
+        Args:
+            raw_df: 原始数据DataFrame
+            adjust: 复权类型
+
+        Returns:
+            标准化后的DataFrame
+        """
+        column_mapping = {
+            "date": "timestamp",
+            "open": "open",
+            "high": "high",
+            "low": "low",
+            "close": "close",
+            "volume": "volume",
+        }
+
+        df = raw_df.rename(columns=column_mapping)
+
+        # Process timestamp
+        if "timestamp" in df.columns:
+            df["timestamp"] = (
+                pd.to_datetime(df["timestamp"])
+                .dt.tz_localize("Asia/Shanghai")
+                .dt.tz_convert("UTC")
+            )
+
+        # Process volume
+        if "volume" in df.columns:
+            df["volume"] = df["volume"].astype("int64")
+
+        # Add adjustment flag
+        df["is_adjusted"] = adjust != "none"
+
+        # Select and order columns
+        standard_columns = [
+            "timestamp",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "is_adjusted",
+        ]
+
+        return df[[col for col in standard_columns if col in df.columns]]
 
     def _clean_income_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化利润表数据
