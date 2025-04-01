@@ -12,7 +12,7 @@ class SinaAdapter:
     - Historical market data
     """
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
     def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
         """获取资产负债表数据
 
@@ -26,7 +26,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
     def get_income_statement(self, symbol: str) -> pd.DataFrame:
         """获取利润表数据
 
@@ -40,7 +40,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: symbol)
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
     def get_cash_flow(self, symbol: str) -> pd.DataFrame:
         """获取现金流量表数据
 
@@ -227,7 +227,7 @@ class SinaAdapter:
         interval_multiplier,
         start_date,
         end_date,
-        adjust: (symbol, interval, interval_multiplier, start_date, end_date, adjust),
+        adjust: ("sina", symbol, interval, interval_multiplier, start_date, end_date, adjust),
     )
     def get_hist_data(
         self,
@@ -242,8 +242,8 @@ class SinaAdapter:
 
         Args:
             symbol: 股票代码 (如 "600000")
-            interval: 时间粒度
-            interval_multiplier: 时间间隔倍数
+            interval: 时间粒度 (支持: "minute", "hour", "day", "week", "month", "year")
+            interval_multiplier: 时间间隔倍数 (如: 5分钟数据设为5)
             start_date: 开始日期 (YYYY-MM-DD)
             end_date: 结束日期 (YYYY-MM-DD)
             adjust: 复权类型 ('none','qfq','hfq','qfq-factor','hfq-factor')
@@ -251,26 +251,76 @@ class SinaAdapter:
         Returns:
             Standardized DataFrame with OHLCV data
         """
-        # Map standard interval to supported periods
         interval = interval.lower()
-        if interval not in ["day", "week", "month", "year"]:
-            raise ValueError("Sina only supports day/week/month/year intervals")
-
-        # Convert date format from YYYY-MM-DD to YYYYMMDD
-        start_date = start_date.replace("-", "") if "-" in start_date else start_date
-        end_date = end_date.replace("-", "") if "-" in end_date else end_date
-
         stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
 
-        raw_df = ak.stock_zh_a_daily(
-            symbol=stock,
-            start_date=start_date,
-            end_date=end_date,
-            adjust=adjust if adjust != "none" else "",
-        )
+        if interval == "minute":
+            raw_df = ak.stock_zh_a_minute(
+                symbol=stock,
+                period="1",
+                adjust=adjust if adjust != "none" else "",
+            )
+            raw_df = raw_df.rename(columns={"day": "date"})
+            raw_df["date"] = pd.to_datetime(raw_df["date"])
+            raw_df = raw_df.set_index("date")
+            raw_df = (
+                raw_df.resample(f"{interval_multiplier}min")
+                .agg(
+                    {
+                        "open": "first",
+                        "high": "max",
+                        "low": "min",
+                        "close": "last",
+                        "volume": "sum",
+                    }
+                )
+                .reset_index()
+            )
 
-        if interval_multiplier > 1:
-            raw_df = self._resample_data(raw_df, interval, interval_multiplier)
+        elif interval == "hour":
+            if interval_multiplier < 1:
+                raise ValueError("Hour interval multiplier must be >= 1")
+
+            raw_df = ak.stock_zh_a_minute(
+                symbol=stock,
+                period="60",
+                adjust=adjust if adjust != "none" else "",
+            )
+            raw_df = raw_df.rename(columns={"day": "date"})
+            raw_df["date"] = pd.to_datetime(raw_df["date"])
+            raw_df = raw_df.set_index("date")
+            raw_df = (
+                raw_df.resample(f"{interval_multiplier}h")
+                .agg(
+                    {
+                        "open": "first",
+                        "high": "max",
+                        "low": "min",
+                        "close": "last",
+                        "volume": "sum",
+                    }
+                )
+                .reset_index()
+            )
+
+        elif interval in ["day", "week", "month", "year"]:
+            # Convert date format from YYYY-MM-DD to YYYYMMDD
+            start_date = (
+                start_date.replace("-", "") if "-" in start_date else start_date
+            )
+            end_date = end_date.replace("-", "") if "-" in end_date else end_date
+
+            raw_df = ak.stock_zh_a_daily(
+                symbol=stock,
+                start_date=start_date,
+                end_date=end_date,
+                adjust=adjust if adjust != "none" else "",
+            )
+
+            if interval_multiplier > 1:
+                raw_df = self._resample_data(raw_df, interval, interval_multiplier)
+        else:
+            raise ValueError(f"Unsupported interval: {interval}")
 
         return self._clean_hist_data(raw_df, adjust)
 
