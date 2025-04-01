@@ -31,20 +31,15 @@ AKShare One希望通过统一封装，提供：
 
 ## 快速开始
 
-安装：
-```bash
-pip install akshare-one
-```
-
 使用示例：
 ```python
 from akshare_one import get_hist_data, get_realtime_data
 
 # 获取历史数据
 df_hist = get_hist_data(
-    symbol="600000",  # 统一股票代码格式
+    symbol="600000",
     interval="day",
-    adjust="qfq"      # 支持前复权
+    adjust="hfq"
 )
 
 # 获取实时数据
