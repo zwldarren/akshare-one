@@ -332,9 +332,6 @@ class SinaAdapter:
         if "volume" in df.columns:
             df["volume"] = df["volume"].astype("int64")
 
-        # Add adjustment flag
-        df["is_adjusted"] = adjust != "none"
-
         # Select and order columns
         standard_columns = [
             "timestamp",
@@ -343,7 +340,6 @@ class SinaAdapter:
             "low",
             "close",
             "volume",
-            "is_adjusted",
         ]
 
         return df[[col for col in standard_columns if col in df.columns]]

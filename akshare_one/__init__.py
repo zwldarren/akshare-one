@@ -48,7 +48,6 @@ def get_hist_data(
         - low: 最低价
         - close: 收盘价
         - volume: 成交量
-        - is_adjusted: 是否复权
     """
     if source == "eastmoney":
         return EastMoneyAdapter().get_hist_data(

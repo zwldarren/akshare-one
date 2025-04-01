@@ -28,7 +28,6 @@
 - low: 最低价
 - close: 收盘价
 - volume: 成交量
-- is_adjusted: 是否复权
 
 #### 示例
 

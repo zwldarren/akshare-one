@@ -44,6 +44,70 @@ class EastMoneyAdapter:
         interval = interval.lower()
         if interval == "second":
             raise ValueError("EastMoney does not support second-level data")
+        elif interval == "minute":
+            if interval_multiplier < 1:
+                raise ValueError("Minute interval multiplier must be >= 1")
+
+            start_date = (
+                f"{start_date} 09:30:00" if " " not in start_date else start_date
+            )
+            end_date = f"{end_date} 15:00:00" if " " not in end_date else end_date
+
+            raw_df = ak.stock_zh_a_hist_min_em(
+                symbol=symbol,
+                period="1",
+                start_date=start_date,
+                end_date=end_date,
+                adjust=adjust if adjust != "none" else "",
+            )
+            # Resample the data to the desired minute interval
+            raw_df["时间"] = pd.to_datetime(raw_df["时间"])
+            raw_df = raw_df.set_index("时间")
+            resampled = raw_df.resample(f"{interval_multiplier}min").agg(
+                {
+                    "开盘": "first",
+                    "最高": "max",
+                    "最低": "min",
+                    "收盘": "last",
+                    "成交量": "sum",
+                    "成交额": "sum",
+                }
+            )
+            raw_df = resampled.reset_index()
+            return self._clean_minute_data(raw_df, str(interval_multiplier))
+        elif interval == "hour":
+            if interval_multiplier < 1:
+                raise ValueError("Hour interval multiplier must be >= 1")
+
+            start_date = (
+                f"{start_date} 09:30:00" if " " not in start_date else start_date
+            )
+            end_date = f"{end_date} 15:00:00" if " " not in end_date else end_date
+
+            raw_df = ak.stock_zh_a_hist_min_em(
+                symbol=symbol,
+                period="1",
+                start_date=start_date,
+                end_date=end_date,
+                adjust=adjust if adjust != "none" else "",
+            )
+
+            # Resample the data to the desired hour interval
+            raw_df["时间"] = pd.to_datetime(raw_df["时间"])
+            raw_df = raw_df.set_index("时间")
+            resampled = raw_df.resample(f"{interval_multiplier}h").agg(
+                {
+                    "开盘": "first",
+                    "最高": "max",
+                    "最低": "min",
+                    "收盘": "last",
+                    "成交量": "sum",
+                    "成交额": "sum",
+                }
+            )
+            raw_df = resampled.reset_index()
+
+            return self._clean_minute_data(raw_df, f"{interval_multiplier}H")
         elif interval == "day":
             period = "daily"
         elif interval == "week":
@@ -52,11 +116,9 @@ class EastMoneyAdapter:
             period = "monthly"
         elif interval == "year":
             period = "monthly"  # use monthly for yearly data
-            interval_multiplier = 12 * interval_multiplier  # 确保年间隔使用乘数
+            interval_multiplier = 12 * interval_multiplier
         else:
-            raise ValueError(
-                f"Unsupported interval: {interval}. For minute/hour data, please use other APIs"
-            )
+            raise ValueError(f"Unsupported interval: {interval}")
 
         # Convert date format from YYYY-MM-DD to YYYYMMDD if needed
         start_date = start_date.replace("-", "") if "-" in start_date else start_date
@@ -111,6 +173,51 @@ class EastMoneyAdapter:
             }
         )
         return resampled.reset_index()
+
+    def _clean_minute_data(self, raw_df: pd.DataFrame, period: str) -> pd.DataFrame:
+        if period == "1":
+            column_mapping = {
+                "时间": "timestamp",
+                "开盘": "open",
+                "收盘": "close",
+                "最高": "high",
+                "最低": "low",
+                "成交量": "volume",
+                "成交额": "amount",
+                "均价": "vwap",
+            }
+        else:
+            column_mapping = {
+                "时间": "timestamp",
+                "开盘": "open",
+                "收盘": "close",
+                "最高": "high",
+                "最低": "low",
+                "涨跌幅": "pct_change",
+                "涨跌额": "change",
+                "成交量": "volume",
+                "成交额": "amount",
+                "振幅": "amplitude",
+                "换手率": "turnover",
+            }
+
+        df = raw_df.rename(columns=column_mapping)
+
+        if "timestamp" in df.columns:
+            df["timestamp"] = (
+                pd.to_datetime(df["timestamp"])
+                .dt.tz_localize("Asia/Shanghai")
+                .dt.tz_convert("UTC")
+            )
+        standard_columns = [
+            "timestamp",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+        ]
+        return df[[col for col in standard_columns if col in df.columns]]
 
     def _clean_data(self, raw_df: pd.DataFrame, adjust: str = "none") -> pd.DataFrame:
         """清理和标准化历史数据格式
@@ -170,7 +277,6 @@ class EastMoneyAdapter:
             "low",
             "close",
             "volume",
-            "is_adjusted",
         ]
         return df[[col for col in standard_columns if col in df.columns]]
 
