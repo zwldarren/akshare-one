@@ -16,11 +16,11 @@ AKShare One希望通过统一封装，提供：
 
 ## 核心功能
 
-### 目前仅实现了以下功能：
+### 目前实现了以下接口：
 - 历史数据 (`get_hist_data`)
 - 实时行情 (`get_realtime_data`) 
 - 个股新闻 (`get_news_data`)
-- 财务数据 (资产负债表/利润表/现金流量表)
+- 财务数据 (`get_balance_sheet`/`get_income_statement`/`get_cash_flow`)
 - 内部交易 (`get_inner_trade_data`)
 
 ### 标准化处理
@@ -30,6 +30,11 @@ AKShare One希望通过统一封装，提供：
 - 统一列名和数据类型
 
 ## 快速开始
+
+安装：
+```bash
+pip install akshare-one
+```
 
 使用示例：
 ```python
