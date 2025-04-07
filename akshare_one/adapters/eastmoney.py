@@ -145,7 +145,7 @@ class EastMoneyAdapter:
         raw_df = ak.stock_zh_a_spot_em()
         df = self._clean_spot_data(raw_df)
         if symbol:
-            df = df[df["symbol"] == symbol]
+            df = df[df["symbol"] == symbol].reset_index(drop=True)
         return df
 
     def _resample_data(
