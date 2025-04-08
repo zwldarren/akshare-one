@@ -31,7 +31,7 @@ class EastMoneyAdapter:
 
         Args:
             symbol: Unified symbol format (e.g. '600000')
-            interval: Time granularity ('second','minute','hour','day','week','month','year')
+            interval: Time granularity ('minute','hour','day','week','month','year')
             interval_multiplier: Interval multiplier (e.g. 5 for 5 minutes)
             start_date: Start date in YYYY-MM-DD format (will be converted to YYYYMMDD)
             end_date: End date in YYYY-MM-DD format (will be converted to YYYYMMDD)
@@ -42,9 +42,7 @@ class EastMoneyAdapter:
         """
         # Map standard interval to akshare supported periods
         interval = interval.lower()
-        if interval == "second":
-            raise ValueError("EastMoney does not support second-level data")
-        elif interval == "minute":
+        if interval == "minute":
             if interval_multiplier < 1:
                 raise ValueError("Minute interval multiplier must be >= 1")
 

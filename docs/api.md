@@ -11,12 +11,14 @@
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | symbol | str | 是 | - | 股票代码(如: "600000") |
-| interval | str | 是 | - | 时间粒度("day","week","month") |
-| interval_multiplier | int | 否 | 1 | 时间间隔乘数 |
+| interval | str | 是 | - | 时间粒度('minute','hour','day','week','month','year') |
+| interval_multiplier | int | 否 | 1 | 时间间隔倍数 |
 | start_date | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
 | end_date | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
 | adjust | str | 否 | "none" | 复权类型("none","qfq","hfq") |
 | source | str | 否 | "eastmoney" | 数据源("eastmoney","sina") |
+
+> 注意: 如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线
 
 #### 返回值
 

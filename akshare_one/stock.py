@@ -21,7 +21,7 @@ def get_hist_data(
 
     Args:
         symbol: 股票代码 (e.g. '600000')
-        interval: 时间间隔 ('second','minute','hour','day','week','month','year')
+        interval: 时间间隔 ('minute','hour','day','week','month','year')
         interval_multiplier: 时间间隔倍数 (e.g. 5 for 5 minutes)
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
