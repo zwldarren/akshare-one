@@ -14,3 +14,6 @@ keywords = ["akshare", "financial-data", "stock-data", "quant"]
 [project.urls]
 Homepage = "https://github.com/zwldarren/akshare-one"
 Repository = "https://github.com/zwldarren/akshare-one.git"
+
+[dependency-groups]
+dev = []

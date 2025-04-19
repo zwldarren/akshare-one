@@ -133,8 +133,6 @@ print(df[["title", "publish_time", "source"]].head())
 返回标准化的DataFrame，包含以下列：
 
 - report_date: 报告日期
-- report_period: 报告期
-- period: 期间
 - currency: 币种
 - total_assets: 资产总计
 - current_assets: 流动资产合计
@@ -143,7 +141,6 @@ print(df[["title", "publish_time", "source"]].head())
 - current_investments: 交易性金融资产
 - trade_and_non_trade_receivables: 应收票据及应收账款
 - non_current_assets: 非流动资产合计
-- property_plant_and_equipment: 固定资产
 - goodwill_and_intangible_assets: 商誉
 - investments: 长期股权投资
 - non_current_investments: 其他非流动金融资产
@@ -189,16 +186,13 @@ print(df[["report_date", "total_assets", "total_liabilities"]].head())
 返回标准化的DataFrame，包含以下列：
 
 - report_date: 报告日期
-- report_period: 报告期
-- period: 期间
 - currency: 币种
 - revenue: 营业总收入
 - cost_of_revenue: 营业成本
-- gross_profit: 营业利润
+- operating_profit: 营业利润
 - operating_expense: 管理费用
 - selling_general_and_administrative_expenses: 销售费用
 - research_and_development: 研发费用
-- operating_income: 营业利润
 - interest_expense: 利息支出
 - ebit: 利润总额
 - income_tax_expense: 所得税费用
@@ -234,25 +228,17 @@ print(df[["report_date", "revenue", "net_income"]].head())
 返回标准化的DataFrame，包含以下列：
 
 - report_date: 报告日期
-- report_period: 报告期
-- period: 期间
+- report_type: 报告类型
 - currency: 币种
-- net_income: 净利润
-- depreciation_and_amortization: 固定资产折旧、油气资产折耗、生产性生物资产折旧
-- share_based_compensation: 无形资产摊销
 - net_cash_flow_from_operations: 经营活动产生的现金流量净额
-- capital_expenditure: 购建固定资产、无形资产和其他长期资产支付的现金
 - business_acquisitions_and_disposals: 取得子公司及其他营业单位支付的现金净额
-- investment_acquisitions_and_disposals: 投资支付的现金
 - net_cash_flow_from_investing: 投资活动产生的现金流量净额
 - issuance_or_repayment_of_debt_securities: 取得借款收到的现金
 - issuance_or_purchase_of_equity_shares: 吸收投资收到的现金
-- dividends_and_other_cash_distributions: 分配股利、利润或偿付利息支付的现金
 - net_cash_flow_from_financing: 筹资活动产生的现金流量净额
 - change_in_cash_and_equivalents: 现金及现金等价物净增加额
 - effect_of_exchange_rate_changes: 汇率变动对现金及现金等价物的影响
 - ending_cash_balance: 期末现金及现金等价物余额
-- free_cash_flow: 自由现金流
 
 #### 示例
 

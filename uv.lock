@@ -124,6 +124,9 @@ requires-dist = [
     { name = "cachetools", specifier = ">=5.5.2" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "attrs"
 version = "25.3.0"
