@@ -12,7 +12,7 @@ class SinaAdapter:
     - Historical market data
     """
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_balance_{symbol}")
     def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
         """获取资产负债表数据
 
@@ -26,7 +26,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_income_{symbol}")
     def get_income_statement(self, symbol: str) -> pd.DataFrame:
         """获取利润表数据
 
@@ -40,7 +40,7 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_{symbol}")
+    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_cash_{symbol}")
     def get_cash_flow(self, symbol: str) -> pd.DataFrame:
         """获取现金流量表数据
 
@@ -98,28 +98,8 @@ class SinaAdapter:
         raw_df = raw_df.rename(columns=column_mapping)
 
         # Select only required columns
-        required_columns = [
-            "report_date",
-            "report_period",
-            "period",
-            "currency",
-            "net_income",
-            "depreciation_and_amortization",
-            "share_based_compensation",
-            "net_cash_flow_from_operations",
-            "capital_expenditure",
-            "business_acquisitions_and_disposals",
-            "investment_acquisitions_and_disposals",
-            "net_cash_flow_from_investing",
-            "issuance_or_repayment_of_debt_securities",
-            "issuance_or_purchase_of_equity_shares",
-            "dividends_and_other_cash_distributions",
-            "net_cash_flow_from_financing",
-            "change_in_cash_and_equivalents",
-            "effect_of_exchange_rate_changes",
-            "ending_cash_balance",
-            "free_cash_flow",
-        ]
+        required_columns = ["report_date"]
+        required_columns.extend(column_mapping.values())
 
         # Filter columns
         available_columns = [col for col in required_columns if col in raw_df.columns]
@@ -420,7 +400,7 @@ class SinaAdapter:
             "币种": "currency",
             "营业总收入": "revenue",
             "营业成本": "cost_of_revenue",
-            "营业利润": "gross_profit",
+            "营业利润": "operating_profit",
             "销售费用": "selling_general_and_administrative_expenses",
             "管理费用": "operating_expense",
             "研发费用": "research_and_development",
@@ -438,16 +418,14 @@ class SinaAdapter:
         # Select only required columns
         required_columns = [
             "report_date",
-            "report_period",
             "period",
             "currency",
             "revenue",
             "cost_of_revenue",
-            "gross_profit",
+            "operating_profit",
             "operating_expense",
             "selling_general_and_administrative_expenses",
             "research_and_development",
-            "operating_income",
             "interest_expense",
             "ebit",
             "income_tax_expense",
