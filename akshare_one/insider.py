@@ -8,7 +8,9 @@ import pandas as pd
 from .adapters import XueQiuAdapter
 
 
-def get_inner_trade_data(source: str = "xueqiu", symbol: Optional[str] = None) -> "pd.DataFrame":
+def get_inner_trade_data(
+    source: str = "xueqiu", symbol: Optional[str] = None
+) -> "pd.DataFrame":
     """获取雪球内部交易数据
 
     Args:

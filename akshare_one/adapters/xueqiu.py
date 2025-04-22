@@ -8,7 +8,10 @@ from .cache.cache import CACHE_CONFIG
 class XueQiuAdapter:
     """Adapter for XueQiu insider trading data API"""
 
-    @cached(CACHE_CONFIG["hist_data_cache"], key=lambda self, symbol=None: f"inner_trade_{symbol if symbol else 'all'}")
+    @cached(
+        CACHE_CONFIG["hist_data_cache"],
+        key=lambda self, symbol=None: f"inner_trade_{symbol if symbol else 'all'}",
+    )
     def get_inner_trade_data(self, symbol: Optional[str] = None) -> pd.DataFrame:
         """获取雪球内部交易数据
 

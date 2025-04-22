@@ -16,7 +16,15 @@ class EastMoneyAdapter:
         interval_multiplier,
         start_date,
         end_date,
-        adjust: ("eastmoney", symbol, interval, interval_multiplier, start_date, end_date, adjust),
+        adjust: (
+            "eastmoney",
+            symbol,
+            interval,
+            interval_multiplier,
+            start_date,
+            end_date,
+            adjust,
+        ),
     )
     def get_hist_data(
         self,
@@ -137,7 +145,10 @@ class EastMoneyAdapter:
         # Standardize the data format
         return self._clean_data(raw_df)
 
-    @cached(CACHE_CONFIG["realtime_cache"], key=lambda self, symbol=None: f"eastmoney_{symbol if symbol else 'all'}")
+    @cached(
+        CACHE_CONFIG["realtime_cache"],
+        key=lambda self, symbol=None: f"eastmoney_{symbol if symbol else 'all'}",
+    )
     def get_realtime_data(self, symbol: Optional[str] = None) -> pd.DataFrame:
         """获取沪深京A股实时行情数据"""
         raw_df = ak.stock_zh_a_spot_em()

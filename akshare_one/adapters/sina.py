@@ -12,7 +12,10 @@ class SinaAdapter:
     - Historical market data
     """
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_balance_{symbol}")
+    @cached(
+        CACHE_CONFIG["financial_cache"],
+        key=lambda self, symbol: f"sina_balance_{symbol}",
+    )
     def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
         """获取资产负债表数据
 
@@ -26,7 +29,10 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_income_{symbol}")
+    @cached(
+        CACHE_CONFIG["financial_cache"],
+        key=lambda self, symbol: f"sina_income_{symbol}",
+    )
     def get_income_statement(self, symbol: str) -> pd.DataFrame:
         """获取利润表数据
 
@@ -40,7 +46,9 @@ class SinaAdapter:
         raw_df = ak.stock_financial_report_sina(stock=stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @cached(CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_cash_{symbol}")
+    @cached(
+        CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_cash_{symbol}"
+    )
     def get_cash_flow(self, symbol: str) -> pd.DataFrame:
         """获取现金流量表数据
 
@@ -207,7 +215,15 @@ class SinaAdapter:
         interval_multiplier,
         start_date,
         end_date,
-        adjust: ("sina", symbol, interval, interval_multiplier, start_date, end_date, adjust),
+        adjust: (
+            "sina",
+            symbol,
+            interval,
+            interval_multiplier,
+            start_date,
+            end_date,
+            adjust,
+        ),
     )
     def get_hist_data(
         self,
