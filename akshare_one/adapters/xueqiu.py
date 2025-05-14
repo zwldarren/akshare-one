@@ -9,6 +9,61 @@ class XueQiuAdapter:
     """Adapter for XueQiu insider trading data API"""
 
     @cached(
+        cache=CACHE_CONFIG,
+        key=lambda self, symbol=None: f"xueqiu_{symbol}",
+    )
+    def get_realtime_data(self, symbol: str) -> pd.DataFrame:
+        """获取雪球实时行情数据
+
+        Args:
+            symbol: 股票代码 ("600000")
+
+        Returns:
+            - symbol: 股票代码
+            - price: 最新价
+            - change: 涨跌额
+            - pct_change: 涨跌幅(%)
+            - timestamp: 时间戳
+            - volume: 成交量(手)
+            - amount: 成交额(元)
+            - open: 今开
+            - high: 最高
+            - low: 最低
+            - prev_close: 昨收
+
+        Raises:
+            ValueError: 如果symbol格式不正确或API返回错误
+        """
+
+        raw_df = ak.stock_individual_spot_xq(symbol=self._convert_symbol(symbol))
+
+        # Transform to match EastMoney format
+        data = {
+            "symbol": symbol,
+            "price": float(raw_df.loc[raw_df["item"] == "现价", "value"].values[0]),
+            "change": float(raw_df.loc[raw_df["item"] == "涨跌", "value"].values[0]),
+            "pct_change": float(
+                raw_df.loc[raw_df["item"] == "涨幅", "value"].values[0]
+            ),
+            "timestamp": pd.to_datetime(
+                raw_df.loc[raw_df["item"] == "时间", "value"].values[0]
+            )
+            .tz_localize("Asia/Shanghai")
+            .tz_convert("UTC"),
+            "volume": int(raw_df.loc[raw_df["item"] == "成交量", "value"].values[0])
+            / 100,
+            "amount": float(raw_df.loc[raw_df["item"] == "成交额", "value"].values[0]),
+            "open": float(raw_df.loc[raw_df["item"] == "今开", "value"].values[0]),
+            "high": float(raw_df.loc[raw_df["item"] == "最高", "value"].values[0]),
+            "low": float(raw_df.loc[raw_df["item"] == "最低", "value"].values[0]),
+            "prev_close": float(
+                raw_df.loc[raw_df["item"] == "昨收", "value"].values[0]
+            ),
+        }
+
+        return pd.DataFrame([data])
+
+    @cached(
         CACHE_CONFIG["hist_data_cache"],
         key=lambda self, symbol=None: f"inner_trade_{symbol if symbol else 'all'}",
     )
@@ -33,9 +88,9 @@ class XueQiuAdapter:
         raw_df = ak.stock_inner_trade_xq()
         if symbol:
             raw_df = raw_df[raw_df["股票代码"] == symbol]
-        return self._clean_data(raw_df)
+        return self._clean_insider_data(raw_df)
 
-    def _clean_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
+    def _clean_insider_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化内部交易数据
 
         Args:
@@ -107,3 +162,14 @@ class XueQiuAdapter:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
         return df
+
+    def _convert_symbol(self, symbol: str) -> str:
+        """
+        Convert Symbol (600000) to XueQiu Symbol (SH600000)
+        """
+        if symbol.startswith("6"):
+            return f"SH{symbol}"
+        elif symbol.startswith("0") or symbol.startswith("3"):
+            return f"SZ{symbol}"
+        else:  # TODO: add more cases
+            return symbol

@@ -54,8 +54,8 @@ df = get_hist_data(
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
-| symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票 |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney", "xueqiu") |
+| symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票(注意: xueqiu源必须提供此参数) |
 
 #### 返回值
 

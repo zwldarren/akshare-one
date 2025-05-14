@@ -5,6 +5,8 @@
 
 from typing import Optional
 import pandas as pd
+
+from akshare_one.adapters.xueqiu import XueQiuAdapter
 from .adapters import EastMoneyAdapter, SinaAdapter
 
 
@@ -65,7 +67,7 @@ def get_realtime_data(
 
     Args:
         symbol: 股票代码 (如 "600000")
-        source: 数据源 ('eastmoney')
+        source: 数据源 ('eastmoney', 'xueqiu')
 
     Returns:
         pd.DataFrame:
@@ -81,6 +83,10 @@ def get_realtime_data(
         - low: 最低
         - prev_close: 昨收
     """
-    if source == "eastmoney":
+    if source == "eastmoney" or symbol is None:
         return EastMoneyAdapter().get_realtime_data(symbol=symbol)
+    elif source == "xueqiu":
+        if not symbol:
+            raise ValueError("XueQiu source requires a symbol parameter")
+        return XueQiuAdapter().get_realtime_data(symbol=symbol)
     raise ValueError(f"Unsupported data source: {source}")
