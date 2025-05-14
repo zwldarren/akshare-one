@@ -61,7 +61,7 @@ def get_hist_data(
 
 
 def get_realtime_data(
-    source: str = "eastmoney", symbol: Optional[str] = None
+    source: str = "xueqiu", symbol: Optional[str] = None
 ) -> "pd.DataFrame":
     """Get real-time market quotes
 
