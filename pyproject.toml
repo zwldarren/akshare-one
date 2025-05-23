@@ -5,7 +5,7 @@ description = "Standardized interface for Chinese financial market data, built o
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "akshare>=1.16.91",
+    "akshare>=1.16.94",
     "cachetools>=5.5.2",
 ]
 license = "MIT"
