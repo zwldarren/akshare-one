@@ -1,22 +1,24 @@
+from cachetools import cached
 import pandas as pd
 import akshare as ak
-from cachetools import cached
-from .cache.cache import CACHE_CONFIG
+
+from akshare_one.modules.cache import CACHE_CONFIG
+from .base import FinancialDataProvider, validate_financial_data
 
 
-class SinaAdapter:
-    """Adapter for Sina financial data API
+class SinaFinancialReport(FinancialDataProvider):
+    def __init__(self, symbol: str) -> None:
+        super().__init__(symbol)
+        self.stock = (
+            f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
+        )
 
-    Includes:
-    - Financial reports (balance sheet, income statement, cash flow)
-    - Historical market data
-    """
-
+    @validate_financial_data
     @cached(
         CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol: f"sina_balance_{symbol}",
+        key=lambda self, symbol=None: f"sina_balance_{self.symbol}",
     )
-    def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
+    def get_balance_sheet(self) -> pd.DataFrame:
         """获取资产负债表数据
 
         Args:
@@ -25,15 +27,15 @@ class SinaAdapter:
         Returns:
             Standardized DataFrame with balance sheet data
         """
-        stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
-        raw_df = ak.stock_financial_report_sina(stock=stock, symbol="资产负债表")
+        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
+    @validate_financial_data
     @cached(
         CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol: f"sina_income_{symbol}",
+        key=lambda self, symbol=None: f"sina_income_{self.symbol}",
     )
-    def get_income_statement(self, symbol: str) -> pd.DataFrame:
+    def get_income_statement(self) -> pd.DataFrame:
         """获取利润表数据
 
         Args:
@@ -42,14 +44,15 @@ class SinaAdapter:
         Returns:
             Standardized DataFrame with income statement data
         """
-        stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
-        raw_df = ak.stock_financial_report_sina(stock=stock, symbol="利润表")
+        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
+    @validate_financial_data
     @cached(
-        CACHE_CONFIG["financial_cache"], key=lambda self, symbol: f"sina_cash_{symbol}"
+        CACHE_CONFIG["financial_cache"],
+        key=lambda self, symbol=None: f"sina_cash_{self.symbol}",
     )
-    def get_cash_flow(self, symbol: str) -> pd.DataFrame:
+    def get_cash_flow(self) -> pd.DataFrame:
         """获取现金流量表数据
 
         Args:
@@ -58,8 +61,7 @@ class SinaAdapter:
         Returns:
             Standardized DataFrame with cash flow data
         """
-        stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
-        raw_df = ak.stock_financial_report_sina(stock=stock, symbol="现金流量表")
+        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="现金流量表")
         return self._clean_cash_data(raw_df)
 
     def _clean_cash_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
@@ -206,189 +208,6 @@ class SinaAdapter:
         # Filter columns
         available_columns = [col for col in required_columns if col in raw_df.columns]
         return raw_df[available_columns]
-
-    @cached(
-        CACHE_CONFIG["hist_data_cache"],
-        key=lambda self,
-        symbol,
-        interval,
-        interval_multiplier,
-        start_date,
-        end_date,
-        adjust: (
-            "sina",
-            symbol,
-            interval,
-            interval_multiplier,
-            start_date,
-            end_date,
-            adjust,
-        ),
-    )
-    def get_hist_data(
-        self,
-        symbol: str,
-        interval: str = "day",
-        interval_multiplier: int = 1,
-        start_date: str = "1970-01-01",
-        end_date: str = "2030-12-31",
-        adjust: str = "none",
-    ) -> pd.DataFrame:
-        """获取新浪历史行情数据
-
-        Args:
-            symbol: 股票代码 (如 "600000")
-            interval: 时间粒度 (支持: "minute", "hour", "day", "week", "month", "year")
-            interval_multiplier: 时间间隔倍数 (如: 5分钟数据设为5)
-            start_date: 开始日期 (YYYY-MM-DD)
-            end_date: 结束日期 (YYYY-MM-DD)
-            adjust: 复权类型 ('none','qfq','hfq','qfq-factor','hfq-factor')
-
-        Returns:
-            Standardized DataFrame with OHLCV data
-        """
-        interval = interval.lower()
-        stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
-
-        if interval == "minute":
-            raw_df = ak.stock_zh_a_minute(
-                symbol=stock,
-                period="1",
-                adjust=adjust if adjust != "none" else "",
-            )
-            raw_df = raw_df.rename(columns={"day": "date"})
-            raw_df["date"] = pd.to_datetime(raw_df["date"])
-            raw_df = raw_df.set_index("date")
-            raw_df = (
-                raw_df.resample(f"{interval_multiplier}min")
-                .agg(
-                    {
-                        "open": "first",
-                        "high": "max",
-                        "low": "min",
-                        "close": "last",
-                        "volume": "sum",
-                    }
-                )
-                .reset_index()
-            )
-
-        elif interval == "hour":
-            if interval_multiplier < 1:
-                raise ValueError("Hour interval multiplier must be >= 1")
-
-            raw_df = ak.stock_zh_a_minute(
-                symbol=stock,
-                period="60",
-                adjust=adjust if adjust != "none" else "",
-            )
-            raw_df = raw_df.rename(columns={"day": "date"})
-            raw_df["date"] = pd.to_datetime(raw_df["date"])
-            raw_df = raw_df.set_index("date")
-            raw_df = (
-                raw_df.resample(f"{interval_multiplier}h")
-                .agg(
-                    {
-                        "open": "first",
-                        "high": "max",
-                        "low": "min",
-                        "close": "last",
-                        "volume": "sum",
-                    }
-                )
-                .reset_index()
-            )
-
-        elif interval in ["day", "week", "month", "year"]:
-            # Convert date format from YYYY-MM-DD to YYYYMMDD
-            start_date = (
-                start_date.replace("-", "") if "-" in start_date else start_date
-            )
-            end_date = end_date.replace("-", "") if "-" in end_date else end_date
-
-            raw_df = ak.stock_zh_a_daily(
-                symbol=stock,
-                start_date=start_date,
-                end_date=end_date,
-                adjust=adjust if adjust != "none" else "",
-            )
-
-            if interval_multiplier > 1:
-                raw_df = self._resample_data(raw_df, interval, interval_multiplier)
-        else:
-            raise ValueError(f"Unsupported interval: {interval}")
-
-        return self._clean_hist_data(raw_df, adjust)
-
-    def _resample_data(
-        self, df: pd.DataFrame, interval: str, multiplier: int
-    ) -> pd.DataFrame:
-        if interval == "day":
-            freq = f"{multiplier}D"
-        elif interval == "week":
-            freq = f"{multiplier}W-MON"
-        elif interval == "month":
-            freq = f"{multiplier}MS"
-        elif interval == "year":
-            freq = f"{multiplier}AS-JAN"
-
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.set_index("date")
-        resampled = df.resample(freq).agg(
-            {
-                "open": "first",
-                "high": "max",
-                "low": "min",
-                "close": "last",
-                "volume": "sum",
-            }
-        )
-        return resampled.reset_index()
-
-    def _clean_hist_data(self, raw_df: pd.DataFrame, adjust: str) -> pd.DataFrame:
-        """清理和标准化历史行情数据
-
-        Args:
-            raw_df: 原始数据DataFrame
-            adjust: 复权类型
-
-        Returns:
-            标准化后的DataFrame
-        """
-        column_mapping = {
-            "date": "timestamp",
-            "open": "open",
-            "high": "high",
-            "low": "low",
-            "close": "close",
-            "volume": "volume",
-        }
-
-        df = raw_df.rename(columns=column_mapping)
-
-        # Process timestamp
-        if "timestamp" in df.columns:
-            df["timestamp"] = (
-                pd.to_datetime(df["timestamp"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
-            )
-
-        # Process volume
-        if "volume" in df.columns:
-            df["volume"] = df["volume"].astype("int64")
-
-        # Select and order columns
-        standard_columns = [
-            "timestamp",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-        ]
-
-        return df[[col for col in standard_columns if col in df.columns]]
 
     def _clean_income_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化利润表数据

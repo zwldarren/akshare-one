@@ -4,7 +4,7 @@
 """
 
 import pandas as pd
-from .adapters import SinaAdapter
+from akshare_one.modules.financial.factory import FinancialDataFactory
 
 
 def get_balance_sheet(symbol: str, source: str = "sina") -> "pd.DataFrame":
@@ -15,7 +15,8 @@ def get_balance_sheet(symbol: str, source: str = "sina") -> "pd.DataFrame":
         source: 数据源 ("sina")
     """
     if source == "sina":
-        return SinaAdapter().get_balance_sheet(symbol=symbol)
+        provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+        return provider.get_balance_sheet()
     raise ValueError(f"Unsupported data source: {source}")
 
 
@@ -27,7 +28,8 @@ def get_income_statement(symbol: str, source: str = "sina") -> "pd.DataFrame":
         source: 数据源 ("sina")
     """
     if source == "sina":
-        return SinaAdapter().get_income_statement(symbol=symbol)
+        provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+        return provider.get_income_statement()
     raise ValueError(f"Unsupported data source: {source}")
 
 
@@ -39,5 +41,6 @@ def get_cash_flow(symbol: str, source: str = "sina") -> "pd.DataFrame":
         source: 数据源 ("sina")
     """
     if source == "sina":
-        return SinaAdapter().get_cash_flow(symbol=symbol)
+        provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+        return provider.get_cash_flow()
     raise ValueError(f"Unsupported data source: {source}")

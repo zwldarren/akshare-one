@@ -6,13 +6,13 @@
 from typing import Optional
 import pandas as pd
 
-from akshare_one.adapters.xueqiu import XueQiuAdapter
-from .adapters import EastMoneyAdapter, SinaAdapter
+from akshare_one.modules.historical.factory import HistoricalDataFactory
+from akshare_one.modules.realtime.factory import RealtimeDataFactory
 
 
 def get_hist_data(
     symbol: str,
-    interval: str,
+    interval: str = "day",
     interval_multiplier: int = 1,
     start_date: str = "1970-01-01",
     end_date: str = "2030-12-31",
@@ -39,25 +39,16 @@ def get_hist_data(
         - close: 收盘价
         - volume: 成交量
     """
-    if source == "eastmoney":
-        return EastMoneyAdapter().get_hist_data(
-            symbol=symbol,
-            interval=interval,
-            interval_multiplier=interval_multiplier,
-            start_date=start_date,
-            end_date=end_date,
-            adjust=adjust,
-        )
-    elif source == "sina":
-        return SinaAdapter().get_hist_data(
-            symbol=symbol,
-            interval=interval,
-            interval_multiplier=interval_multiplier,
-            start_date=start_date,
-            end_date=end_date,
-            adjust=adjust,
-        )
-    raise ValueError(f"Unsupported data source: {source}")
+    kwargs = {
+        "symbol": symbol,
+        "interval": interval,
+        "interval_multiplier": interval_multiplier,
+        "start_date": start_date,
+        "end_date": end_date,
+        "adjust": adjust,
+    }
+    provider = HistoricalDataFactory.get_provider(source, **kwargs)
+    return provider.get_hist_data()
 
 
 def get_realtime_data(
@@ -83,10 +74,5 @@ def get_realtime_data(
         - low: 最低
         - prev_close: 昨收
     """
-    if source == "eastmoney" or symbol is None:
-        return EastMoneyAdapter().get_realtime_data(symbol=symbol)
-    elif source == "xueqiu":
-        if not symbol:
-            raise ValueError("XueQiu source requires a symbol parameter")
-        return XueQiuAdapter().get_realtime_data(symbol=symbol)
-    raise ValueError(f"Unsupported data source: {source}")
+    provider = RealtimeDataFactory.get_provider(source, symbol=symbol)
+    return provider.get_current_data()

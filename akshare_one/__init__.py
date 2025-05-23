@@ -7,12 +7,11 @@ Provides standardized access to various financial data sources with:
 
 Example:
     >>> from akshare_one import get_hist_data, get_realtime_data
+    >>> # 获取股票历史数据
     >>> df = get_hist_data("600000", interval="day")
     >>> print(df.head())
-    >>> # 获取单只股票实时数据
+    >>> # 获取股票实时数据
     >>> df = get_realtime_data(symbol="600000")
-    >>> # 获取所有股票实时数据
-    >>> df = get_realtime_data()
 """
 
 from .stock import get_hist_data, get_realtime_data

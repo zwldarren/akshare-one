@@ -4,7 +4,7 @@
 """
 
 import pandas as pd
-from .adapters import EastMoneyAdapter
+from .modules.news.factory import NewsDataFactory
 
 
 def get_news_data(symbol: str, source: str = "eastmoney") -> "pd.DataFrame":
@@ -23,6 +23,5 @@ def get_news_data(symbol: str, source: str = "eastmoney") -> "pd.DataFrame":
         - source: 文章来源
         - url: 新闻链接
     """
-    if source == "eastmoney":
-        return EastMoneyAdapter().get_news_data(symbol=symbol)
-    raise ValueError(f"Unsupported data source: {source}")
+    provider = NewsDataFactory.get_provider(source, symbol=symbol)
+    return provider.get_news_data()

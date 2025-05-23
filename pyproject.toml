@@ -18,5 +18,6 @@ Repository = "https://github.com/zwldarren/akshare-one.git"
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
     "ruff>=0.11.6",
 ]

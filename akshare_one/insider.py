@@ -5,11 +5,11 @@
 
 from typing import Optional
 import pandas as pd
-from .adapters import XueQiuAdapter
+from .modules.insider.factory import InsiderDataFactory
 
 
 def get_inner_trade_data(
-    source: str = "xueqiu", symbol: Optional[str] = None
+    symbol: Optional[str] = None, source: str = "xueqiu"
 ) -> "pd.DataFrame":
     """获取雪球内部交易数据
 
@@ -32,6 +32,5 @@ def get_inner_trade_data(
         - transaction_value: 交易金额(变动股数*成交均价)
         - shares_owned_before_transaction: 变动前持股数
     """
-    if source == "xueqiu":
-        return XueQiuAdapter().get_inner_trade_data(symbol=symbol)
-    raise ValueError(f"Unsupported data source: {source}")
+    provider = InsiderDataFactory.get_provider(source, symbol=symbol)
+    return provider.get_inner_trade_data()
