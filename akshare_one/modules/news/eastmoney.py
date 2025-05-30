@@ -3,11 +3,10 @@ import pandas as pd
 import akshare as ak
 
 from ..cache import CACHE_CONFIG
-from .base import NewsDataProvider, validate_news_data
+from .base import NewsDataProvider
 
 
 class EastMoneyNews(NewsDataProvider):
-    @validate_news_data
     @cached(
         CACHE_CONFIG["news_cache"],
         key=lambda self: f"eastmoney_news_{self.symbol}",

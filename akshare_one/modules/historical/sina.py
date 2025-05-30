@@ -1,5 +1,5 @@
 from cachetools import cached
-from .base import HistoricalDataProvider, validate_hist_data
+from .base import HistoricalDataProvider
 import akshare as ak
 import pandas as pd
 from ..cache import CACHE_CONFIG
@@ -8,7 +8,6 @@ from ..cache import CACHE_CONFIG
 class SinaHistorical(HistoricalDataProvider):
     """Adapter for Sina historical stock data API"""
 
-    @validate_hist_data
     @cached(
         cache=CACHE_CONFIG["hist_data_cache"],
         key=lambda self: f"sina_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",

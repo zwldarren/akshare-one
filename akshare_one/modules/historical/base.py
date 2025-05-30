@@ -2,31 +2,6 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 
-def validate_hist_data(func):
-    """Decorator to validate historical data returned by data providers"""
-
-    def wrapper(*args, **kwargs):
-        df = func(*args, **kwargs)
-
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError("Returned data must be a pandas DataFrame")
-
-        required_columns = {"timestamp", "open", "high", "low", "close", "volume"}
-        missing_cols = required_columns - set(df.columns)
-        if missing_cols:
-            raise ValueError(f"Missing required columns: {missing_cols}")
-
-        if "timestamp" in df.columns:
-            if not pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
-                raise ValueError("timestamp must be datetime64 dtype")
-            if df["timestamp"].dt.tz is None or str(df["timestamp"].dt.tz) != "UTC":
-                raise ValueError("timestamp must be in UTC timezone")
-
-        return df
-
-    return wrapper
-
-
 class HistoricalDataProvider(ABC):
     def __init__(
         self,

@@ -3,11 +3,10 @@ import pandas as pd
 import akshare as ak
 from ..utils import convert_xieqiu_symbol
 from ..cache import CACHE_CONFIG
-from .base import RealtimeDataProvider, validate_realtime_data
+from .base import RealtimeDataProvider
 
 
 class XueQiuRealtime(RealtimeDataProvider):
-    @validate_realtime_data
     @cached(
         cache=CACHE_CONFIG["realtime_cache"],
         key=lambda self, symbol=None: f"xueqiu_{symbol}",

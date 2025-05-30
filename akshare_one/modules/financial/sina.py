@@ -3,7 +3,7 @@ import pandas as pd
 import akshare as ak
 
 from akshare_one.modules.cache import CACHE_CONFIG
-from .base import FinancialDataProvider, validate_financial_data
+from .base import FinancialDataProvider
 
 
 class SinaFinancialReport(FinancialDataProvider):
@@ -13,7 +13,6 @@ class SinaFinancialReport(FinancialDataProvider):
             f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
         )
 
-    @validate_financial_data
     @cached(
         CACHE_CONFIG["financial_cache"],
         key=lambda self, symbol=None: f"sina_balance_{self.symbol}",
@@ -30,7 +29,6 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @validate_financial_data
     @cached(
         CACHE_CONFIG["financial_cache"],
         key=lambda self, symbol=None: f"sina_income_{self.symbol}",
@@ -47,7 +45,6 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @validate_financial_data
     @cached(
         CACHE_CONFIG["financial_cache"],
         key=lambda self, symbol=None: f"sina_cash_{self.symbol}",

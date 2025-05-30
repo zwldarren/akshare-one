@@ -3,11 +3,10 @@ import pandas as pd
 import akshare as ak
 
 from ..cache import CACHE_CONFIG
-from .base import RealtimeDataProvider, validate_realtime_data
+from .base import RealtimeDataProvider
 
 
 class EastmoneyRealtime(RealtimeDataProvider):
-    @validate_realtime_data
     @cached(
         CACHE_CONFIG["realtime_cache"],
         key=lambda self, symbol=None: f"eastmoney_{symbol if symbol else 'all'}",

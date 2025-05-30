@@ -258,8 +258,8 @@ print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].hea
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "600000") |
 | source | str | 否 | "xueqiu" | 数据源(目前支持"xueqiu") |
-| symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有数据 |
 
 #### 返回值
 
@@ -283,11 +283,7 @@ print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].hea
 ```python
 from akshare_one import get_inner_trade_data
 
-# 获取所有股票内部交易数据
-df_all = get_inner_trade_data()
-print(df_all[["symbol", "name", "transaction_date", "transaction_value"]].head())
-
 # 获取指定股票内部交易数据
-df_single = get_inner_trade_data(symbol="600000")
-print(df_single[["symbol", "name", "transaction_date", "transaction_value"]].head())
+df = get_inner_trade_data(symbol="600000")
+print(df[["symbol", "name", "transaction_date", "transaction_value"]].head())
 ```

@@ -3,19 +3,16 @@
 包含上市公司内部交易相关功能
 """
 
-from typing import Optional
 import pandas as pd
 from .modules.insider.factory import InsiderDataFactory
 
 
-def get_inner_trade_data(
-    symbol: Optional[str] = None, source: str = "xueqiu"
-) -> "pd.DataFrame":
+def get_inner_trade_data(symbol: str, source: str = "xueqiu") -> "pd.DataFrame":
     """获取雪球内部交易数据
 
     Args:
         source: 数据源 (目前支持 "xueqiu")
-        symbol: 可选股票代码，如"600000"，不传则返回所有数据
+        symbol: 股票代码，如"600000"
 
     Returns:
         pd.DataFrame:

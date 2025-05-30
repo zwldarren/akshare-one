@@ -1,7 +1,7 @@
 from cachetools import cached
 import pandas as pd
 import akshare as ak
-from .base import InsiderDataProvider, validate_insider_data
+from .base import InsiderDataProvider
 from ..utils import convert_xieqiu_symbol
 from ..cache import CACHE_CONFIG
 
@@ -9,7 +9,6 @@ from ..cache import CACHE_CONFIG
 class XueQiuInsider(InsiderDataProvider):
     """Provider for XueQiu insider trading data"""
 
-    @validate_insider_data
     @cached(
         cache=CACHE_CONFIG["financial_cache"],
         key=lambda self, symbol=None: f"xueqiu_insider_{symbol if symbol else 'all'}",

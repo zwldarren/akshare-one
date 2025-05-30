@@ -28,7 +28,7 @@ def get_hist_data(
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
         adjust: 复权类型 ('none','qfq','hfq')
-        source: 数据源 ('eastmoney', 'sina')
+        source: 数据源 ('eastmoney', 'sina') (default: 'eastmoney')
 
     Returns:
         pd.DataFrame:
