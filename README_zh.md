@@ -5,7 +5,7 @@
   </div>
 </div>
 
-**AKShare One** 是一个标准化中国金融市场数据接口，基于 [AKShare](https://github.com/akfamily/akshare) 二次封装，解决AKShare多数据源输入输出不统一的问题。
+**AKShare One** 是用于获取中国A股的数据接口，基于 [AKShare](https://github.com/akfamily/akshare) 开发，目的是简化AKShare的调用，并且统一不同数据源的输入输出格式，使得数据可以更加方便的传递给大语言模型。
 
 ## ✨ 项目特色
 
