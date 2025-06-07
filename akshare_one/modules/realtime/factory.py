@@ -1,6 +1,7 @@
 from .eastmoney import EastmoneyRealtime
 from .xueqiu import XueQiuRealtime
 from .base import RealtimeDataProvider
+from .eastmoney_direct import EastMoneyDirectRealtime
 
 
 class RealtimeDataFactory:
@@ -11,6 +12,7 @@ class RealtimeDataFactory:
     _providers = {
         "eastmoney": EastmoneyRealtime,
         "xueqiu": XueQiuRealtime,
+        "eastmoney_direct": EastMoneyDirectRealtime,
     }
 
     @classmethod

@@ -1,5 +1,6 @@
 from .base import HistoricalDataProvider
 from .eastmoney import EastMoneyHistorical
+from .eastmoney_direct import EastMoneyDirectHistorical
 from .sina import SinaHistorical
 
 
@@ -10,6 +11,7 @@ class HistoricalDataFactory:
 
     _providers = {
         "eastmoney": EastMoneyHistorical,
+        "eastmoney_direct": EastMoneyDirectHistorical,
         "sina": SinaHistorical,
     }
 

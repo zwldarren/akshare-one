@@ -28,7 +28,7 @@ def get_hist_data(
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
         adjust: 复权类型 ('none','qfq','hfq')
-        source: 数据源 ('eastmoney', 'sina') (default: 'eastmoney')
+        source: 数据源 ('eastmoney', 'eastmoney_direct', 'sina') (default: 'eastmoney')
 
     Returns:
         pd.DataFrame:
@@ -58,7 +58,7 @@ def get_realtime_data(
 
     Args:
         symbol: 股票代码 (如 "600000")
-        source: 数据源 ('eastmoney', 'xueqiu')
+        source: 数据源 ('eastmoney', 'eastmoney_direct', 'xueqiu')
 
     Returns:
         pd.DataFrame:

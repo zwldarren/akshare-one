@@ -47,8 +47,30 @@ class TestHistData:
             interval="minute",
             interval_multiplier=5,
             start_date="2025-05-01",
-            end_date="2024-05-30",
+            end_date="2026-01-01",
             source="sina",
+        )
+        assert not df.empty
+        assert len(df) > 0
+
+    def test_hist_data_eastmoney_direct(self):
+        """测试 EastMoney Direct 数据源的历史数据"""
+        df = get_hist_data(
+            symbol="600000",
+            interval="day",
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+            source="eastmoney_direct",
+        )
+        assert not df.empty
+        assert len(df) > 0
+
+        df = get_hist_data(
+            symbol="00700",  # 港股：腾讯
+            interval="day",
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+            source="eastmoney_direct",
         )
         assert not df.empty
         assert len(df) > 0
@@ -94,6 +116,16 @@ class TestRealtimeData:
         df = get_realtime_data(symbol="600000", source="xueqiu")
         assert not df.empty
         assert df.iloc[0]["symbol"] == "600000"
+
+    def test_eastmoney_direct_source(self):
+        """测试 EastMoney Direct 实时数据源"""
+        df = get_realtime_data(symbol="000001", source="eastmoney_direct")
+        assert not df.empty
+        assert df.iloc[0]["symbol"] == "000001"
+
+        df = get_realtime_data(symbol="00700", source="eastmoney_direct")
+        assert not df.empty
+        assert df.iloc[0]["symbol"] == "00700"
 
     def test_invalid_source(self):
         """测试无效数据源"""

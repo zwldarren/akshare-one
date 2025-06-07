@@ -16,9 +16,11 @@
 | start_date | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
 | end_date | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
 | adjust | str | 否 | "none" | 复权类型("none","qfq","hfq") |
-| source | str | 否 | "eastmoney" | 数据源("eastmoney","sina") |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney","eastmoney_direct","sina") |
 
 > 注意: 如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线
+
+> eastmoney_direct 数据源支持港股，如 "00700" 表示腾讯控股。此外，小时和分钟级数据只支持当前交易日。
 
 #### 返回值
 
@@ -54,8 +56,10 @@ df = get_hist_data(
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| source | str | 否 | "eastmoney" | 数据源("eastmoney", "xueqiu") |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
 | symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票(注意: xueqiu源必须提供此参数) |
+
+> eastmoney_direct 数据源支持港股，如 "00700" 表示腾讯控股。
 
 #### 返回值
 
