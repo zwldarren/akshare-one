@@ -15,6 +15,11 @@ keywords = ["akshare", "financial-data", "stock-data", "quant"]
 Homepage = "https://github.com/zwldarren/akshare-one"
 Repository = "https://github.com/zwldarren/akshare-one.git"
 
+[project.optional-dependencies]
+talib = [
+    "ta-lib>=0.6.4",
+]
+
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
