@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from akshare_one import get_hist_data, get_realtime_data
 
 
@@ -105,6 +106,30 @@ class TestRealtimeData:
             "prev_close",
         }
 
+    def test_historical_data_api_error(self):
+        """测试历史数据API错误处理"""
+        with patch(
+            "akshare_one.modules.historical.eastmoney.EastMoneyHistorical.get_hist_data"
+        ) as mock_get:
+            mock_get.side_effect = Exception("API error")
+            with pytest.raises(Exception, match="API error"):
+                get_hist_data(
+                    symbol="600000",
+                    interval="day",
+                    start_date="2024-01-01",
+                    end_date="2024-01-31",
+                )
+
+    def test_historical_data_invalid_dates(self):
+        """测试历史数据无效日期"""
+        with pytest.raises(ValueError):
+            get_hist_data(
+                symbol="600000",
+                interval="day",
+                start_date="2024-31-01",  # invalid date
+                end_date="2024-01-31",
+            )
+
     def test_all_realtime_data(self):
         """测试获取所有股票实时数据"""
         df = get_realtime_data()
@@ -131,3 +156,12 @@ class TestRealtimeData:
         """测试无效数据源"""
         with pytest.raises(Exception):
             get_realtime_data(symbol="600000", source="invalid")
+
+    def test_api_error_handling(self):
+        """测试API错误处理"""
+        with patch(
+            "akshare_one.modules.realtime.eastmoney.EastmoneyRealtime.get_current_data"
+        ) as mock_get:
+            mock_get.side_effect = Exception("API error")
+            with pytest.raises(Exception, match="API error"):
+                get_realtime_data(symbol="600000", source="eastmoney")

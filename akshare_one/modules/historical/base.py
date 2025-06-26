@@ -18,6 +18,14 @@ class HistoricalDataProvider(ABC):
         self.start_date = start_date
         self.end_date = end_date
         self.adjust = adjust
+        self._validate_dates()
+
+    def _validate_dates(self):
+        try:
+            pd.to_datetime(self.start_date)
+            pd.to_datetime(self.end_date)
+        except ValueError:
+            raise ValueError("Invalid date format. Please use YYYY-MM-DD.")
 
     @classmethod
     def get_supported_intervals(cls):
