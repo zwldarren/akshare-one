@@ -23,6 +23,7 @@
 | Stock news | `get_news_data` |
 | Financial data | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
 | Internal transactions | `get_inner_trade_data` |
+| Technical indicators | `get_sma`/`get_ema`/`get_rsi`/`get_macd` |
 
 ## 📦 Quick Installation
 
@@ -33,17 +34,18 @@ pip install akshare-one
 ## 💻 Usage Example
 
 ```python
-from akshare_one import get_hist_data, get_realtime_data
+from akshare_one import get_hist_data
+from akshare_one.indicators import get_sma
 
 # Get historical data
-df_hist = get_hist_data(
+df = get_hist_data(
     symbol="600000",
     interval="day",
     adjust="hfq"
 )
 
-# Get real-time data
-df_realtime = get_realtime_data(symbol="600000")
+# Calculate 20-day Simple Moving Average
+df_sma = get_sma(df, window=20)
 ```
 
 ## 📚 Documentation

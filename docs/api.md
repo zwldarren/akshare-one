@@ -1,8 +1,22 @@
 # Akshare One API 文档
 
+## 目录
+
+- [核心接口](#核心接口)
+  - [`get_hist_data(symbol, **kwargs)`](#get_hist_datasymbol-kwargs)
+  - [`get_realtime_data(symbol=None)`](#get_realtime_datasymbolnone)
+  - [`get_news_data(symbol)`](#get_news_datasymbol)
+  - [`get_balance_sheet(symbol)`](#get_balance_sheetsymbol)
+  - [`get_income_statement(symbol)`](#get_income_statementsymbol)
+  - [`get_cash_flow(symbol)`](#get_cash_flowsymbol)
+  - [`get_inner_trade_data()`](#get_inner_trade_data)
+- [技术指标](#技术指标)
+
+# Akshare One API 文档
+
 ## 核心接口
 
-### `get_hist_data(symbol, interval, **kwargs)`
+### `get_hist_data(symbol, **kwargs)`
 
 获取股票历史行情数据
 
@@ -11,7 +25,7 @@
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | symbol | str | 是 | - | 股票代码(如: "600000") |
-| interval | str | 是 | - | 时间粒度('minute','hour','day','week','month','year') |
+| interval | str | 否 | "day" | 时间粒度('minute','hour','day','week','month','year') |
 | interval_multiplier | int | 否 | 1 | 时间间隔倍数 |
 | start_date | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
 | end_date | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
@@ -56,8 +70,8 @@ df = get_hist_data(
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| source | str | 否 | "eastmoney" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
 | symbol | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票(注意: xueqiu源必须提供此参数) |
+| source | str | 否 | "xueqiu" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
 
 > eastmoney_direct 数据源支持港股，如 "00700" 表示腾讯控股。
 
@@ -290,4 +304,31 @@ from akshare_one import get_inner_trade_data
 # 获取指定股票内部交易数据
 df = get_inner_trade_data(symbol="600000")
 print(df[["symbol", "name", "transaction_date", "transaction_value"]].head())
+```
+
+## 技术指标
+
+技术指标模块提供常见的技术分析指标计算功能，需要通过`akshare_one.indicators`模块调用：
+
+```python
+from akshare_one.indicators import get_sma, get_ema, get_rsi, get_macd
+```
+
+> Note: 所有技术指标计算函数都支持`talib`和`simple`两种计算方式，`talib`需要额外安装[TA-Lib](https://ta-lib.org/install/)依赖并使用`pip install akshare-one[talib]`安装。
+
+- **简单移动平均线(SMA)**: `get_sma(df, window=20, calculator_type="talib")`
+- **指数移动平均线(EMA)**: `get_ema(df, window=20, calculator_type="talib")`
+- **相对强弱指数(RSI)**: `get_rsi(df, window=14, calculator_type="talib")`
+- **移动平均收敛发散指标(MACD)**: `get_macd(df, fast=12, slow=26, signal=9, calculator_type="talib")`
+
+#### 示例
+
+```python
+from akshare_one.indicators import get_sma, get_macd
+
+# 计算20日简单移动平均
+df_sma = get_sma(df, window=20)
+
+# 计算MACD指标
+df_macd = get_macd(df)
 ```
