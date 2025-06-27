@@ -320,6 +320,10 @@ from akshare_one.indicators import get_sma, get_ema, get_rsi, get_macd
 - **指数移动平均线(EMA)**: `get_ema(df, window=20, calculator_type="talib")`
 - **相对强弱指数(RSI)**: `get_rsi(df, window=14, calculator_type="talib")`
 - **移动平均收敛发散指标(MACD)**: `get_macd(df, fast=12, slow=26, signal=9, calculator_type="talib")`
+- **布林带(Bollinger Bands)**: `get_bollinger_bands(df, window=20, std=2, calculator_type="talib")`
+- **随机指标(Stochastic Oscillator)**: `get_stoch(df, window=14, smooth_d=3, smooth_k=3, calculator_type="talib")`
+- **平均真实波幅(ATR)**: `get_atr(df, window=14, calculator_type="talib")`
+- **商品通道指数(CCI)**: `get_cci(df, window=14, calculator_type="talib")`
 
 #### 示例
 
