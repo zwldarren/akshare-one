@@ -1,11 +1,11 @@
 [project]
 name = "akshare-one"
-version = "0.2.3"
+version = "0.3.0"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "akshare>=1.17.5",
+    "akshare>=1.17.8",
     "cachetools>=6.1.0",
 ]
 license = "MIT"
@@ -23,9 +23,9 @@ talib = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
-    "pytest>=8.4.0",
+    "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
-    "ruff>=0.11.13",
+    "ruff>=0.12.1",
 ]
 
 [tool.pytest.ini_options]
