@@ -23,6 +23,7 @@
 | 个股新闻 | `get_news_data` |
 | 财务数据 | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
 | 内部交易 | `get_inner_trade_data` |
+| 技术指标 | `get_sma`/`get_ema`/`get_rsi`/`get_macd` |
 
 ## 📦 快速安装
 
@@ -33,17 +34,18 @@ pip install akshare-one
 ## 💻 使用示例
 
 ```python
-from akshare_one import get_hist_data, get_realtime_data
+from akshare_one import get_hist_data
+from akshare_one.indicators import get_sma
 
 # 获取历史数据
-df_hist = get_hist_data(
+df = get_hist_data(
     symbol="600000",
     interval="day",
     adjust="hfq"
 )
 
-# 获取实时数据
-df_realtime = get_realtime_data(symbol="600000")
+# 计算20日简单移动平均
+df_sma = get_sma(df, window=20)
 ```
 
 ## 📚 文档
