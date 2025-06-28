@@ -108,3 +108,123 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
 
         cci = (tp - tp_sma) / (0.015 * mean_dev)
         return cci.to_frame("cci")
+
+    def calculate_adx(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        high = df["high"]
+        low = df["low"]
+        close = df["close"]
+
+        # Calculate +DM, -DM and TR
+        move_up = high.diff()
+        move_down = low.diff().apply(abs)
+
+        plus_dm = pd.Series((move_up > move_down) & (move_up > 0)).astype(int) * move_up
+        minus_dm = (
+            pd.Series((move_down > move_up) & (move_down > 0)).astype(int) * move_down
+        )
+
+        tr1 = high - low
+        tr2 = abs(high - close.shift())
+        tr3 = abs(low - close.shift())
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+
+        # Smooth +DM, -DM and TR
+        atr = tr.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
+        plus_di = 100 * (
+            plus_dm.ewm(alpha=1 / window, adjust=False, min_periods=window).mean() / atr
+        )
+        minus_di = 100 * (
+            minus_dm.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
+            / atr
+        )
+
+        # Calculate ADX
+        dx = 100 * (abs(plus_di - minus_di) / (plus_di + minus_di))
+        adx = dx.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
+
+        return adx.to_frame("adx")
+
+    def calculate_willr(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("WILLR not implemented in simple calculator")
+
+    def calculate_ad(self, df: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("AD not implemented in simple calculator")
+
+    def calculate_adosc(
+        self, df: pd.DataFrame, fast_period: int, slow_period: int
+    ) -> pd.DataFrame:
+        raise NotImplementedError("ADOSC not implemented in simple calculator")
+
+    def calculate_obv(self, df: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("OBV not implemented in simple calculator")
+
+    def calculate_mom(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("MOM not implemented in simple calculator")
+
+    def calculate_sar(
+        self, df: pd.DataFrame, acceleration: float, maximum: float
+    ) -> pd.DataFrame:
+        raise NotImplementedError("SAR not implemented in simple calculator")
+
+    def calculate_tsf(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("TSF not implemented in simple calculator")
+
+    def calculate_apo(
+        self, df: pd.DataFrame, fast_period: int, slow_period: int, ma_type: int
+    ) -> pd.DataFrame:
+        raise NotImplementedError("APO not implemented in simple calculator")
+
+    def calculate_aroon(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("AROON not implemented in simple calculator")
+
+    def calculate_aroonosc(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("AROONOSC not implemented in simple calculator")
+
+    def calculate_bop(self, df: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("BOP not implemented in simple calculator")
+
+    def calculate_cmo(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("CMO not implemented in simple calculator")
+
+    def calculate_dx(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("DX not implemented in simple calculator")
+
+    def calculate_mfi(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("MFI not implemented in simple calculator")
+
+    def calculate_minus_di(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("MINUS_DI not implemented in simple calculator")
+
+    def calculate_minus_dm(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("MINUS_DM not implemented in simple calculator")
+
+    def calculate_plus_di(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("PLUS_DI not implemented in simple calculator")
+
+    def calculate_plus_dm(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("PLUS_DM not implemented in simple calculator")
+
+    def calculate_ppo(
+        self, df: pd.DataFrame, fast_period: int, slow_period: int, ma_type: int
+    ) -> pd.DataFrame:
+        raise NotImplementedError("PPO not implemented in simple calculator")
+
+    def calculate_roc(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("ROC not implemented in simple calculator")
+
+    def calculate_rocp(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("ROCP not implemented in simple calculator")
+
+    def calculate_rocr(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("ROCR not implemented in simple calculator")
+
+    def calculate_rocr100(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("ROCR100 not implemented in simple calculator")
+
+    def calculate_trix(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
+        raise NotImplementedError("TRIX not implemented in simple calculator")
+
+    def calculate_ultosc(
+        self, df: pd.DataFrame, window1: int, window2: int, window3: int
+    ) -> pd.DataFrame:
+        raise NotImplementedError("ULTOSC not implemented in simple calculator")
