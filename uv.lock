@@ -83,7 +83,7 @@ wheels = [
 
 [[package]]
 name = "akshare"
-version = "1.17.8"
+version = "1.17.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -104,9 +104,9 @@ dependencies = [
     { name = "urllib3" },
     { name = "xlrd" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/95/0e720789de6c3c64a6e319ac5f7a1f581c86fa5711c30df8292b1f2102d1/akshare-1.17.8.tar.gz", hash = "sha256:7422d77927ebe8a08848edcae3ccf9760494d294cbfcb738b0257dcc9d98a1fc", size = 838897, upload-time = "2025-06-23T07:20:22.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/a3/1632cf54ae5ae39e8eff0222700356a924576480087b8b1ebfdefba1fcdb/akshare-1.17.15.tar.gz", hash = "sha256:a14db5f8cf118ad025ab679801b74d0d365231b9581f0608bf2f7aa2fcb46eb5", size = 839226, upload-time = "2025-07-03T16:34:51.492Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/95/ac436bce3880823905e0d1c0bede7e10d15c4927960f54b5e0fbc555ea4a/akshare-1.17.8-py3-none-any.whl", hash = "sha256:deb8fbd83053ba238bfa1ecbd6c169dba7dbf027d854cd0275f1a7a558598e2a", size = 1053086, upload-time = "2025-06-23T07:20:20.539Z" },
+    { url = "https://files.pythonhosted.org/packages/58/70/1e7384396e1cf62ae762e435007ddf0b67203e20f04b4fc9e56c8c2ffedb/akshare-1.17.15-py3-none-any.whl", hash = "sha256:70083dc2ac8a11db8e87ebd6ace3745101a555b58b071127a65f4c25050e06be", size = 1053471, upload-time = "2025-07-03T16:34:49.843Z" },
 ]
 
 [[package]]
@@ -133,7 +133,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "akshare", specifier = ">=1.17.8" },
+    { name = "akshare", specifier = ">=1.17.15" },
     { name = "cachetools", specifier = ">=6.1.0" },
     { name = "ta-lib", marker = "extra == 'talib'", specifier = ">=0.6.4" },
 ]
