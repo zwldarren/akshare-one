@@ -112,4 +112,4 @@ class XueQiuInsider(InsiderDataProvider):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        return df
+        return df.reset_index(drop=True)
