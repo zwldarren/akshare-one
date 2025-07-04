@@ -98,8 +98,44 @@ class SinaHistorical(HistoricalDataProvider):
         )
         return self._clean_minute_data(raw_df)
 
+    def _get_b_share_data(self, stock: str) -> pd.DataFrame:
+        """Fetches B-share historical data"""
+        start_date = self._convert_date_format(self.start_date)
+        end_date = self._convert_date_format(self.end_date)
+
+        if self.interval in ["minute", "hour"]:
+            period = "1" if self.interval == "minute" else "60"
+            raw_df = ak.stock_zh_b_minute(
+                symbol=stock,
+                period=period,
+                adjust=self._map_adjust_param(self.adjust),
+            )
+            # Rename 'day' to 'date' for consistency
+            raw_df = raw_df.rename(columns={"day": "date"})
+
+            if self.interval_multiplier > 1:
+                freq = f"{self.interval_multiplier}{'min' if self.interval == 'minute' else 'h'}"
+                raw_df = self._resample_intraday_data(raw_df, freq)
+        else:
+            raw_df = ak.stock_zh_b_daily(
+                symbol=stock,
+                start_date=start_date,
+                end_date=end_date,
+                adjust=self._map_adjust_param(self.adjust),
+            )
+            if self.interval_multiplier > 1:
+                raw_df = self._resample_data(
+                    raw_df, self.interval, self.interval_multiplier
+                )
+
+        return self._clean_data(raw_df)
+
     def _get_daily_plus_data(self, stock: str) -> pd.DataFrame:
         """Fetches daily and higher-level data (day/week/month/year)"""
+        # Check if it's a B-share symbol
+        if stock.startswith(("sh9", "sz2")):
+            return self._get_b_share_data(stock)
+
         start_date = self._convert_date_format(self.start_date)
         end_date = self._convert_date_format(self.end_date)
 
