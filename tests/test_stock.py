@@ -157,6 +157,39 @@ class TestRealtimeData:
         with pytest.raises(Exception):
             get_realtime_data(symbol="600000", source="invalid")
 
+    def test_b_share_daily_data(self):
+        """测试B股日线数据"""
+        df = get_hist_data(
+            symbol="sh900901",
+            interval="day",
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+            source="sina",
+        )
+        assert not df.empty
+        assert set(df.columns) == {
+            "timestamp",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+        }
+        assert len(df) > 0
+
+    def test_b_share_minute_data(self):
+        """测试B股分钟数据"""
+        df = get_hist_data(
+            symbol="sh900901",
+            interval="minute",
+            interval_multiplier=5,
+            start_date="2024-01-01",
+            end_date="2024-01-31",
+            source="sina",
+        )
+        assert not df.empty
+        assert len(df) > 0
+
     def test_api_error_handling(self):
         """测试API错误处理"""
         with patch(
