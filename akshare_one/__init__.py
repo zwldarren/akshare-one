@@ -14,7 +14,7 @@ Example:
     >>> df = get_realtime_data(symbol="600000")
 """
 
-from .stock import get_hist_data, get_realtime_data
+from .stock import get_hist_data, get_realtime_data, get_info
 from .news import get_news_data
 from .insider import get_inner_trade_data
 from .financial import get_balance_sheet, get_income_statement, get_cash_flow
@@ -23,6 +23,7 @@ from .financial import get_balance_sheet, get_income_statement, get_cash_flow
 __all__ = [
     "get_hist_data",
     "get_realtime_data",
+    "get_info",
     "get_news_data",
     "get_inner_trade_data",
     "get_balance_sheet",

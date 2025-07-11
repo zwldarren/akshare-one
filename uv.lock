@@ -149,7 +149,7 @@ wheels = [
 
 [[package]]
 name = "akshare-one"
-version = "0.3.2"
+version = "0.3.3"
 source = { virtual = "." }
 dependencies = [
     { name = "akshare" },
@@ -172,7 +172,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "akshare", specifier = ">=1.17.15" },
-    { name = "cachetools", specifier = ">=6.1.0" },
+    { name = "cachetools", specifier = ">=5.5.2" },
     { name = "ta-lib", marker = "extra == 'talib'", specifier = ">=0.6.4" },
 ]
 provides-extras = ["talib"]

@@ -5,6 +5,7 @@
 - [核心接口](#核心接口)
   - [`get_hist_data(symbol, **kwargs)`](#get_hist_datasymbol-kwargs)
   - [`get_realtime_data(symbol=None)`](#get_realtime_datasymbolnone)
+  - [`get_info(symbol)`](#get_infosymbol)
   - [`get_news_data(symbol)`](#get_news_datasymbol)
   - [`get_balance_sheet(symbol)`](#get_balance_sheetsymbol)
   - [`get_income_statement(symbol)`](#get_income_statementsymbol)
@@ -38,7 +39,7 @@
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - timestamp: 时间戳(UTC时区)
 - open: 开盘价
@@ -77,7 +78,7 @@ df = get_hist_data(
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - symbol: 股票代码
 - price: 最新价
@@ -103,6 +104,41 @@ df_all = get_realtime_data()
 df_single = get_realtime_data(symbol="600000")
 ```
 
+### `get_info(symbol)`
+
+获取股票基础信息
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "600000") |
+| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+
+#### 返回值
+
+pd.DataFrame:
+
+- price: 最新价
+- symbol: 股票代码
+- name: 股票简称
+- total_shares: 总股本
+- float_shares: 流通股
+- total_market_cap: 总市值
+- float_market_cap: 流通市值
+- industry: 行业
+- listing_date: 上市时间
+
+#### 示例
+
+```python
+from akshare_one import get_info
+
+# 获取股票基础信息
+df = get_info(symbol="600405")
+print(df)
+```
+
 ### `get_news_data(symbol)`
 
 获取个股新闻数据
@@ -116,7 +152,7 @@ df_single = get_realtime_data(symbol="600000")
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - keyword: 关键词
 - title: 新闻标题
@@ -148,7 +184,7 @@ print(df[["title", "publish_time", "source"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
 - currency: 币种
@@ -201,7 +237,7 @@ print(df[["report_date", "total_assets", "total_liabilities"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
 - currency: 币种
@@ -243,7 +279,7 @@ print(df[["report_date", "revenue", "net_income"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
 - report_type: 报告类型
@@ -281,7 +317,7 @@ print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].hea
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - symbol: 股票代码
 - issuer: 股票名称

@@ -8,6 +8,30 @@ import pandas as pd
 
 from akshare_one.modules.historical.factory import HistoricalDataFactory
 from akshare_one.modules.realtime.factory import RealtimeDataFactory
+from akshare_one.modules.info.factory import InfoDataFactory
+
+
+def get_info(symbol: str, source: str = "eastmoney") -> "pd.DataFrame":
+    """获取股票基础信息
+
+    Args:
+        symbol: 股票代码 (e.g. '600000')
+        source: 数据源 ('eastmoney')
+
+    Returns:
+        pd.DataFrame:
+        - price: 最新价
+        - symbol: 股票代码
+        - name: 股票简称
+        - total_shares: 总股本
+        - float_shares: 流通股
+        - total_market_cap: 总市值
+        - float_market_cap: 流通市值
+        - industry: 行业
+        - listing_date: 上市时间
+    """
+    provider = InfoDataFactory.get_provider(source, symbol=symbol)
+    return provider.get_info()
 
 
 def get_hist_data(
