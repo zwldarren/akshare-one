@@ -86,27 +86,27 @@ class SinaFinancialReport(FinancialDataProvider):
             "类型": "report_type",
             "币种": "currency",
             "净利润": "net_income",
-            "固定资产折旧、油气资产折耗、生产性生物资产折旧": "depreciation_and_amortization",
-            "无形资产摊销": "share_based_compensation",
             "经营活动产生的现金流量净额": "net_cash_flow_from_operations",
             "购建固定资产、无形资产和其他长期资产支付的现金": "capital_expenditure",
             "取得子公司及其他营业单位支付的现金净额": "business_acquisitions_and_disposals",
-            "投资支付的现金": "investment_acquisitions_and_disposals",
             "投资活动产生的现金流量净额": "net_cash_flow_from_investing",
             "取得借款收到的现金": "issuance_or_repayment_of_debt_securities",
             "吸收投资收到的现金": "issuance_or_purchase_of_equity_shares",
-            "分配股利、利润或偿付利息支付的现金": "dividends_and_other_cash_distributions",
             "筹资活动产生的现金流量净额": "net_cash_flow_from_financing",
             "现金及现金等价物净增加额": "change_in_cash_and_equivalents",
             "汇率变动对现金及现金等价物的影响": "effect_of_exchange_rate_changes",
             "期末现金及现金等价物余额": "ending_cash_balance",
-            "自由现金流": "free_cash_flow",
         }
         raw_df = raw_df.rename(columns=column_mapping)
 
         # Select only required columns
         required_columns = ["report_date"]
         required_columns.extend(column_mapping.values())
+
+        # Ensure all required columns are present, fill with NaN if not
+        for col in required_columns:
+            if col not in raw_df.columns:
+                raw_df[col] = pd.NA
 
         # Filter columns
         available_columns = [col for col in required_columns if col in raw_df.columns]
@@ -167,8 +167,6 @@ class SinaFinancialReport(FinancialDataProvider):
         # Select only required columns
         required_columns = [
             "report_date",
-            "report_period",
-            "period",
             "currency",
             "total_assets",
             "current_assets",
@@ -250,7 +248,6 @@ class SinaFinancialReport(FinancialDataProvider):
         # Select only required columns
         required_columns = [
             "report_date",
-            "period",
             "currency",
             "revenue",
             "cost_of_revenue",
