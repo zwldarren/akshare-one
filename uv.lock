@@ -122,7 +122,7 @@ wheels = [
 [[package]]
 name = "akshare"
 version = "1.17.19"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/zwldarren/akshare.git#88657fb2a20a1145265b56c424948378261b3738" }
 dependencies = [
     { name = "aiohttp" },
     { name = "akracer", marker = "sys_platform == 'linux'" },
@@ -141,10 +141,6 @@ dependencies = [
     { name = "tqdm" },
     { name = "urllib3" },
     { name = "xlrd" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/81/4c/084ecf6c833fc2db142544921edfb339d27a8fd91a9a481c3e3259c64dda/akshare-1.17.19.tar.gz", hash = "sha256:2c1bafa83343d8666d6176b2a97a2e371ce68ade95cb29f7327fe7466c093c87", size = 839812, upload-time = "2025-07-10T03:53:59.419Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/62/42bb5efd287bffd2dc343a224ec120c503463370c0b1190fa692b133d827/akshare-1.17.19-py3-none-any.whl", hash = "sha256:208833d8a4c4b46fe45f43b5f221cd5a1877d841e9702d24a7e8c13675c3f81e", size = 1054005, upload-time = "2025-07-10T03:53:57.66Z" },
 ]
 
 [[package]]
@@ -171,7 +167,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "akshare", specifier = ">=1.17.15" },
+    { name = "akshare", git = "https://github.com/zwldarren/akshare.git" },
     { name = "cachetools", specifier = ">=5.5.2" },
     { name = "ta-lib", marker = "extra == 'talib'", specifier = ">=0.6.4" },
 ]
