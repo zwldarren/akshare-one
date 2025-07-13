@@ -5,11 +5,12 @@
 - [核心接口](#核心接口)
   - [`get_hist_data(symbol, **kwargs)`](#get_hist_datasymbol-kwargs)
   - [`get_realtime_data(symbol=None)`](#get_realtime_datasymbolnone)
-  - [`get_info(symbol)`](#get_infosymbol)
+  - [`get_basic_info(symbol)`](#get_basic_infosymbol)
   - [`get_news_data(symbol)`](#get_news_datasymbol)
   - [`get_balance_sheet(symbol)`](#get_balance_sheetsymbol)
   - [`get_income_statement(symbol)`](#get_income_statementsymbol)
   - [`get_cash_flow(symbol)`](#get_cash_flowsymbol)
+  - [`get_financial_metrics(symbol)`](#get_financial_metricssymbol)
   - [`get_inner_trade_data()`](#get_inner_trade_data)
 - [技术指标](#技术指标)
 
@@ -104,7 +105,7 @@ df_all = get_realtime_data()
 df_single = get_realtime_data(symbol="600000")
 ```
 
-### `get_info(symbol)`
+### `get_basic_info(symbol)`
 
 获取股票基础信息
 
@@ -135,7 +136,7 @@ pd.DataFrame:
 from akshare_one import get_info
 
 # 获取股票基础信息
-df = get_info(symbol="600405")
+df = get_basic_info(symbol="600405")
 print(df)
 ```
 
@@ -338,6 +339,50 @@ from akshare_one import get_cash_flow
 # 获取现金流量表数据
 df = get_cash_flow(symbol="600600")
 print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].head())
+```
+
+### `get_financial_metrics(symbol)`
+
+获取合并财务报表关键指标数据
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "600600") |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney","sina") |
+
+#### 返回值
+
+pd.DataFrame:
+
+- report_date: 报告日期
+- total_assets: 资产总计
+- fixed_assets_net: 固定资产净值
+- cash_and_equivalents: 货币资金
+- accounts_receivable: 应收账款
+- inventory: 存货
+- total_liabilities: 负债合计
+- trade_and_non_trade_payables: 应付票据及应付账款
+- deferred_revenue: 合同负债
+- shareholders_equity: 所有者权益(或股东权益)合计
+- revenue: 营业总收入
+- total_operating_costs: 营业总成本
+- operating_profit: 营业利润
+- net_income_common_stock: 归属于母公司所有者的净利润
+- net_cash_flow_from_operations: 经营活动产生的现金流量净额
+- net_cash_flow_from_investing: 投资活动产生的现金流量净额
+- net_cash_flow_from_financing: 筹资活动产生的现金流量净额
+- change_in_cash_and_equivalents: 现金及现金等价物净增加额
+
+#### 示例
+
+```python
+from akshare_one import get_financial_metrics
+
+# 获取财务指标数据
+df = get_financial_metrics(symbol="600600")
+print(df[["report_date", "revenue", "net_income_common_stock"]].head())
 ```
 
 ### `get_inner_trade_data()`

@@ -1,12 +1,12 @@
 import unittest
 import pandas as pd
-from akshare_one import get_info
+from akshare_one import get_basic_info
 
 
 class TestInfo(unittest.TestCase):
     def test_get_info(self):
         """测试获取股票基本信息"""
-        df = get_info("600405")
+        df = get_basic_info("600405")
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
         self.assertEqual(df.shape[0], 1)

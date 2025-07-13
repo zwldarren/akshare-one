@@ -20,3 +20,8 @@ class FinancialDataProvider(ABC):
     def get_cash_flow(self) -> pd.DataFrame:
         """Fetches cash flow data"""
         pass
+
+    @abstractmethod
+    def get_financial_metrics(self) -> pd.DataFrame:
+        """Fetch financial metrics"""
+        pass

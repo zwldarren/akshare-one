@@ -7,7 +7,7 @@ from .base import InfoDataProvider
 
 
 class EastmoneyInfo(InfoDataProvider):
-    _rename_map = {
+    _basic_info_rename_map = {
         "最新": "price",
         "股票代码": "symbol",
         "股票简称": "name",
@@ -23,12 +23,12 @@ class EastmoneyInfo(InfoDataProvider):
         CACHE_CONFIG["info_cache"],
         key=lambda self, symbol=None: f"eastmoney_{symbol}",
     )
-    def get_info(self) -> pd.DataFrame:
+    def get_basic_info(self) -> pd.DataFrame:
         """获取东方财富个股信息"""
         info_df = ak.stock_individual_info_em(symbol=self.symbol)
         info_df = info_df.set_index("item").T
         info_df.reset_index(drop=True, inplace=True)
-        info_df.rename(columns=self._rename_map, inplace=True)
+        info_df.rename(columns=self._basic_info_rename_map, inplace=True)
 
         if "symbol" in info_df.columns:
             info_df["symbol"] = info_df["symbol"].astype(str)

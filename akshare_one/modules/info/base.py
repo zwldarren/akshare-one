@@ -7,8 +7,8 @@ class InfoDataProvider(ABC):
         self.symbol = symbol
 
     @abstractmethod
-    def get_info(self) -> pd.DataFrame:
-        """Fetches stock info data
+    def get_basic_info(self) -> pd.DataFrame:
+        """Fetches stock basic info data
 
         Returns:
             pd.DataFrame:

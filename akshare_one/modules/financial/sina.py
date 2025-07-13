@@ -293,3 +293,6 @@ class SinaFinancialReport(FinancialDataProvider):
 
         required_columns = ["report_date"] + list(column_mapping.values())
         return raw_df.rename(columns=column_mapping).reindex(columns=required_columns)
+
+    def get_financial_metrics(self):
+        pass
