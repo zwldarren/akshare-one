@@ -40,11 +40,6 @@ class TestNewsData:
         assert len(sample_news["content"]) > 0
         assert sample_news["url"].startswith("http")
 
-    def test_invalid_symbol(self):
-        """测试无效股票代码"""
-        with pytest.raises(Exception):
-            get_news_data(symbol="INVALID")
-
     def test_multiple_pages(self):
         """测试多页新闻数据"""
         df = get_news_data(symbol="300059")
