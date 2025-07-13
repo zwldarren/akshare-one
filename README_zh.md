@@ -23,7 +23,9 @@
 | 个股新闻 | `get_news_data` |
 | 财务数据 | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
 | 内部交易 | `get_inner_trade_data` |
-| 技术指标 | `get_sma`/`get_ema`/`get_rsi`/`get_macd` |
+| 股票基本信息 | `get_basic_info` |
+| 财务指标 | `get_financial_metrics` |
+| 技术指标 | 参见 [indicators.py](akshare-one/indicators.py) |
 
 ## 📦 快速安装
 
