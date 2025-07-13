@@ -1,8 +1,7 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 
-from akshare_one.modules.cache import CACHE_CONFIG
+from ..cache import cache
 from .base import FinancialDataProvider
 
 
@@ -19,9 +18,8 @@ class SinaFinancialReport(FinancialDataProvider):
             f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
         )
 
-    @cached(
-        CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol=None: f"sina_balance_{self.symbol}",
+    @cache(
+        "financial_cache", key=lambda self, symbol=None: f"sina_balance_{self.symbol}"
     )
     def get_balance_sheet(self) -> pd.DataFrame:
         """获取资产负债表数据
@@ -35,9 +33,8 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @cached(
-        CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol=None: f"sina_income_{self.symbol}",
+    @cache(
+        "financial_cache", key=lambda self, symbol=None: f"sina_income_{self.symbol}"
     )
     def get_income_statement(self) -> pd.DataFrame:
         """获取利润表数据
@@ -51,10 +48,7 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @cached(
-        CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol=None: f"sina_cash_{self.symbol}",
-    )
+    @cache("financial_cache", key=lambda self, symbol=None: f"sina_cash_{self.symbol}")
     def get_cash_flow(self) -> pd.DataFrame:
         """获取现金流量表数据
 

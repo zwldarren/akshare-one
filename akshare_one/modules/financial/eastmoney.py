@@ -1,8 +1,7 @@
-from cachetools import cached
 import pandas as pd
 import requests
 
-from akshare_one.modules.cache import CACHE_CONFIG
+from akshare_one.modules.cache import cache
 from .base import FinancialDataProvider
 
 
@@ -48,9 +47,9 @@ class EastMoneyFinancialReport(FinancialDataProvider):
     def get_cash_flow(self):
         pass
 
-    @cached(
-        CACHE_CONFIG["financial_cache"],
-        key=lambda self, symbol=None: f"financial_metrics_{self.symbol}",
+    @cache(
+        "financial_cache",
+        key=lambda self, symbol=None: f"eastmoney_financial_metrics_{self.symbol}",
     )
     def get_financial_metrics(self) -> pd.DataFrame:
         """获取三大财务报表关键指标"""

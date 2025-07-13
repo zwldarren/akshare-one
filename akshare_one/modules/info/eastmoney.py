@@ -1,8 +1,7 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 from .base import InfoDataProvider
 
 
@@ -19,8 +18,8 @@ class EastmoneyInfo(InfoDataProvider):
         "上市时间": "listing_date",
     }
 
-    @cached(
-        CACHE_CONFIG["info_cache"],
+    @cache(
+        "info_cache",
         key=lambda self, symbol=None: f"eastmoney_{symbol}",
     )
     def get_basic_info(self) -> pd.DataFrame:

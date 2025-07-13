@@ -1,9 +1,8 @@
 import pandas as pd
-from cachetools import cached
 from .base import HistoricalDataProvider
-from ..cache import CACHE_CONFIG
-from ..eastmoney.client import EastMoneyClient
-from ..eastmoney.utils import parse_kline_data, resample_historical_data
+from ..cache import cache
+from akshare_one.eastmoney.client import EastMoneyClient
+from akshare_one.eastmoney.utils import parse_kline_data, resample_historical_data
 
 
 class EastMoneyDirectHistorical(HistoricalDataProvider):
@@ -13,8 +12,8 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
         super().__init__(*args, **kwargs)
         self.client = EastMoneyClient()
 
-    @cached(
-        cache=CACHE_CONFIG["hist_data_cache"],
+    @cache(
+        "hist_data_cache",
         key=lambda self: f"eastmoney_direct_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",
     )
     def get_hist_data(self) -> pd.DataFrame:

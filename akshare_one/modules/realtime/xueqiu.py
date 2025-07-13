@@ -1,14 +1,13 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 from ..utils import convert_xieqiu_symbol
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 from .base import RealtimeDataProvider
 
 
 class XueQiuRealtime(RealtimeDataProvider):
-    @cached(
-        cache=CACHE_CONFIG["realtime_cache"],
+    @cache(
+        "realtime_cache",
         key=lambda self, symbol=None: f"xueqiu_{symbol}",
     )
     def get_current_data(self) -> pd.DataFrame:

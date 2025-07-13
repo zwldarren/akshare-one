@@ -1,15 +1,14 @@
-from cachetools import cached
 from .base import HistoricalDataProvider
 import akshare as ak
 import pandas as pd
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 
 
 class EastMoneyHistorical(HistoricalDataProvider):
     """Adapter for EastMoney historical stock data API"""
 
-    @cached(
-        cache=CACHE_CONFIG["hist_data_cache"],
+    @cache(
+        "hist_data_cache",
         key=lambda self: f"eastmoney_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",
     )
     def get_hist_data(self) -> pd.DataFrame:

@@ -1,14 +1,13 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 from .base import RealtimeDataProvider
 
 
 class EastmoneyRealtime(RealtimeDataProvider):
-    @cached(
-        CACHE_CONFIG["realtime_cache"],
+    @cache(
+        "realtime_cache",
         key=lambda self, symbol=None: f"eastmoney_{symbol if symbol else 'all'}",
     )
     def get_current_data(self) -> pd.DataFrame:

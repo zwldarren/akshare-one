@@ -1,9 +1,8 @@
 import pandas as pd
-from cachetools import cached
 from .base import RealtimeDataProvider
-from ..cache import CACHE_CONFIG
-from ..eastmoney.client import EastMoneyClient
-from ..eastmoney.utils import parse_realtime_data
+from ..cache import cache
+from akshare_one.eastmoney.client import EastMoneyClient
+from akshare_one.eastmoney.utils import parse_realtime_data
 
 
 class EastMoneyDirectRealtime(RealtimeDataProvider):
@@ -13,8 +12,8 @@ class EastMoneyDirectRealtime(RealtimeDataProvider):
         super().__init__(symbol)
         self.client = EastMoneyClient()
 
-    @cached(
-        cache=CACHE_CONFIG["realtime_cache"],
+    @cache(
+        "realtime_cache",
         key=lambda self: f"eastmoney_direct_realtime_{self.symbol}",
     )
     def get_current_data(self) -> pd.DataFrame:

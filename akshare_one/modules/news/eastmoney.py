@@ -1,14 +1,13 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 from .base import NewsDataProvider
 
 
 class EastMoneyNews(NewsDataProvider):
-    @cached(
-        CACHE_CONFIG["news_cache"],
+    @cache(
+        "news_cache",
         key=lambda self: f"eastmoney_news_{self.symbol}",
     )
     def get_news_data(self) -> pd.DataFrame:

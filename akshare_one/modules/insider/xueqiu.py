@@ -1,16 +1,15 @@
-from cachetools import cached
 import pandas as pd
 import akshare as ak
 from .base import InsiderDataProvider
 from ..utils import convert_xieqiu_symbol
-from ..cache import CACHE_CONFIG
+from ..cache import cache
 
 
 class XueQiuInsider(InsiderDataProvider):
     """Provider for XueQiu insider trading data"""
 
-    @cached(
-        cache=CACHE_CONFIG["financial_cache"],
+    @cache(
+        "financial_cache",
         key=lambda self, symbol=None: f"xueqiu_insider_{symbol if symbol else 'all'}",
     )
     def get_inner_trade_data(self) -> pd.DataFrame:
