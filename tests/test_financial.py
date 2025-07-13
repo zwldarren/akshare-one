@@ -1,5 +1,10 @@
 import pytest
-from akshare_one import get_balance_sheet, get_income_statement, get_cash_flow
+from akshare_one import (
+    get_balance_sheet,
+    get_financial_metrics,
+    get_income_statement,
+    get_cash_flow,
+)
 
 
 class TestBalanceSheet:
@@ -54,7 +59,6 @@ class TestCashFlow:
         assert not df.empty
         required_columns = {
             "report_date",
-            "report_type",
             "currency",
             "net_cash_flow_from_operations",
             "net_cash_flow_from_investing",
@@ -71,3 +75,33 @@ class TestCashFlow:
             get_income_statement(symbol="600600", source="invalid")
         with pytest.raises(ValueError):
             get_cash_flow(symbol="600600", source="invalid")
+        with pytest.raises(ValueError):
+            get_financial_metrics(symbol="600600", source="invalid")
+
+
+class TestFinancialMetrics:
+    def test_basic_financial_metrics(self):
+        """测试基本财务指标获取功能"""
+        df = get_financial_metrics(symbol="600600")
+        assert not df.empty
+        required_columns = {
+            "report_date",
+            "total_assets",
+            "fixed_assets_net",
+            "cash_and_equivalents",
+            "accounts_receivable",
+            "inventory",
+            "total_liabilities",
+            "trade_and_non_trade_payables",
+            "deferred_revenue",
+            "shareholders_equity",
+            "revenue",
+            "total_operating_costs",
+            "operating_profit",
+            "net_income_common_stock",
+            "net_cash_flow_from_operations",
+            "net_cash_flow_from_investing",
+            "net_cash_flow_from_financing",
+            "change_in_cash_and_equivalents",
+        }
+        assert required_columns.issubset(df.columns)

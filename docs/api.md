@@ -5,10 +5,12 @@
 - [核心接口](#核心接口)
   - [`get_hist_data(symbol, **kwargs)`](#get_hist_datasymbol-kwargs)
   - [`get_realtime_data(symbol=None)`](#get_realtime_datasymbolnone)
+  - [`get_basic_info(symbol)`](#get_basic_infosymbol)
   - [`get_news_data(symbol)`](#get_news_datasymbol)
   - [`get_balance_sheet(symbol)`](#get_balance_sheetsymbol)
   - [`get_income_statement(symbol)`](#get_income_statementsymbol)
   - [`get_cash_flow(symbol)`](#get_cash_flowsymbol)
+  - [`get_financial_metrics(symbol)`](#get_financial_metricssymbol)
   - [`get_inner_trade_data()`](#get_inner_trade_data)
 - [技术指标](#技术指标)
 
@@ -38,7 +40,7 @@
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - timestamp: 时间戳(UTC时区)
 - open: 开盘价
@@ -77,7 +79,7 @@ df = get_hist_data(
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - symbol: 股票代码
 - price: 最新价
@@ -103,6 +105,41 @@ df_all = get_realtime_data()
 df_single = get_realtime_data(symbol="600000")
 ```
 
+### `get_basic_info(symbol)`
+
+获取股票基础信息
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "600000") |
+| source | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+
+#### 返回值
+
+pd.DataFrame:
+
+- price: 最新价
+- symbol: 股票代码
+- name: 股票简称
+- total_shares: 总股本
+- float_shares: 流通股
+- total_market_cap: 总市值
+- float_market_cap: 流通市值
+- industry: 行业
+- listing_date: 上市时间
+
+#### 示例
+
+```python
+from akshare_one import get_info
+
+# 获取股票基础信息
+df = get_basic_info(symbol="600405")
+print(df)
+```
+
 ### `get_news_data(symbol)`
 
 获取个股新闻数据
@@ -116,7 +153,7 @@ df_single = get_realtime_data(symbol="600000")
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - keyword: 关键词
 - title: 新闻标题
@@ -148,7 +185,7 @@ print(df[["title", "publish_time", "source"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
 - currency: 币种
@@ -158,11 +195,18 @@ print(df[["title", "publish_time", "source"]].head())
 - inventory: 存货
 - current_investments: 交易性金融资产
 - trade_and_non_trade_receivables: 应收票据及应收账款
+- accounts_receivable: 应收账款
+- prepayments: 预付款项
+- other_receivables: 其他应收款
 - non_current_assets: 非流动资产合计
+- property_plant_and_equipment: 固定资产
+- fixed_assets_net: 固定资产净值
+- construction_in_progress: 在建工程
 - goodwill_and_intangible_assets: 商誉
 - investments: 长期股权投资
 - non_current_investments: 其他非流动金融资产
 - outstanding_shares: 实收资本(或股本)
+- capital_reserve: 资本公积
 - tax_assets: 递延所得税资产
 - total_liabilities: 负债合计
 - current_liabilities: 流动负债合计
@@ -177,6 +221,8 @@ print(df[["title", "publish_time", "source"]].head())
 - retained_earnings: 未分配利润
 - accumulated_other_comprehensive_income: 其他综合收益
 - total_debt: 总债务(短期借款+长期借款)
+- current_ratio: 流动比率
+- debt_to_assets: 资产负债率
 
 #### 示例
 
@@ -201,15 +247,17 @@ print(df[["report_date", "total_assets", "total_liabilities"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
 - currency: 币种
 - revenue: 营业总收入
+- operating_revenue: 营业收入
+- total_operating_costs: 营业总成本
 - cost_of_revenue: 营业成本
 - operating_profit: 营业利润
-- operating_expense: 管理费用
 - selling_general_and_administrative_expenses: 销售费用
+- operating_expense: 管理费用
 - research_and_development: 研发费用
 - interest_expense: 利息支出
 - ebit: 利润总额
@@ -219,6 +267,13 @@ print(df[["report_date", "total_assets", "total_liabilities"]].head())
 - net_income_non_controlling_interests: 少数股东损益
 - earnings_per_share: 基本每股收益
 - earnings_per_share_diluted: 稀释每股收益
+- investment_income: 投资收益
+- fair_value_adjustments: 公允价值变动收益
+- asset_impairment_loss: 资产减值损失
+- financial_expenses: 财务费用
+- taxes_and_surcharges: 营业税金及附加
+- other_comprehensive_income: 其他综合收益
+- total_comprehensive_income: 综合收益总额
 
 #### 示例
 
@@ -243,20 +298,38 @@ print(df[["report_date", "revenue", "net_income"]].head())
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - report_date: 报告日期
-- report_type: 报告类型
 - currency: 币种
 - net_cash_flow_from_operations: 经营活动产生的现金流量净额
+- cash_from_sales: 销售商品、提供劳务收到的现金
+- tax_refunds_received: 收到的税费返还
+- cash_paid_to_employees: 支付给职工以及为职工支付的现金
+- taxes_paid: 支付的各项税费
+- total_cash_inflow_from_operations: 经营活动现金流入小计
+- total_cash_outflow_from_operations: 经营活动现金流出小计
+- capital_expenditure: 购建固定资产、无形资产和其他长期资产支付的现金
+- cash_from_investment_recovery: 收回投资所收到的现金
+- cash_from_investment_income: 取得投资收益收到的现金
+- cash_from_asset_sales: 处置固定资产、无形资产收回的现金
 - business_acquisitions_and_disposals: 取得子公司及其他营业单位支付的现金净额
+- total_cash_inflow_from_investing: 投资活动现金流入小计
+- total_cash_outflow_from_investing: 投资活动现金流出小计
 - net_cash_flow_from_investing: 投资活动产生的现金流量净额
 - issuance_or_repayment_of_debt_securities: 取得借款收到的现金
 - issuance_or_purchase_of_equity_shares: 吸收投资收到的现金
+- cash_paid_for_dividends_and_interest: 分配股利、利润或偿付利息所支付的现金
+- cash_paid_for_debt_repayment: 偿还债务支付的现金
+- total_cash_inflow_from_financing: 筹资活动现金流入小计
+- total_cash_outflow_from_financing: 筹资活动现金流出小计
 - net_cash_flow_from_financing: 筹资活动产生的现金流量净额
 - change_in_cash_and_equivalents: 现金及现金等价物净增加额
 - effect_of_exchange_rate_changes: 汇率变动对现金及现金等价物的影响
+- beginning_cash_balance: 期初现金及现金等价物余额
 - ending_cash_balance: 期末现金及现金等价物余额
+- ending_cash: 现金的期末余额
+- ending_cash_equivalents: 现金等价物的期末余额
 
 #### 示例
 
@@ -266,6 +339,50 @@ from akshare_one import get_cash_flow
 # 获取现金流量表数据
 df = get_cash_flow(symbol="600600")
 print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].head())
+```
+
+### `get_financial_metrics(symbol)`
+
+获取合并财务报表关键指标数据
+
+#### 参数
+
+| 参数名 | 类型 | 必填 | 默认值 | 描述 |
+|--------|------|------|--------|------|
+| symbol | str | 是 | - | 股票代码(如: "600600") |
+| source | str | 否 | "eastmoney" | 数据源("eastmoney","sina") |
+
+#### 返回值
+
+pd.DataFrame:
+
+- report_date: 报告日期
+- total_assets: 资产总计
+- fixed_assets_net: 固定资产净值
+- cash_and_equivalents: 货币资金
+- accounts_receivable: 应收账款
+- inventory: 存货
+- total_liabilities: 负债合计
+- trade_and_non_trade_payables: 应付票据及应付账款
+- deferred_revenue: 合同负债
+- shareholders_equity: 所有者权益(或股东权益)合计
+- revenue: 营业总收入
+- total_operating_costs: 营业总成本
+- operating_profit: 营业利润
+- net_income_common_stock: 归属于母公司所有者的净利润
+- net_cash_flow_from_operations: 经营活动产生的现金流量净额
+- net_cash_flow_from_investing: 投资活动产生的现金流量净额
+- net_cash_flow_from_financing: 筹资活动产生的现金流量净额
+- change_in_cash_and_equivalents: 现金及现金等价物净增加额
+
+#### 示例
+
+```python
+from akshare_one import get_financial_metrics
+
+# 获取财务指标数据
+df = get_financial_metrics(symbol="600600")
+print(df[["report_date", "revenue", "net_income_common_stock"]].head())
 ```
 
 ### `get_inner_trade_data()`
@@ -281,7 +398,7 @@ print(df[["report_date", "net_cash_flow_from_operations", "free_cash_flow"]].hea
 
 #### 返回值
 
-返回标准化的DataFrame，包含以下列：
+pd.DataFrame:
 
 - symbol: 股票代码
 - issuer: 股票名称

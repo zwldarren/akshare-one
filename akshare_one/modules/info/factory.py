@@ -1,43 +1,41 @@
-from .eastmoney import EastMoneyFinancialReport
-from .sina import SinaFinancialReport
-from .base import FinancialDataProvider
+from .eastmoney import EastmoneyInfo
+from .base import InfoDataProvider
 
 
-class FinancialDataFactory:
+class InfoDataFactory:
     """
-    Factory class for creating financial data providers
+    Factory class for creating info data providers
     """
 
     _providers = {
-        "sina": SinaFinancialReport,
-        "eastmoney": EastMoneyFinancialReport,
+        "eastmoney": EastmoneyInfo,
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs) -> FinancialDataProvider:
+    def get_provider(cls, provider_name: str, **kwargs) -> InfoDataProvider:
         """
-        Get a financial data provider by name
+        Get a info data provider by name
 
         Args:
-            provider_name: Name of the provider (e.g., 'sina')
+            provider_name: Name of the provider (e.g., 'eastmoney')
             **kwargs: Additional arguments to pass to the provider's constructor
 
         Returns:
-            FinancialDataProvider: An instance of the requested provider
+            InfoDataProvider: An instance of the requested provider
 
         Raises:
             ValueError: If the requested provider is not found
         """
         provider_class = cls._providers.get(provider_name.lower())
         if not provider_class:
-            raise ValueError(f"Unknown financial data provider: {provider_name}")
+            raise ValueError(f"Unknown info data provider: {provider_name}")
 
         return provider_class(**kwargs)
 
     @classmethod
     def register_provider(cls, name: str, provider_class: type):
         """
-        Register a new financial data provider
+        Register a new info data provider
 
         Args:
             name: Name to associate with this provider
