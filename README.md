@@ -23,7 +23,9 @@
 | Stock news | `get_news_data` |
 | Financial data | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
 | Internal transactions | `get_inner_trade_data` |
-| Technical indicators | See [indicators.py](akshare_one/indicators.py) |
+| Basic stock info | `get_basic_info` |
+| Financial metrics | `get_financial_metrics` |
+| Technical indicators | See [indicators.py](akshare-one/indicators.py) |
 
 ## 📦 Quick Installation
 
