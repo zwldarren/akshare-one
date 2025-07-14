@@ -1,0 +1,67 @@
+site_name: AKShare One
+site_description: 'Standardized interface for Chinese financial market data'
+site_author: 'zwldarren'
+site_url: 'https://github.com/zwldarren/akshare-one'
+
+repo_name: 'zwldarren/akshare-one'
+repo_url: 'https://github.com/zwldarren/akshare-one'
+
+theme:
+  name: material
+  language: zh
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+nav:
+  - 首页: index.md
+  - 快速开始: quickstart.md
+  - API 参考:
+    - 概览: api/overview.md
+    - 历史数据: api/historical.md
+    - 实时数据: api/realtime.md
+    - 基础信息: api/basic-info.md
+    - 新闻数据: api/news.md
+    - 财务数据: api/financial.md
+    - 内部交易: api/insider.md
+    - 技术指标: api/indicators.md
+  - 示例: examples.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search:
+      lang: zh
