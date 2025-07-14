@@ -53,7 +53,7 @@ class TestInfo(unittest.TestCase):
         # 测试缓存禁用
         os.environ["AKSHARE_ONE_CACHE_ENABLED"] = "false"
         disabled_size = cache.currsize
-        df3 = get_basic_info("600405")
+        get_basic_info("600405")
         self.assertEqual(cache.currsize, disabled_size)
 
         # 测试缓存过期
@@ -72,7 +72,7 @@ class TestInfo(unittest.TestCase):
         time.sleep(1.1)
 
         # 过期后调用 - 应该缓存未命中
-        df4 = get_basic_info("600405")
+        get_basic_info("600405")
         self.assertEqual(temp_cache.currsize, expired_size)  # 缓存被替换，大小不变
 
         CACHE_CONFIG["info_cache"] = original_cache

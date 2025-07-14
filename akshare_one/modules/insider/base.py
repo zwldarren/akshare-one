@@ -16,7 +16,7 @@ class InsiderDataProvider(ABC):
             - issuer: 股票名称
             - name: 变动人
             - title: 董监高职务
-            - transaction_date: 变动日期(UTC时区)
+            - transaction_date: 变动日期
             - transaction_shares: 变动股数
             - transaction_price_per_share: 成交均价
             - shares_owned_after_transaction: 变动后持股数

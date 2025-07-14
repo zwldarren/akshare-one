@@ -15,7 +15,7 @@ class NewsDataProvider(ABC):
             - keyword: 关键词
             - title: 新闻标题
             - content: 新闻内容
-            - publish_time: 发布时间 (UTC)
+            - publish_time: 发布时间
             - source: 文章来源
             - url: 新闻链接
         """

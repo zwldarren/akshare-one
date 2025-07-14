@@ -5,7 +5,7 @@ from akshare_one.modules.cache import cache
 from .base import FinancialDataProvider
 
 
-class EastMoneyFinancialReport(FinancialDataProvider):
+class EastMoneyDirectFinancialReport(FinancialDataProvider):
     _balance_sheet_rename_map = {
         "REPORT_DATE": "report_date",
         "TOTAL_ASSETS": "total_assets",

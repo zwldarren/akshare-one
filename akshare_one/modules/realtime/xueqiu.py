@@ -42,9 +42,7 @@ class XueQiuRealtime(RealtimeDataProvider):
             ),
             "timestamp": pd.to_datetime(
                 raw_df.loc[raw_df["item"] == "时间", "value"].values[0]
-            )
-            .tz_localize("Asia/Shanghai")
-            .tz_convert("UTC"),
+            ).tz_localize("Asia/Shanghai"),
             "volume": int(raw_df.loc[raw_df["item"] == "成交量", "value"].values[0])
             / 100,
             "amount": float(raw_df.loc[raw_df["item"] == "成交额", "value"].values[0]),

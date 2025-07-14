@@ -30,9 +30,7 @@ def parse_kline_data(data: Dict[str, Any]) -> pd.DataFrame:
     df = pd.DataFrame(records)
     if not df.empty:
         df["timestamp"] = pd.to_datetime(df["timestamp"])
-        df["timestamp"] = (
-            df["timestamp"].dt.tz_localize("Asia/Shanghai").dt.tz_convert("UTC")
-        )
+        df["timestamp"] = df["timestamp"].dt.tz_localize("Asia/Shanghai")
         df = df[["timestamp", "open", "high", "low", "close", "volume"]]
     return df
 
@@ -61,7 +59,7 @@ def parse_realtime_data(data: Dict[str, Any]) -> pd.DataFrame:
             }
         ]
     )
-    df["timestamp"] = pd.Timestamp.now(tz="Asia/Shanghai").tz_convert("UTC")
+    df["timestamp"] = pd.Timestamp.now(tz="Asia/Shanghai")
     return df
 
 

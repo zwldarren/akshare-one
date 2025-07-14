@@ -71,7 +71,7 @@ def get_hist_data(
 
     Returns:
         pd.DataFrame:
-        - timestamp: 时间戳(UTC时区)
+        - timestamp: 时间戳
         - open: 开盘价
         - high: 最高价
         - low: 最低价
@@ -183,13 +183,13 @@ def get_cash_flow(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
 
 
 def get_financial_metrics(
-    symbol: str, source: Literal["eastmoney"] = "eastmoney"
+    symbol: str, source: Literal["eastmoney_direct"] = "eastmoney_direct"
 ) -> pd.DataFrame:
     """获取三大财务报表关键指标
 
     Args:
         symbol: 股票代码 (如 "600600")
-        source: 数据源 ('eastmoney')
+        source: 数据源 ('eastmoney_direct')
 
     Returns:
         pd.DataFrame: 财务关键指标数据

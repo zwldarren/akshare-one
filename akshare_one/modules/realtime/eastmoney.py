@@ -35,10 +35,7 @@ class EastmoneyRealtime(RealtimeDataProvider):
 
         df = raw_df.rename(columns=column_mapping)
 
-        # Change time to UTC
-        df = df.assign(
-            timestamp=lambda x: pd.Timestamp.now(tz="Asia/Shanghai").tz_convert("UTC")
-        )
+        df = df.assign(timestamp=lambda x: pd.Timestamp.now(tz="Asia/Shanghai"))
 
         required_columns = [
             "symbol",

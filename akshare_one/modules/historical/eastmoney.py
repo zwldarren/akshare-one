@@ -156,7 +156,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
         return resampled.reset_index()
 
     def _clean_minute_data(self, raw_df: pd.DataFrame, period: str) -> pd.DataFrame:
-        """Cleans and standardizes minute/hour level data, converting timestamps to UTC"""
+        """Cleans and standardizes minute/hour level data"""
         column_map = {
             "1": {
                 "时间": "timestamp",
@@ -187,16 +187,14 @@ class EastMoneyHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=mapping)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = (
-                pd.to_datetime(df["timestamp"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
+                "Asia/Shanghai"
             )
 
         return self._select_standard_columns(df)
 
     def _clean_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Cleans and standardizes daily and higher-level data, converting timestamps to UTC"""
+        """Cleans and standardizes daily and higher-level data"""
         column_map = {
             "日期": "timestamp",
             "开盘": "open",
@@ -216,10 +214,8 @@ class EastMoneyHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=available_columns)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = (
-                pd.to_datetime(df["timestamp"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
+                "Asia/Shanghai"
             )
 
         if "volume" in df.columns:

@@ -195,7 +195,7 @@ class SinaHistorical(HistoricalDataProvider):
         return resampled.reset_index()
 
     def _clean_minute_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Cleans and standardizes minute/hour level data, converting timestamps to UTC"""
+        """Cleans and standardizes minute/hour level data"""
         column_map = {
             "date": "timestamp",
             "open": "open",
@@ -208,16 +208,14 @@ class SinaHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=column_map)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = (
-                pd.to_datetime(df["timestamp"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
+                "Asia/Shanghai"
             )
 
         return self._select_standard_columns(df)
 
     def _clean_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Cleans and standardizes daily and higher-level data, converting timestamps to UTC"""
+        """Cleans and standardizes daily and higher-level data"""
         column_map = {
             "date": "timestamp",
             "open": "open",
@@ -230,10 +228,8 @@ class SinaHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=column_map)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = (
-                pd.to_datetime(df["timestamp"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
+                "Asia/Shanghai"
             )
 
         if "volume" in df.columns:

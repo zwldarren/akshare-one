@@ -86,17 +86,13 @@ class XueQiuInsider(InsiderDataProvider):
 
         # Convert date format
         if "transaction_date" in df.columns:
-            df["transaction_date"] = (
-                pd.to_datetime(df["transaction_date"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
-            )
+            df["transaction_date"] = pd.to_datetime(
+                df["transaction_date"]
+            ).dt.tz_localize("Asia/Shanghai")
 
         if "filing_date" in df.columns:
-            df["filing_date"] = (
-                pd.to_datetime(df["filing_date"])
-                .dt.tz_localize("Asia/Shanghai")
-                .dt.tz_convert("UTC")
+            df["filing_date"] = pd.to_datetime(df["filing_date"]).dt.tz_localize(
+                "Asia/Shanghai"
             )
 
         # Convert numeric columns

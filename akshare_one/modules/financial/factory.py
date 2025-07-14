@@ -1,4 +1,4 @@
-from .eastmoney import EastMoneyFinancialReport
+from .eastmoney_direct import EastMoneyDirectFinancialReport
 from .sina import SinaFinancialReport
 from .base import FinancialDataProvider
 
@@ -10,7 +10,7 @@ class FinancialDataFactory:
 
     _providers = {
         "sina": SinaFinancialReport,
-        "eastmoney": EastMoneyFinancialReport,
+        "eastmoney_direct": EastMoneyDirectFinancialReport,
     }
 
     @classmethod

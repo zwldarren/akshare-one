@@ -28,11 +28,8 @@ class EastMoneyNews(NewsDataProvider):
 
         df = raw_df.rename(columns=column_mapping)
 
-        # Convert time to UTC
-        df["publish_time"] = (
-            pd.to_datetime(df["publish_time"])
-            .dt.tz_localize("Asia/Shanghai")
-            .dt.tz_convert("UTC")
+        df["publish_time"] = pd.to_datetime(df["publish_time"]).dt.tz_localize(
+            "Asia/Shanghai"
         )
 
         required_columns = [

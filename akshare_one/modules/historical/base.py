@@ -37,7 +37,7 @@ class HistoricalDataProvider(ABC):
 
         Returns:
             pd.DataFrame:
-            - timestamp (UTC)
+            - timestamp
             - open
             - high
             - low
