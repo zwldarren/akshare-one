@@ -1,6 +1,6 @@
 [project]
 name = "akshare-one"
-version = "0.3.3"
+version = "0.3.4"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,6 +28,9 @@ dev = [
     "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
 ]
+
+[tool.setuptools]
+packages = ["akshare_one"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
