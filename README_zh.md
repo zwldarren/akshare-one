@@ -52,4 +52,6 @@ df_sma = get_sma(df, window=20)
 
 ## 📚 文档
 
-详细API说明请参考 [docs/api.md](docs/api.md)
+完整API文档现已迁移至GitHub Pages：
+
+https://zwldarren.github.io/akshare-one/
