@@ -13,7 +13,7 @@ def get_realtime_data(symbol=None, **kwargs) -> pd.DataFrame
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | `symbol` | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票 |
-| `source` | str | 否 | "xueqiu" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
+| `source` | str | 否 | "eastmoney_direct" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
 
 !!! warning "重要提示"
     使用 `xueqiu` 数据源时，必须提供 `symbol` 参数
