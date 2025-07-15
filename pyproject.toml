@@ -1,11 +1,11 @@
 [project]
 name = "akshare-one"
-version = "0.3.4"
+version = "0.3.5"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "akshare>=1.17.20",
+    "akshare>=1.17.21",
     "cachetools>=5.5.2",
 ]
 license = "MIT"
