@@ -94,11 +94,29 @@ class TestIndicators(unittest.TestCase):
         result = get_stoch(self.df, 14, 3, 3, calculator_type="simple")
         self.assertEqual(len(result), len(self.df))
         self.assertEqual(set(result.columns), {"slow_k", "slow_d"})
+        # Test handling of zero range (high == low)
+        df_zero_range = self.df.copy()
+        df_zero_range["high"] = df_zero_range["low"]
+        result_zero = get_stoch(df_zero_range, 14, 3, 3, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_zero_range))
+        self.assertTrue(
+            not result_zero["slow_k"].isna().all()
+        )  # Should handle zero range
 
     def test_simple_atr(self):
         result = get_atr(self.df, 14, calculator_type="simple")
         self.assertEqual(len(result), len(self.df))
         self.assertTrue("atr" in result.columns)
+
+    def test_simple_willr(self):
+        result = get_willr(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("willr" in result.columns)
+        # Test handling of zero range (high == low)
+        df_zero_range = self.df.copy()
+        df_zero_range["high"] = df_zero_range["low"]
+        result_zero = get_willr(df_zero_range, 14, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_zero_range))
 
     def test_simple_cci(self):
         result = get_cci(self.df, 14, calculator_type="simple")
@@ -109,6 +127,17 @@ class TestIndicators(unittest.TestCase):
         result = get_adx(self.df, 14, calculator_type="simple")
         self.assertEqual(len(result), len(self.df))
         self.assertTrue("adx" in result.columns)
+
+    def test_simple_ad(self):
+        result = get_ad(self.df, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("ad" in result.columns)
+        # Test handling of zero range (high == low)
+        df_zero_range = self.df.copy()
+        df_zero_range["high"] = df_zero_range["low"]
+        result_zero = get_ad(df_zero_range, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_zero_range))
+        self.assertTrue(not result_zero["ad"].isna().all())  # Should handle zero range
 
     # Explicitly test talib implementation
     @unittest.skipUnless(TALIB_AVAILABLE, "talib not installed")
@@ -329,3 +358,163 @@ class TestIndicators(unittest.TestCase):
         result = get_ultosc(self.df, 7, 14, 28)
         self.assertEqual(len(result), len(self.df))
         self.assertTrue("ultosc" in result.columns)
+
+    # Additional tests for edge cases in simple implementation
+    def test_simple_bop_edge_case(self):
+        result = get_bop(self.df, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("bop" in result.columns)
+        # Test handling of zero range (high == low)
+        df_zero_range = self.df.copy()
+        df_zero_range["high"] = df_zero_range["low"]
+        result_zero = get_bop(df_zero_range, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_zero_range))
+        self.assertTrue(not result_zero["bop"].isna().all())  # Should handle zero range
+
+    def test_simple_mfi_edge_case(self):
+        result = get_mfi(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("mfi" in result.columns)
+        # Test handling of zero negative money flow
+        df_constant_price = self.df.copy()
+        df_constant_price["close"] = 100  # All prices are the same
+        result_zero = get_mfi(df_constant_price, 14, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_constant_price))
+        self.assertTrue(
+            not result_zero["mfi"].isna().all()
+        )  # Should handle zero negative flow
+
+    def test_simple_dx_edge_case(self):
+        result = get_dx(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("dx" in result.columns)
+        # Test handling of zero DI sum
+        df_flat = self.df.copy()
+        df_flat["high"] = df_flat["low"]  # No directional movement
+        result_zero = get_dx(df_flat, 14, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_flat))
+        self.assertTrue(not result_zero["dx"].isna().all())  # Should handle zero DI sum
+
+    def test_simple_cmo_edge_case(self):
+        result = get_cmo(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("cmo" in result.columns)
+        # Test handling of zero price movement
+        df_flat = self.df.copy()
+        df_flat["close"] = 100  # No price movement
+        result_zero = get_cmo(df_flat, 14, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_flat))
+        self.assertTrue(
+            not result_zero["cmo"].isna().all()
+        )  # Should handle zero movement
+
+    def test_simple_ultosc_edge_case(self):
+        result = get_ultosc(self.df, 7, 14, 28, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("ultosc" in result.columns)
+        # Test handling of zero true range
+        df_flat = self.df.copy()
+        df_flat["high"] = df_flat["low"]  # Zero true range
+        result_zero = get_ultosc(df_flat, 7, 14, 28, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_flat))
+        self.assertTrue(not result_zero["ultosc"].isna().all())  # Should handle zero TR
+
+    def test_simple_sar_edge_case(self):
+        result = get_sar(self.df, 0.02, 0.2, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("sar" in result.columns)
+        # Test handling of flat market
+        df_flat = self.df.copy()
+        df_flat["high"] = df_flat["low"] = df_flat["close"]  # Flat market
+        result_zero = get_sar(df_flat, 0.02, 0.2, calculator_type="simple")
+        self.assertEqual(len(result_zero), len(df_flat))
+        self.assertTrue(
+            not result_zero["sar"].isna().all()
+        )  # Should handle flat market
+
+    # Tests for other simple implementation functions not covered above
+    def test_simple_adosc(self):
+        result = get_adosc(self.df, 3, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("adosc" in result.columns)
+
+    def test_simple_obv(self):
+        result = get_obv(self.df, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("obv" in result.columns)
+
+    def test_simple_mom(self):
+        result = get_mom(self.df, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("mom" in result.columns)
+
+    def test_simple_tsf(self):
+        result = get_tsf(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("tsf" in result.columns)
+
+    def test_simple_apo(self):
+        result = get_apo(self.df, 12, 26, 0, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("apo" in result.columns)
+
+    def test_simple_aroon(self):
+        result = get_aroon(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("aroon_up" in result.columns)
+        self.assertTrue("aroon_down" in result.columns)
+
+    def test_simple_aroonosc(self):
+        result = get_aroonosc(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("aroonosc" in result.columns)
+
+    def test_simple_ppo(self):
+        result = get_ppo(self.df, 12, 26, 0, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("ppo" in result.columns)
+
+    def test_simple_roc(self):
+        result = get_roc(self.df, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("roc" in result.columns)
+
+    def test_simple_rocp(self):
+        result = get_rocp(self.df, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("rocp" in result.columns)
+
+    def test_simple_rocr(self):
+        result = get_rocr(self.df, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("rocr" in result.columns)
+
+    def test_simple_rocr100(self):
+        result = get_rocr100(self.df, 10, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("rocr100" in result.columns)
+
+    def test_simple_trix(self):
+        result = get_trix(self.df, 30, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("trix" in result.columns)
+
+    def test_simple_minus_di(self):
+        result = get_minus_di(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("minus_di" in result.columns)
+
+    def test_simple_minus_dm(self):
+        result = get_minus_dm(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("minus_dm" in result.columns)
+
+    def test_simple_plus_di(self):
+        result = get_plus_di(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("plus_di" in result.columns)
+
+    def test_simple_plus_dm(self):
+        result = get_plus_dm(self.df, 14, calculator_type="simple")
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue("plus_dm" in result.columns)
