@@ -132,7 +132,7 @@ class TestRealtimeData:
 
     def test_all_realtime_data(self):
         """测试获取所有股票实时数据"""
-        df = get_realtime_data()
+        df = get_realtime_data(source="eastmoney")
         assert not df.empty
         assert "600000" in df["symbol"].values
 
