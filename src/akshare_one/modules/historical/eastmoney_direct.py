@@ -1,9 +1,12 @@
-import pandas as pd
 from typing import Any
-from .base import HistoricalDataProvider
-from ..cache import cache
+
+import pandas as pd
+
 from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_kline_data, resample_historical_data
+
+from ..cache import cache
+from .base import HistoricalDataProvider
 
 
 class EastMoneyDirectHistorical(HistoricalDataProvider):
@@ -15,7 +18,9 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
 
     @cache(
         "hist_data_cache",
-        key=lambda self: f"eastmoney_direct_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",
+        key=lambda self: (
+            f"eastmoney_direct_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}"
+        ),
     )
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches EastMoney historical market data directly from API"""
@@ -46,7 +51,9 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
             return df
 
         except Exception as e:
-            raise ValueError(f"Failed to fetch historical data for {self.symbol}: {e}")
+            raise ValueError(
+                f"Failed to fetch historical data for {self.symbol}: {e}"
+            ) from e
 
     def _get_kline_type(self) -> str:
         """Get K-line type based on interval."""

@@ -1,5 +1,5 @@
-from .eastmoney import EastMoneyNews
 from .base import NewsDataProvider
+from .eastmoney import EastMoneyNews
 
 
 class NewsDataFactory:

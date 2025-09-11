@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import pandas as pd
 
 
@@ -25,7 +26,7 @@ class HistoricalDataProvider(ABC):
             pd.to_datetime(self.start_date)
             pd.to_datetime(self.end_date)
         except ValueError:
-            raise ValueError("Invalid date format. Please use YYYY-MM-DD.")
+            raise ValueError("Invalid date format. Please use YYYY-MM-DD.") from None
 
     @classmethod
     def get_supported_intervals(cls) -> list[str]:

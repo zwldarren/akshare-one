@@ -1,7 +1,8 @@
-from .base import HistoricalDataProvider
-import akshare as ak # type: ignore
+import akshare as ak  # type: ignore
 import pandas as pd
+
 from ..cache import cache
+from .base import HistoricalDataProvider
 
 
 class EastMoneyHistorical(HistoricalDataProvider):
@@ -9,7 +10,9 @@ class EastMoneyHistorical(HistoricalDataProvider):
 
     @cache(
         "hist_data_cache",
-        key=lambda self: f"eastmoney_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",
+        key=lambda self: (
+            f"eastmoney_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}"
+        ),
     )
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches EastMoney historical market data
@@ -34,7 +37,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
 
             return df
         except Exception as e:
-            raise ValueError(f"Failed to fetch historical data: {str(e)}")
+            raise ValueError(f"Failed to fetch historical data: {str(e)}") from e
 
     def _get_intraday_data(self) -> pd.DataFrame:
         """Fetches intraday data at minute or hour intervals"""

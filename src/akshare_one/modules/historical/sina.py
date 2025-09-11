@@ -1,16 +1,18 @@
-from cachetools import cached
-from .base import HistoricalDataProvider
 import akshare as ak  # type: ignore
 import pandas as pd
-from ..cache import CACHE_CONFIG
+
+from ..cache import cache
+from .base import HistoricalDataProvider
 
 
 class SinaHistorical(HistoricalDataProvider):
     """Adapter for Sina historical stock data API"""
 
-    @cached(
-        cache=CACHE_CONFIG["hist_data_cache"],
-        key=lambda self: f"sina_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}",
+    @cache(
+        "hist_data_cache",
+        key=lambda self: (
+            f"sina_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}"
+        ),
     )
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches Sina historical market data
@@ -43,7 +45,7 @@ class SinaHistorical(HistoricalDataProvider):
 
             return df
         except Exception as e:
-            raise ValueError(f"Failed to fetch historical data: {str(e)}")
+            raise ValueError(f"Failed to fetch historical data: {str(e)}") from e
 
     def _get_minute_data(self, stock: str) -> pd.DataFrame:
         """Fetches minute level data"""
@@ -114,8 +116,9 @@ class SinaHistorical(HistoricalDataProvider):
             raw_df = raw_df.rename(columns={"day": "date"})
 
             if self.interval_multiplier > 1:
-                freq = f"{self.interval_multiplier}{'min' if self.interval == 'minute' else 'h'}"
-                raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
+                raw_df = self._resample_data(
+                    raw_df, self.interval, self.interval_multiplier
+                )
         else:
             raw_df = ak.stock_zh_b_daily(
                 symbol=stock,

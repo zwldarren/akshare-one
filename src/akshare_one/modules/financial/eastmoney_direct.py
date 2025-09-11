@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 
 from akshare_one.modules.cache import cache
+
 from .base import FinancialDataProvider
 
 
@@ -49,7 +50,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
 
     @cache(
         "financial_cache",
-        key=lambda self, symbol=None: f"eastmoney_financial_metrics_{self.symbol}",
+        key=lambda self: f"eastmoney_financial_metrics_{self.symbol}",
     )
     def get_financial_metrics(self) -> pd.DataFrame:
         """获取三大财务报表关键指标"""

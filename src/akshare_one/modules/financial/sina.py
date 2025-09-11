@@ -1,5 +1,5 @@
+import akshare as ak  # type: ignore
 import pandas as pd
-import akshare as ak # type: ignore
 
 from ..cache import cache
 from .base import FinancialDataProvider
@@ -18,9 +18,7 @@ class SinaFinancialReport(FinancialDataProvider):
             f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
         )
 
-    @cache(
-        "financial_cache", key=lambda self, symbol=None: f"sina_balance_{self.symbol}"
-    )
+    @cache("financial_cache", key=lambda self: f"sina_balance_{self.symbol}")
     def get_balance_sheet(self) -> pd.DataFrame:
         """获取资产负债表数据
 
@@ -33,9 +31,7 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
         return self._clean_balance_data(raw_df)
 
-    @cache(
-        "financial_cache", key=lambda self, symbol=None: f"sina_income_{self.symbol}"
-    )
+    @cache("financial_cache", key=lambda self: f"sina_income_{self.symbol}")
     def get_income_statement(self) -> pd.DataFrame:
         """获取利润表数据
 
@@ -48,7 +44,7 @@ class SinaFinancialReport(FinancialDataProvider):
         raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
         return self._clean_income_data(raw_df)
 
-    @cache("financial_cache", key=lambda self, symbol=None: f"sina_cash_{self.symbol}")
+    @cache("financial_cache", key=lambda self: f"sina_cash_{self.symbol}")
     def get_cash_flow(self) -> pd.DataFrame:
         """获取现金流量表数据
 
@@ -81,8 +77,10 @@ class SinaFinancialReport(FinancialDataProvider):
         column_mapping = {
             "币种": "currency",
             "经营活动产生的现金流量净额": "net_cash_flow_from_operations",
-            "购建固定资产、无形资产和其他长期资产支付的现金": "capital_expenditure",
-            "取得子公司及其他营业单位支付的现金净额": "business_acquisitions_and_disposals",
+            "购建固定资产、无形资产和其他长期资产支付的现金": ("capital_expenditure"),
+            "取得子公司及其他营业单位支付的现金净额": (
+                "business_acquisitions_and_disposals"
+            ),
             "投资活动产生的现金流量净额": "net_cash_flow_from_investing",
             "取得借款收到的现金": "issuance_or_repayment_of_debt_securities",
             "吸收投资收到的现金": "issuance_or_purchase_of_equity_shares",
@@ -101,7 +99,9 @@ class SinaFinancialReport(FinancialDataProvider):
             "处置固定资产、无形资产收回的现金": "cash_from_asset_sales",
             "投资活动现金流入小计": "total_cash_inflow_from_investing",
             "投资活动现金流出小计": "total_cash_outflow_from_investing",
-            "分配股利、利润或偿付利息所支付的现金": "cash_paid_for_dividends_and_interest",
+            "分配股利、利润或偿付利息所支付的现金": (
+                "cash_paid_for_dividends_and_interest"
+            ),
             "偿还债务支付的现金": "cash_paid_for_debt_repayment",
             "筹资活动现金流入小计": "total_cash_inflow_from_financing",
             "筹资活动现金流出小计": "total_cash_outflow_from_financing",
