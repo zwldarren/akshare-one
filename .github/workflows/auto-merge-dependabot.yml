@@ -1,0 +1,80 @@
+name: Auto-merge Dependabot
+
+on:
+  pull_request:
+    branches: [main]
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.event_name == 'pull_request_target'
+
+    steps:
+      - name: Wait for checks to complete
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // Wait for all checks to complete
+            await github.rest.repos.listCommitStatusesForRef({
+              owner,
+              repo,
+              ref: context.payload.pull_request.head.sha
+            }).then(response => {
+              const statuses = response.data;
+              const allCompleted = statuses.every(status => status.state === 'success' || status.state === 'failure');
+              
+              if (!allCompleted) {
+                console.log('Waiting for checks to complete...');
+                // Wait a bit for checks to complete
+                return new Promise(resolve => setTimeout(resolve, 30000));
+              }
+            });
+
+      - name: Check if all checks passed
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // Get the combined status
+            const combinedStatus = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: context.payload.pull_request.head.sha
+            });
+
+            const allChecksPassed = combinedStatus.data.state === 'success';
+
+            if (!allChecksPassed) {
+              console.log('Not all checks passed, skipping merge');
+              process.exit(1);
+            }
+
+            console.log('All checks passed, proceeding with merge');
+
+      - name: Merge pull request
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            await github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number: prNumber,
+              merge_method: 'merge'
+            });
+
+            console.log(`Merged pull request #${prNumber}`);
