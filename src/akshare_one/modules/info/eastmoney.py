@@ -20,7 +20,7 @@ class EastmoneyInfo(InfoDataProvider):
 
     @cache(
         "info_cache",
-        key=lambda self, symbol=None: f"eastmoney_{symbol}",
+        key=lambda symbol=None: f"eastmoney_{symbol}",
     )
     def get_basic_info(self) -> pd.DataFrame:
         """获取东方财富个股信息"""
