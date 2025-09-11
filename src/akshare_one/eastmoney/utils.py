@@ -1,8 +1,9 @@
+from typing import Any
+
 import pandas as pd
-from typing import Dict, Any
 
 
-def parse_kline_data(data: Dict[str, Any]) -> pd.DataFrame:
+def parse_kline_data(data: dict[str, Any]) -> pd.DataFrame:
     """
     Parses K-line data from the API response into a pandas DataFrame.
     """
@@ -35,7 +36,7 @@ def parse_kline_data(data: Dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-def parse_realtime_data(data: Dict[str, Any]) -> pd.DataFrame:
+def parse_realtime_data(data: dict[str, Any]) -> pd.DataFrame:
     """
     Parses real-time quote data from the API response into a pandas DataFrame.
     """

@@ -1,8 +1,10 @@
 import pandas as pd
-from .base import RealtimeDataProvider
-from ..cache import cache
+
 from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_realtime_data
+
+from ..cache import cache
+from .base import RealtimeDataProvider
 
 
 class EastMoneyDirectRealtime(RealtimeDataProvider):
@@ -33,4 +35,6 @@ class EastMoneyDirectRealtime(RealtimeDataProvider):
             return df
 
         except Exception as e:
-            raise ValueError(f"Failed to get real-time data for {self.symbol}: {e}")
+            raise ValueError(
+                f"Failed to get real-time data for {self.symbol}: {e}"
+            ) from e

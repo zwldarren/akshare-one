@@ -1,7 +1,7 @@
-from .eastmoney import EastmoneyRealtime
-from .xueqiu import XueQiuRealtime
 from .base import RealtimeDataProvider
+from .eastmoney import EastmoneyRealtime
 from .eastmoney_direct import EastMoneyDirectRealtime
+from .xueqiu import XueQiuRealtime
 
 
 class RealtimeDataFactory:
@@ -16,7 +16,9 @@ class RealtimeDataFactory:
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs: object) -> "RealtimeDataProvider":
+    def get_provider(
+        cls, provider_name: str, **kwargs: object
+    ) -> "RealtimeDataProvider":
         """
         Get a realtime data provider by name
 
@@ -38,26 +40,8 @@ class RealtimeDataFactory:
         symbol = kwargs.get("symbol", "")
         if not isinstance(symbol, str):
             raise ValueError("symbol must be a string")
-        
+
         return provider_class(symbol=symbol)
-        """
-        Get a realtime data provider by name
-
-        Args:
-            provider_name: Name of the provider (e.g., 'eastmoney')
-            **kwargs: Additional arguments to pass to the provider's constructor
-
-        Returns:
-            RealtimeDataProvider: An instance of the requested provider
-
-        Raises:
-            ValueError: If the requested provider is not found
-        """
-        provider_class = cls._providers.get(provider_name.lower())
-        if not provider_class:
-            raise ValueError(f"Unknown realtime data provider: {provider_name}")
-
-        return provider_class(**kwargs)
 
     @classmethod
     def register_provider(cls, name: str, provider_class: type) -> None:

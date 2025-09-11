@@ -1,5 +1,5 @@
+import akshare as ak  # type: ignore
 import pandas as pd
-import akshare as ak # type: ignore
 
 from ..cache import cache
 from .base import InfoDataProvider
@@ -20,7 +20,7 @@ class EastmoneyInfo(InfoDataProvider):
 
     @cache(
         "info_cache",
-        key=lambda symbol=None: f"eastmoney_{symbol}",
+        key=lambda self: f"eastmoney_{self.symbol}",
     )
     def get_basic_info(self) -> pd.DataFrame:
         """获取东方财富个股信息"""

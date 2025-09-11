@@ -1,5 +1,5 @@
-import pandas as pd
 import akshare as ak  # type: ignore
+import pandas as pd
 
 from ..cache import cache
 from .base import NewsDataProvider

@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from .base import BaseIndicatorCalculator
 
 
@@ -13,7 +14,8 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
             return series.ewm(span=window, adjust=False, min_periods=window).mean()
         else:
             raise ValueError(
-                f"Unsupported ma_type: {ma_type} in simple calculator. Only SMA (0) and EMA (1) are supported."
+                f"Unsupported ma_type: {ma_type} in simple calculator. "
+                f"Only SMA (0) and EMA (1) are supported."
             )
 
     def _wilder_smooth(self, series: pd.Series, window: int) -> pd.Series:
@@ -358,8 +360,8 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         ema1 = close.ewm(span=window, adjust=False).mean()
         ema2 = ema1.ewm(span=window, adjust=False).mean()
         ema3 = ema2.ewm(span=window, adjust=False).mean()
-        trix = 100 * ema3.diff(1) / ema3.shift(1)
-        return trix.to_frame("trix")
+        trix = 100 * ema3.diff(1) / ema3.shift(1)  # type: ignore
+        return pd.DataFrame({"trix": trix}, index=df.index)
 
     def calculate_ultosc(
         self, df: pd.DataFrame, window1: int, window2: int, window3: int
@@ -381,5 +383,5 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         avg1 = avg1.fillna(0)
         avg2 = avg2.fillna(0)
         avg3 = avg3.fillna(0)
-        ultosc = 100 * (4 * avg1 + 2 * avg2 + 1 * avg3) / (4 + 2 + 1)
-        return ultosc.to_frame("ultosc")
+        ultosc = 100 * (4 * avg1 + 2 * avg2 + avg3) / (4 + 2 + 1)
+        return pd.DataFrame({"ultosc": ultosc}, index=df.index)

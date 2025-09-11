@@ -1,5 +1,5 @@
-from .eastmoney import EastmoneyInfo
 from .base import InfoDataProvider
+from .eastmoney import EastmoneyInfo
 
 
 class InfoDataFactory:

@@ -38,6 +38,7 @@ Provides common technical analysis indicators like:
 """
 
 import pandas as pd
+
 from .modules.indicators.factory import IndicatorFactory
 
 

@@ -1,5 +1,6 @@
+from typing import Any
+
 import requests
-from typing import Dict, Any
 
 
 class EastMoneyClient:
@@ -44,7 +45,7 @@ class EastMoneyClient:
 
     def fetch_historical_klines(
         self, symbol: str, klt: str, fqt: str, start_date: str, end_date: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Fetches historical K-line (candlestick) data.
         """
@@ -63,7 +64,7 @@ class EastMoneyClient:
         response.raise_for_status()
         return response.json()  # type: ignore
 
-    def fetch_realtime_quote(self, symbol: str) -> Dict[str, Any]:
+    def fetch_realtime_quote(self, symbol: str) -> dict[str, Any]:
         """
         Fetches real-time quote data for a single stock.
         """
@@ -72,7 +73,9 @@ class EastMoneyClient:
         params = {
             "invt": "2",
             "fltt": "2",
-            "fields": "f43,f57,f58,f169,f170,f46,f60,f44,f51,f168,f47,f164,f163,f116,f60,f45,f52,f50,f48,f167,f117,f71,f161,f49,f530",
+            "fields": (
+                "f43,f57,f58,f169,f170,f46,f60,f44,f51,f168,f47,f164,f163,f116,f60,f45,f52,f50,f48,f167,f117,f71,f161,f49,f530"
+            ),
             "secid": secid,
         }
         response = self.session.get(url, params=params)

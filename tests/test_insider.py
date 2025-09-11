@@ -1,7 +1,9 @@
-import pytest
-from unittest.mock import patch
-from akshare_one import get_inner_trade_data
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
+
+import pytest
+
+from akshare_one import get_inner_trade_data
 
 
 class TestInnerTradeData:
@@ -44,7 +46,7 @@ class TestInnerTradeData:
 
     def test_invalid_source(self):
         """测试无效数据源"""
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             get_inner_trade_data("600405", source="invalid")
 
     def test_api_error_handling(self):

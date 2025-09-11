@@ -1,8 +1,10 @@
-from cachetools import TTLCache, cached
 import os
-from typing import Any, Callable, TypeVar, Optional
+from collections.abc import Callable
+from typing import Any, TypeVar
 
-F = TypeVar('F', bound=Callable[..., Any])
+from cachetools import TTLCache, cached
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 # 缓存配置
 CACHE_CONFIG: dict[str, TTLCache[Any, Any]] = {
@@ -14,17 +16,30 @@ CACHE_CONFIG: dict[str, TTLCache[Any, Any]] = {
 }
 
 
-def cache(cache_key: str, key: Optional[Callable[..., Any]] = None) -> Callable[[F], F]:
-    cache_enabled = os.getenv("AKSHARE_ONE_CACHE_ENABLED", "true").lower() in (
-        "1",
-        "true",
-        "yes",
-        "on",
-    )
-
+def cache(cache_key: str, key: Callable[..., Any] | None = None) -> Callable[[F], F]:
     def decorator(func: F) -> F:
-        if cache_enabled:
-            return cached(CACHE_CONFIG[cache_key], key=key)(func)  # type: ignore
-        return func
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            cache_enabled = os.getenv("AKSHARE_ONE_CACHE_ENABLED", "true").lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            )
+
+            if cache_enabled:
+                if cache_key not in CACHE_CONFIG:
+                    raise KeyError(
+                        f"Cache configuration '{cache_key}' not found. "
+                        f"Available keys: {list(CACHE_CONFIG.keys())}"
+                    )
+                if key is not None:
+                    return cached(CACHE_CONFIG[cache_key], key=key)(func)(
+                        *args, **kwargs
+                    )
+                else:
+                    return cached(CACHE_CONFIG[cache_key])(func)(*args, **kwargs)
+            return func(*args, **kwargs)
+
+        return wrapper  # type: ignore
 
     return decorator

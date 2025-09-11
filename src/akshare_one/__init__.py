@@ -14,14 +14,16 @@ Example:
     >>> df = get_realtime_data(symbol="600000")
 """
 
-from typing import Optional, Literal
+from typing import Literal
+
 import pandas as pd
+
 from .modules.financial.factory import FinancialDataFactory
 from .modules.historical.factory import HistoricalDataFactory
-from .modules.realtime.factory import RealtimeDataFactory
 from .modules.info.factory import InfoDataFactory
-from .modules.news.factory import NewsDataFactory
 from .modules.insider.factory import InsiderDataFactory
+from .modules.news.factory import NewsDataFactory
+from .modules.realtime.factory import RealtimeDataFactory
 
 
 def get_basic_info(
@@ -91,7 +93,7 @@ def get_hist_data(
 
 
 def get_realtime_data(
-    symbol: Optional[str] = None,
+    symbol: str | None = None,
     source: Literal["eastmoney", "eastmoney_direct", "xueqiu"] = "eastmoney_direct",
 ) -> pd.DataFrame:
     """Get real-time market quotes

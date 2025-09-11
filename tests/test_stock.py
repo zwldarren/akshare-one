@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from akshare_one import get_hist_data, get_realtime_data
 
 
@@ -78,7 +80,7 @@ class TestHistData:
 
     def test_invalid_symbol(self):
         """测试无效股票代码"""
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             get_hist_data(
                 symbol="INVALID",
                 interval="day",
@@ -154,7 +156,7 @@ class TestRealtimeData:
 
     def test_invalid_source(self):
         """测试无效数据源"""
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             get_realtime_data(symbol="600000", source="invalid")
 
     def test_b_share_daily_data(self):

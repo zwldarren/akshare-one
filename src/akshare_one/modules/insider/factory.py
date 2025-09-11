@@ -1,5 +1,5 @@
-from .xueqiu import XueQiuInsider
 from .base import InsiderDataProvider
+from .xueqiu import XueQiuInsider
 
 
 class InsiderDataFactory:

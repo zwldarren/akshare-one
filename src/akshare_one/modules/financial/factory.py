@@ -1,6 +1,6 @@
+from .base import FinancialDataProvider
 from .eastmoney_direct import EastMoneyDirectFinancialReport
 from .sina import SinaFinancialReport
-from .base import FinancialDataProvider
 
 
 class FinancialDataFactory:

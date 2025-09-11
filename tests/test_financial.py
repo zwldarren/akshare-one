@@ -1,9 +1,10 @@
 import pytest
+
 from akshare_one import (
     get_balance_sheet,
+    get_cash_flow,
     get_financial_metrics,
     get_income_statement,
-    get_cash_flow,
 )
 
 
@@ -26,7 +27,7 @@ class TestBalanceSheet:
 
     def test_invalid_symbol(self):
         """测试无效股票代码"""
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             get_balance_sheet(symbol="INVALID")
 
 

@@ -46,5 +46,21 @@ addopts = "-v --cov=akshare_one --cov-report=term-missing"
 [tool.ruff]
 line-length = 88
 
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
 [tool.mypy]
 strict = true
