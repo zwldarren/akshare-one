@@ -1,13 +1,10 @@
 [project]
 name = "akshare-one"
-version = "0.3.11"
+version = "0.3.12"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "akshare>=1.17.41",
-    "cachetools>=5.5.2",
-]
+dependencies = ["akshare>=1.17.41", "cachetools>=5.5.2"]
 license = "MIT"
 keywords = ["akshare", "financial-data", "stock-data", "quant"]
 
@@ -16,9 +13,7 @@ Homepage = "https://github.com/zwldarren/akshare-one"
 Repository = "https://github.com/zwldarren/akshare-one.git"
 
 [project.optional-dependencies]
-talib = [
-    "ta-lib>=0.6.4",
-]
+talib = ["ta-lib>=0.6.4"]
 
 [dependency-groups]
 dev = [
