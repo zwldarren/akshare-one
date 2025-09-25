@@ -38,7 +38,9 @@ class RealtimeDataFactory:
 
         # Extract symbol from kwargs if present
         symbol = kwargs.get("symbol", "")
-        if not isinstance(symbol, str):
+        if symbol is None:
+            symbol = ""
+        elif not isinstance(symbol, str):
             raise ValueError("symbol must be a string")
 
         return provider_class(symbol=symbol)

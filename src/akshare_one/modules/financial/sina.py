@@ -28,8 +28,17 @@ class SinaFinancialReport(FinancialDataProvider):
         Returns:
             Standardized DataFrame with balance sheet data
         """
-        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
-        return self._clean_balance_data(raw_df)
+        try:
+            raw_df = ak.stock_financial_report_sina(
+                stock=self.stock, symbol="资产负债表"
+            )
+            if raw_df is None or raw_df.empty:
+                raise ValueError(f"Invalid stock symbol: {self.symbol}")
+            return self._clean_balance_data(raw_df)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to get balance sheet for symbol {self.symbol}: {str(e)}"
+            ) from e
 
     @cache("financial_cache", key=lambda self: f"sina_income_{self.symbol}")
     def get_income_statement(self) -> pd.DataFrame:
@@ -41,8 +50,15 @@ class SinaFinancialReport(FinancialDataProvider):
         Returns:
             Standardized DataFrame with income statement data
         """
-        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
-        return self._clean_income_data(raw_df)
+        try:
+            raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
+            if raw_df is None or raw_df.empty:
+                raise ValueError(f"Invalid stock symbol: {self.symbol}")
+            return self._clean_income_data(raw_df)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to get income statement for symbol {self.symbol}: {str(e)}"
+            ) from e
 
     @cache("financial_cache", key=lambda self: f"sina_cash_{self.symbol}")
     def get_cash_flow(self) -> pd.DataFrame:
@@ -54,8 +70,17 @@ class SinaFinancialReport(FinancialDataProvider):
         Returns:
             Standardized DataFrame with cash flow data
         """
-        raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="现金流量表")
-        return self._clean_cash_data(raw_df)
+        try:
+            raw_df = ak.stock_financial_report_sina(
+                stock=self.stock, symbol="现金流量表"
+            )
+            if raw_df is None or raw_df.empty:
+                raise ValueError(f"Invalid stock symbol: {self.symbol}")
+            return self._clean_cash_data(raw_df)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to get cash flow statement for symbol {self.symbol}: {str(e)}"
+            ) from e
 
     def _clean_cash_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化现金流量表数据
