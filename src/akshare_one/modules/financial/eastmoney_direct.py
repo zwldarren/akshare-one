@@ -61,10 +61,20 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         if balance_sheet.empty and income_statement.empty and cash_flow.empty:
             return pd.DataFrame()
 
-        merged = pd.merge(
-            balance_sheet, income_statement, on="report_date", how="outer"
-        )
-        merged = pd.merge(merged, cash_flow, on="report_date", how="outer")
+        # Start with the non-empty DataFrame
+        if not balance_sheet.empty:
+            merged = balance_sheet
+        elif not income_statement.empty:
+            merged = income_statement
+        else:
+            merged = cash_flow
+
+        # Merge with the remaining non-empty DataFrames
+        if not income_statement.empty and merged is not income_statement:
+            merged = pd.merge(merged, income_statement, on="report_date", how="outer")
+
+        if not cash_flow.empty and merged is not cash_flow:
+            merged = pd.merge(merged, cash_flow, on="report_date", how="outer")
 
         # Convert report_date to datetime and format as YYYY-MM-DD
         merged["report_date"] = pd.to_datetime(merged["report_date"]).dt.strftime(
