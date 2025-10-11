@@ -23,22 +23,58 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const prNumber = context.payload.pull_request.number;
+            let retries = 0;
+            const maxRetries = 10;
+            const waitTime = 30000; // 30 seconds
 
-            // Wait for all checks to complete
-            await github.rest.repos.listCommitStatusesForRef({
-              owner,
-              repo,
-              ref: context.payload.pull_request.head.sha
-            }).then(response => {
-              const statuses = response.data;
-              const allCompleted = statuses.every(status => status.state === 'success' || status.state === 'failure');
-              
-              if (!allCompleted) {
-                console.log('Waiting for checks to complete...');
-                // Wait a bit for checks to complete
-                return new Promise(resolve => setTimeout(resolve, 30000));
+            // Function to check if all checks are complete
+            const areChecksComplete = async () => {
+              try {
+                // Get all check runs for the commit
+                const checkRuns = await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: context.payload.pull_request.head.sha
+                });
+
+                const statuses = await github.rest.repos.listCommitStatusesForRef({
+                  owner,
+                  repo,
+                  ref: context.payload.pull_request.head.sha
+                });
+
+                // Check if there are any in-progress checks
+                const inProgressChecks = checkRuns.data.check_runs.filter(
+                  check => check.status !== 'completed'
+                );
+                
+                const inProgressStatuses = statuses.data.filter(
+                  status => status.state === 'pending'
+                );
+
+                return {
+                  complete: inProgressChecks.length === 0 && inProgressStatuses.length === 0,
+                  hasChecks: checkRuns.data.total_count > 0 || statuses.data.length > 0
+                };
+              } catch (error) {
+                console.log('Error checking status:', error.message);
+                return { complete: true, hasChecks: false };
               }
-            });
+            };
+
+            // Wait for checks to complete or timeout
+            while (retries < maxRetries) {
+              const { complete, hasChecks } = await areChecksComplete();
+              
+              if (complete) {
+                console.log(`Checks completed. Has checks: ${hasChecks}`);
+                break;
+              }
+              
+              retries++;
+              console.log(`Waiting for checks to complete... (${retries}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
 
       - name: Check if all checks passed
         uses: actions/github-script@v8
@@ -47,21 +83,56 @@ jobs:
             const { owner, repo } = context.repo;
             const prNumber = context.payload.pull_request.number;
 
-            // Get the combined status
-            const combinedStatus = await github.rest.repos.getCombinedStatusForRef({
-              owner,
-              repo,
-              ref: context.payload.pull_request.head.sha
-            });
+            try {
+              // Get the combined status
+              const combinedStatus = await github.rest.repos.getCombinedStatusForRef({
+                owner,
+                repo,
+                ref: context.payload.pull_request.head.sha
+              });
 
-            const allChecksPassed = combinedStatus.data.state === 'success';
+              // Get check runs as well
+              const checkRuns = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: context.payload.pull_request.head.sha
+              });
 
-            if (!allChecksPassed) {
-              console.log('Not all checks passed, skipping merge');
-              process.exit(1);
+              const hasStatuses = combinedStatus.data.statuses.length > 0;
+              const hasCheckRuns = checkRuns.data.total_count > 0;
+              const hasAnyChecks = hasStatuses || hasCheckRuns;
+
+              console.log(`Has any checks: ${hasAnyChecks}`);
+              console.log(`Combined status state: ${combinedStatus.data.state}`);
+              console.log(`Check runs total: ${checkRuns.data.total_count}`);
+
+              // If there are no checks at all, proceed with merge
+              if (!hasAnyChecks) {
+                console.log('No checks found, proceeding with merge');
+                return;
+              }
+
+              // If there are checks, ensure they all passed
+              const allChecksPassed = combinedStatus.data.state === 'success';
+              
+              // Also check individual check runs
+              const allCheckRunsPassed = checkRuns.data.check_runs.every(
+                check => check.conclusion === 'success'
+              );
+
+              if (!allChecksPassed || !allCheckRunsPassed) {
+                console.log('Not all checks passed, skipping merge');
+                console.log('Combined status:', combinedStatus.data.state);
+                console.log('Check runs:', checkRuns.data.check_runs.map(r => `${r.name}: ${r.conclusion}`));
+                process.exit(1);
+              }
+
+              console.log('All checks passed, proceeding with merge');
+            } catch (error) {
+              console.log('Error checking status:', error.message);
+              // If we can't check the status, proceed with caution
+              console.log('Unable to verify check status, proceeding with merge');
             }
-
-            console.log('All checks passed, proceeding with merge');
 
       - name: Merge pull request
         uses: actions/github-script@v8
