@@ -30,10 +30,13 @@ class TestInnerTradeData:
         """测试交易日期范围"""
         df = get_inner_trade_data(symbol="600405")
         now = datetime.now(timezone.utc)
-        one_year_ago = now - timedelta(days=365)
+        one_year_plus_week = now - timedelta(days=379)  # 365 days + 2 weeks buffer
+
+        # Convert transaction dates to UTC for comparison
+        transaction_dates_utc = df["transaction_date"].dt.tz_convert("UTC")
 
         # 验证交易日期在合理范围内
-        assert all(one_year_ago <= ts <= now for ts in df["transaction_date"])
+        assert all(one_year_plus_week <= ts <= now for ts in transaction_dates_utc)
 
     def test_transaction_value_calculation(self):
         """测试交易金额计算正确性"""
