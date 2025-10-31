@@ -4,7 +4,10 @@ version = "0.3.13"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["akshare>=1.17.41", "cachetools>=5.5.2"]
+dependencies = [
+    "akshare>=1.17.80",
+    "cachetools>=5.5.2",
+]
 license = "MIT"
 keywords = ["akshare", "financial-data", "stock-data", "quant"]
 
