@@ -25,7 +25,7 @@
 | 内部交易 | `get_inner_trade_data` |
 | 股票基本信息 | `get_basic_info` |
 | 财务指标 | `get_financial_metrics` |
-| 技术指标 | 参见 [indicators.py](akshare-one/indicators.py) |
+| 技术指标 | 参见 [indicators.py](src/akshare_one/indicators.py) |
 
 ## 📦 快速安装
 

@@ -58,7 +58,7 @@ def get_hist_data(
     start_date: str = "1970-01-01",
     end_date: str = "2030-12-31",
     adjust: Literal["none", "qfq", "hfq"] = "none",
-    source: Literal["eastmoney", "eastmoney_direct", "sina"] = "eastmoney",
+    source: Literal["eastmoney", "eastmoney_direct", "sina"] = "eastmoney_direct",
 ) -> pd.DataFrame:
     """Get historical market data
 
@@ -69,7 +69,7 @@ def get_hist_data(
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
         adjust: 复权类型 ('none','qfq','hfq')
-        source: 数据源 ('eastmoney', 'eastmoney_direct', 'sina') (default: 'eastmoney')
+        source: 数据源 ('eastmoney', 'eastmoney_direct', 'sina')
 
     Returns:
         pd.DataFrame:

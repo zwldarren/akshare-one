@@ -18,7 +18,7 @@ def get_hist_data(symbol, **kwargs) -> pd.DataFrame
 | `start_date` | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
 | `end_date` | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
 | `adjust` | str | 否 | "none" | 复权类型("none","qfq","hfq") |
-| `source` | str | 否 | "eastmoney" | 数据源("eastmoney","eastmoney_direct","sina") |
+| `source` | str | 否 | "eastmoney_direct" | 数据源("eastmoney","eastmoney_direct","sina") |
 
 !!! note "时间间隔说明"
     如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线

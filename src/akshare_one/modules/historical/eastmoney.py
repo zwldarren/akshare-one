@@ -77,13 +77,17 @@ class EastMoneyHistorical(HistoricalDataProvider):
         }
         period = period_map[self.interval]
 
-        raw_df = ak.stock_zh_a_hist(
-            symbol=self.symbol,
-            period=period,
-            start_date=start_date,
-            end_date=end_date,
-            adjust=self._map_adjust_param(self.adjust),
-        )
+        # Check if this is an ETF code (starts with '5' and is 6 digits)
+        if self._is_etf_code(self.symbol):
+            raw_df = self._get_etf_data(start_date, end_date)
+        else:
+            raw_df = ak.stock_zh_a_hist(
+                symbol=self.symbol,
+                period=period,
+                start_date=start_date,
+                end_date=end_date,
+                adjust=self._map_adjust_param(self.adjust),
+            )
 
         if self.interval == "year":
             self.interval_multiplier *= 12
@@ -198,13 +202,20 @@ class EastMoneyHistorical(HistoricalDataProvider):
 
     def _clean_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans and standardizes daily and higher-level data"""
+        # Handle both Chinese and English column names (for stocks vs ETFs)
         column_map = {
             "日期": "timestamp",
+            "date": "timestamp",
             "开盘": "open",
+            "open": "open",
             "收盘": "close",
+            "close": "close",
             "最高": "high",
+            "high": "high",
             "最低": "low",
+            "low": "low",
             "成交量": "volume",
+            "volume": "volume",
         }
 
         available_columns = {
@@ -225,6 +236,33 @@ class EastMoneyHistorical(HistoricalDataProvider):
             df["volume"] = df["volume"].astype("int64")
 
         return self._select_standard_columns(df)
+
+    def _is_etf_code(self, symbol: str) -> bool:
+        """Check if the symbol is an ETF code (starts with '5' and is 6 digits)"""
+        return len(symbol) == 6 and symbol.startswith("5")
+
+    def _get_etf_data(self, start_date: str, end_date: str) -> pd.DataFrame:
+        """Fetch ETF data using akshare's fund_etf_hist_sina function"""
+        # Determine market prefix based on the first digit
+        market_prefix = "sh" if self.symbol.startswith("5") else "sh"
+
+        etf_symbol = f"{market_prefix}{self.symbol}"
+
+        raw_df: pd.DataFrame = ak.fund_etf_hist_sina(symbol=etf_symbol)
+
+        if raw_df.empty:
+            raise ValueError(f"No data found for ETF {self.symbol}")
+
+        # Filter by date range if needed
+        if start_date and end_date:
+            start_dt = pd.to_datetime(start_date, format="%Y%m%d")
+            end_dt = pd.to_datetime(end_date, format="%Y%m%d")
+            raw_df = raw_df[
+                (pd.to_datetime(raw_df["date"]) >= start_dt)
+                & (pd.to_datetime(raw_df["date"]) <= end_dt)
+            ]
+
+        return raw_df
 
     def _select_standard_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Selects and orders the standard output columns"""

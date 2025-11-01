@@ -25,7 +25,7 @@
 | Internal transactions | `get_inner_trade_data` |
 | Basic stock info | `get_basic_info` |
 | Financial metrics | `get_financial_metrics` |
-| Technical indicators | See [indicators.py](akshare-one/indicators.py) |
+| Technical indicators | See [indicators.py](src/akshare_one/indicators.py) |
 
 ## 📦 Quick Installation
 
