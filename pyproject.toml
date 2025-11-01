@@ -62,3 +62,6 @@ select = [
 
 [tool.mypy]
 strict = true
+
+[tool.pyright]
+typeCheckingMode = "standard"

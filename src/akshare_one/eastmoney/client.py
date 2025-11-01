@@ -30,7 +30,9 @@ class EastMoneyClient:
         elif len(symbol) == 6:
             if symbol.startswith(("000", "001", "002", "003", "300", "200")):
                 market = "0"
-            elif symbol.startswith(("600", "601", "603", "605", "688", "900")):
+            elif symbol.startswith(
+                ("600", "601", "603", "605", "688", "900", "5", "6")
+            ):
                 market = "1"
             else:
                 market = "0"  # Default to SZ for ambiguity
