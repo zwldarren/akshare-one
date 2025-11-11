@@ -160,7 +160,7 @@ wheels = [
 
 [[package]]
 name = "akshare"
-version = "1.17.80"
+version = "1.17.83"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -181,9 +181,9 @@ dependencies = [
     { name = "urllib3" },
     { name = "xlrd" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3c/10/ae25a8d38152b72e68cd09ea7e06226cefbbbc4121571361b90350a0db2d/akshare-1.17.80.tar.gz", hash = "sha256:1aed4f2e0a0d35178233ffca4033722f66ee91611212e6c8f2a187991083e4c2", size = 849481, upload-time = "2025-10-30T11:49:58.779Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/ca/dd34f02219d62689b0f0036fbbc0f3f50083c12311199798c113e65912cf/akshare-1.17.83.tar.gz", hash = "sha256:debf5491acfd473a3b151350780ecfe037415f09a0635193bb72ecc2490cd486", size = 849695, upload-time = "2025-11-04T10:09:33.429Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/f2/9606c234c7ad7955182e6c89f428f3cdad5a97170ee96cfb98b2be70b42e/akshare-1.17.80-py3-none-any.whl", hash = "sha256:fb6b2ca2746e4d887bdaf1af6e31588bc0240352571517df111fb755f72d76a5", size = 1067950, upload-time = "2025-10-30T11:49:55.251Z" },
+    { url = "https://files.pythonhosted.org/packages/04/ac/e5602b44af872f6ee86da661617a2d8bb2a52ed05ace08562df83c292b40/akshare-1.17.83-py3-none-any.whl", hash = "sha256:26b771a5627fa161b2123eb88de8c115def999c716a24d43cb502594e55517fe", size = 1068171, upload-time = "2025-11-04T10:09:31.886Z" },
 ]
 
 [[package]]
@@ -577,7 +577,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749, upload-time = "2025-05-10T17:42:51.123Z" }
 wheels = [
