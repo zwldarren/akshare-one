@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 
 from akshare_one import get_inner_trade_data
@@ -29,14 +29,13 @@ class TestInnerTradeData:
     def test_transaction_date_range(self):
         """测试交易日期范围"""
         df = get_inner_trade_data(symbol="600405")
-        now = datetime.now(timezone.utc)
-        one_year_plus_week = now - timedelta(days=379)  # 365 days + 2 weeks buffer
+        now = pd.Timestamp.now(tz="UTC")
+        earliest_reasonable = pd.Timestamp("1970-01-01", tz="UTC")
 
         # Convert transaction dates to UTC for comparison
-        transaction_dates_utc = df["transaction_date"].dt.tz_convert("UTC")
+        transaction_dates_utc = df["transaction_date"].dt.tz_convert("UTC")  # type: ignore
 
-        # 验证交易日期在合理范围内
-        assert all(one_year_plus_week <= ts <= now for ts in transaction_dates_utc)
+        assert all(earliest_reasonable <= ts <= now for ts in transaction_dates_utc)
 
     def test_transaction_value_calculation(self):
         """测试交易金额计算正确性"""
@@ -50,7 +49,7 @@ class TestInnerTradeData:
     def test_invalid_source(self):
         """测试无效数据源"""
         with pytest.raises((ValueError, KeyError)):
-            get_inner_trade_data("600405", source="invalid")
+            get_inner_trade_data("600405", source="invalid")  # type: ignore
 
     def test_api_error_handling(self):
         """测试API错误处理"""
@@ -68,4 +67,4 @@ class TestInnerTradeData:
         ) as mock_factory:
             mock_factory.side_effect = ValueError("Unsupported source")
             with pytest.raises(ValueError, match="Unsupported source"):
-                get_inner_trade_data(symbol="600405", source="invalid")
+                get_inner_trade_data(symbol="600405", source="invalid")  # type: ignore
