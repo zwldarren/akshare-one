@@ -33,26 +33,33 @@ class XueQiuRealtime(RealtimeDataProvider):
         """
         raw_df = ak.stock_individual_spot_xq(symbol=convert_xieqiu_symbol(self.symbol))
 
+        # Convert to dictionary for easier lookup
+        data_map = dict(zip(raw_df["item"], raw_df["value"], strict=True))
+
+        def _get_value(key: str, type_func: type = float) -> float | str:
+            val = data_map.get(key)
+            if val is None:
+                return 0.0 if type_func in (float, int) else ""
+            try:
+                return type_func(val)
+            except (ValueError, TypeError):
+                return 0.0 if type_func in (float, int) else ""
+
         # Transform to match standard format
         data = {
             "symbol": self.symbol,
-            "price": float(raw_df.loc[raw_df["item"] == "现价", "value"].values[0]),
-            "change": float(raw_df.loc[raw_df["item"] == "涨跌", "value"].values[0]),
-            "pct_change": float(
-                raw_df.loc[raw_df["item"] == "涨幅", "value"].values[0]
+            "price": _get_value("现价"),
+            "change": _get_value("涨跌"),
+            "pct_change": _get_value("涨幅"),
+            "timestamp": pd.to_datetime(_get_value("时间", str)).tz_localize(
+                "Asia/Shanghai"
             ),
-            "timestamp": pd.to_datetime(
-                raw_df.loc[raw_df["item"] == "时间", "value"].values[0]
-            ).tz_localize("Asia/Shanghai"),
-            "volume": int(raw_df.loc[raw_df["item"] == "成交量", "value"].values[0])
-            / 100,
-            "amount": float(raw_df.loc[raw_df["item"] == "成交额", "value"].values[0]),
-            "open": float(raw_df.loc[raw_df["item"] == "今开", "value"].values[0]),
-            "high": float(raw_df.loc[raw_df["item"] == "最高", "value"].values[0]),
-            "low": float(raw_df.loc[raw_df["item"] == "最低", "value"].values[0]),
-            "prev_close": float(
-                raw_df.loc[raw_df["item"] == "昨收", "value"].values[0]
-            ),
+            "volume": float(_get_value("成交量", int)) / 100,
+            "amount": _get_value("成交额"),
+            "open": _get_value("今开"),
+            "high": _get_value("最高"),
+            "low": _get_value("最低"),
+            "prev_close": _get_value("昨收"),
         }
 
         return pd.DataFrame([data])

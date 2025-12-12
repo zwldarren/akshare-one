@@ -1,9 +1,13 @@
+import logging
+
 import pandas as pd
 import requests
 
 from akshare_one.modules.cache import cache
 
 from .base import FinancialDataProvider
+
+logger = logging.getLogger(__name__)
 
 
 class EastMoneyDirectFinancialReport(FinancialDataProvider):
@@ -40,13 +44,13 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         super().__init__(symbol)
 
     def get_income_statement(self) -> pd.DataFrame:
-        return pd.DataFrame()
+        return self._fetch_income_statement()
 
     def get_balance_sheet(self) -> pd.DataFrame:
-        return pd.DataFrame()
+        return self._fetch_balance_sheet()
 
     def get_cash_flow(self) -> pd.DataFrame:
-        return pd.DataFrame()
+        return self._fetch_cash_flow()
 
     @cache(
         "financial_cache",
@@ -116,11 +120,13 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 df.rename(columns=self._balance_sheet_rename_map, inplace=True)
                 return df
             else:
-                print("No balance sheet data found in API response")
+                logger.warning(
+                    "No balance sheet data found in API response for %s", self.symbol
+                )
                 return pd.DataFrame()
 
         except Exception as e:
-            print(f"Error occurred: {str(e)}")
+            logger.error("Error fetching balance sheet for %s: %s", self.symbol, str(e))
             return pd.DataFrame()
 
     def _fetch_income_statement(self) -> pd.DataFrame:
@@ -151,11 +157,15 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 df.rename(columns=self._income_statement_rename_map, inplace=True)
                 return df
             else:
-                print("No income statement data found in API response")
+                logger.warning(
+                    "No income statement data found in API response for %s", self.symbol
+                )
                 return pd.DataFrame()
 
         except Exception as e:
-            print(f"Error occurred: {str(e)}")
+            logger.error(
+                "Error fetching income statement for %s: %s", self.symbol, str(e)
+            )
             return pd.DataFrame()
 
     def _fetch_cash_flow(self) -> pd.DataFrame:
@@ -186,9 +196,14 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 df.rename(columns=self._cash_flow_rename_map, inplace=True)
                 return df
             else:
-                print("No cash flow statement data found in API response")
+                logger.warning(
+                    "No cash flow statement data found in API response for %s",
+                    self.symbol,
+                )
                 return pd.DataFrame()
 
         except Exception as e:
-            print(f"Error occurred: {str(e)}")
+            logger.error(
+                "Error fetching cash flow statement for %s: %s", self.symbol, str(e)
+            )
             return pd.DataFrame()
