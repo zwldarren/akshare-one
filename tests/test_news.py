@@ -59,7 +59,7 @@ class TestNewsData:
     def test_unsupported_source(self):
         """测试不支持的来源"""
         with pytest.raises(ValueError):
-            get_news_data(symbol="300059", source="invalid")
+            get_news_data(symbol="300059", source="invalid")  # type: ignore
 
     def test_factory_error_handling(self):
         """测试工厂错误处理"""
@@ -68,4 +68,4 @@ class TestNewsData:
         ) as mock_factory:
             mock_factory.side_effect = ValueError("Unsupported source")
             with pytest.raises(ValueError, match="Unsupported source"):
-                get_news_data(symbol="300059", source="invalid")
+                get_news_data(symbol="300059", source="invalid")  # type: ignore

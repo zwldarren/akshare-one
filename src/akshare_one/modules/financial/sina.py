@@ -313,5 +313,47 @@ class SinaFinancialReport(FinancialDataProvider):
         required_columns = ["report_date"] + list(column_mapping.values())
         return raw_df.rename(columns=column_mapping).reindex(columns=required_columns)
 
+    @cache("financial_cache", key=lambda self: f"sina_metrics_{self.symbol}")
     def get_financial_metrics(self) -> pd.DataFrame:
-        return pd.DataFrame()
+        """获取三大财务报表关键指标"""
+        # Fetch all reports
+        try:
+            balance_sheet = self.get_balance_sheet()
+        except ValueError:
+            balance_sheet = pd.DataFrame()
+
+        try:
+            income_statement = self.get_income_statement()
+        except ValueError:
+            income_statement = pd.DataFrame()
+
+        try:
+            cash_flow = self.get_cash_flow()
+        except ValueError:
+            cash_flow = pd.DataFrame()
+
+        if balance_sheet.empty and income_statement.empty and cash_flow.empty:
+            return pd.DataFrame()
+
+        # Start with the non-empty DataFrame
+        if not balance_sheet.empty:
+            merged = balance_sheet
+        elif not income_statement.empty:
+            merged = income_statement
+        else:
+            merged = cash_flow
+
+        # Merge with the remaining non-empty DataFrames
+        if not income_statement.empty and merged is not income_statement:
+            merged = pd.merge(merged, income_statement, on="report_date", how="outer")
+
+        if not cash_flow.empty and merged is not cash_flow:
+            merged = pd.merge(merged, cash_flow, on="report_date", how="outer")
+
+        # Sort by report_date in descending order (most recent first)
+        if "report_date" in merged.columns:
+            merged = merged.sort_values("report_date", ascending=False).reset_index(
+                drop=True
+            )
+
+        return merged
