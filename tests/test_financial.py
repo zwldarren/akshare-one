@@ -71,13 +71,13 @@ class TestCashFlow:
     def test_unsupported_source(self):
         """测试不支持的来源"""
         with pytest.raises(ValueError):
-            get_balance_sheet(symbol="600600", source="invalid")
+            get_balance_sheet(symbol="600600", source="invalid")  # type: ignore[arg-type]
         with pytest.raises(ValueError):
-            get_income_statement(symbol="600600", source="invalid")
+            get_income_statement(symbol="600600", source="invalid")  # type: ignore[arg-type]
         with pytest.raises(ValueError):
-            get_cash_flow(symbol="600600", source="invalid")
+            get_cash_flow(symbol="600600", source="invalid")  # type: ignore[arg-type]
         with pytest.raises(ValueError):
-            get_financial_metrics(symbol="600600", source="invalid")
+            get_financial_metrics(symbol="600600", source="invalid")  # type: ignore[arg-type]
 
 
 class TestFinancialMetrics:

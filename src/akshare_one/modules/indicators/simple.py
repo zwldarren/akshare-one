@@ -270,8 +270,8 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
 
     def calculate_cmo(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
         close_diff = df["close"].diff(1)
-        sum_up = close_diff.where(close_diff > 0, 0).rolling(window=window).sum()  # type: ignore
-        sum_down = -close_diff.where(close_diff < 0, 0).rolling(window=window).sum()  # type: ignore
+        sum_up = close_diff.where(close_diff > 0, 0).rolling(window=window).sum()
+        sum_down = -close_diff.where(close_diff < 0, 0).rolling(window=window).sum()
         cmo = 100 * (sum_up - sum_down) / (sum_up + sum_down).replace(0, np.nan)
         cmo = cmo.fillna(0)
         return cmo.to_frame("cmo")
@@ -287,8 +287,8 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         typical_price = (df["high"] + df["low"] + df["close"]) / 3
         money_flow = typical_price * df["volume"]
         price_diff = typical_price.diff()
-        positive_mf = money_flow.where(price_diff > 0, 0)  # type: ignore
-        negative_mf = money_flow.where(price_diff < 0, 0)  # type: ignore
+        positive_mf = money_flow.where(price_diff > 0, 0)
+        negative_mf = money_flow.where(price_diff < 0, 0)
         positive_mf_sum = positive_mf.rolling(window=window).sum()
         negative_mf_sum = negative_mf.rolling(window=window).sum()
         money_ratio = positive_mf_sum / negative_mf_sum.replace(0, np.nan)
@@ -307,7 +307,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         low = df["low"]
         up_move = high.diff()
         down_move = -low.diff()
-        minus_dm = down_move.where((down_move > up_move) & (down_move > 0), 0)  # type: ignore
+        minus_dm = down_move.where((down_move > up_move) & (down_move > 0), 0)
         smoothed_minus_dm = self._wilder_smooth(minus_dm, window)
         return smoothed_minus_dm.to_frame("minus_dm")
 
@@ -322,7 +322,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         low = df["low"]
         up_move = high.diff()
         down_move = -low.diff()
-        plus_dm = up_move.where((up_move > down_move) & (up_move > 0), 0)  # type: ignore
+        plus_dm = up_move.where((up_move > down_move) & (up_move > 0), 0)
         smoothed_plus_dm = self._wilder_smooth(plus_dm, window)
         return smoothed_plus_dm.to_frame("plus_dm")
 
@@ -360,7 +360,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         ema1 = close.ewm(span=window, adjust=False).mean()
         ema2 = ema1.ewm(span=window, adjust=False).mean()
         ema3 = ema2.ewm(span=window, adjust=False).mean()
-        trix = 100 * ema3.diff(1) / ema3.shift(1)  # type: ignore
+        trix = 100 * ema3.diff(1) / ema3.shift(1)
         return pd.DataFrame({"trix": trix}, index=df.index)
 
     def calculate_ultosc(

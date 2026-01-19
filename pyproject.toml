@@ -1,6 +1,6 @@
 [project]
 name = "akshare-one"
-version = "0.3.17"
+version = "0.4.0"
 description = "Standardized interface for Chinese financial market data, built on AKShare with unified data formats and simplified APIs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,12 +21,12 @@ talib = ["ta-lib>=0.6.4"]
 [dependency-groups]
 dev = [
     "mkdocs-material>=9.6.15",
-    "mypy>=1.17.1",
     "pandas-stubs>=2.3.0.250703",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
+    "ty>=0.0.10",
     "types-cachetools>=6.1.0.20250717",
     "types-requests>=2.32.4.20250809",
 ]

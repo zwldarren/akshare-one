@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import talib
-from talib import MA_Type  # type: ignore
+import talib  # type: ignore[import-not-found]
+from talib import MA_Type  # type: ignore[import-not-found]
 
 from .base import BaseIndicatorCalculator
 

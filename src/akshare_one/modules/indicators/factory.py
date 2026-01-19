@@ -8,7 +8,7 @@ TALIB_AVAILABLE = False
 try:
     from .talib import TalibIndicatorCalculator
 
-    _calculators["talib"] = TalibIndicatorCalculator  # type: ignore
+    _calculators["talib"] = TalibIndicatorCalculator
     TALIB_AVAILABLE = True
 except ImportError:
     # talib is optional
