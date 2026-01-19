@@ -64,7 +64,7 @@ class EastMoneyClient:
         }
         response = self.session.get(url, params=params)
         response.raise_for_status()
-        return response.json()  # type: ignore
+        return response.json()
 
     def fetch_realtime_quote(self, symbol: str) -> dict[str, Any]:
         """
@@ -82,4 +82,4 @@ class EastMoneyClient:
         }
         response = self.session.get(url, params=params)
         response.raise_for_status()
-        return response.json()  # type: ignore
+        return response.json()

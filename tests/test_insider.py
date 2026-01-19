@@ -33,7 +33,7 @@ class TestInnerTradeData:
         earliest_reasonable = pd.Timestamp("1970-01-01", tz="UTC")
 
         # Convert transaction dates to UTC for comparison
-        transaction_dates_utc = df["transaction_date"].dt.tz_convert("UTC")  # type: ignore
+        transaction_dates_utc = df["transaction_date"].dt.tz_convert("UTC")
 
         assert all(earliest_reasonable <= ts <= now for ts in transaction_dates_utc)
 

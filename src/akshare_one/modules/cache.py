@@ -13,6 +13,10 @@ CACHE_CONFIG: dict[str, TTLCache[Any, Any]] = {
     "news_cache": TTLCache(maxsize=500, ttl=3600),  # 新闻数据缓存1小时
     "financial_cache": TTLCache(maxsize=500, ttl=86400),  # 财务数据缓存24小时
     "info_cache": TTLCache(maxsize=500, ttl=86400),  # 信息数据缓存24小时
+    "futures_hist_cache": TTLCache(maxsize=1000, ttl=3600),  # 期货历史数据缓存1小时
+    "futures_realtime_cache": TTLCache(maxsize=500, ttl=60),  # 期货实时数据缓存1分钟
+    "options_chain_cache": TTLCache(maxsize=1000, ttl=3600),  # 期权链数据缓存1小时
+    "options_realtime_cache": TTLCache(maxsize=500, ttl=60),  # 期权实时数据缓存1分钟
 }
 
 

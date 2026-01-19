@@ -1,4 +1,4 @@
-import akshare as ak  # type: ignore
+import akshare as ak
 import pandas as pd
 
 from ..cache import cache

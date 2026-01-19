@@ -157,7 +157,7 @@ class TestRealtimeData:
     def test_invalid_source(self):
         """测试无效数据源"""
         with pytest.raises((ValueError, KeyError)):
-            get_realtime_data(symbol="600000", source="invalid")
+            get_realtime_data(symbol="600000", source="invalid")  # type: ignore[arg-type]
 
     def test_b_share_daily_data(self):
         """测试B股日线数据"""

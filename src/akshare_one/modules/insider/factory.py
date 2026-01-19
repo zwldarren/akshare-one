@@ -12,7 +12,7 @@ class InsiderDataFactory:
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs) -> InsiderDataProvider:  # type: ignore
+    def get_provider(cls, provider_name: str, **kwargs) -> InsiderDataProvider:
         """
         Get an insider data provider by name
 
@@ -41,4 +41,4 @@ class InsiderDataFactory:
             name: Name to associate with this provider
             provider_class: The provider class to register
         """
-        cls._providers[name.lower()] = provider_class  # type: ignore
+        cls._providers[name.lower()] = provider_class

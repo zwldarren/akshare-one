@@ -14,7 +14,7 @@ class FinancialDataFactory:
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs) -> FinancialDataProvider:  # type: ignore
+    def get_provider(cls, provider_name: str, **kwargs) -> FinancialDataProvider:
         """
         Get a financial data provider by name
 
@@ -43,4 +43,4 @@ class FinancialDataFactory:
             name: Name to associate with this provider
             provider_class: The provider class to register
         """
-        cls._providers[name.lower()] = provider_class  # type: ignore
+        cls._providers[name.lower()] = provider_class

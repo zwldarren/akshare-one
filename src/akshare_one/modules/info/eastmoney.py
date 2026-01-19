@@ -1,4 +1,4 @@
-import akshare as ak  # type: ignore
+import akshare as ak
 import pandas as pd
 
 from ..cache import cache
@@ -48,4 +48,4 @@ class EastmoneyInfo(InfoDataProvider):
             if col in info_df.columns:
                 info_df[col] = pd.to_numeric(info_df[col], errors="coerce")
 
-        return info_df  # type: ignore
+        return info_df

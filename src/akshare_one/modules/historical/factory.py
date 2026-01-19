@@ -16,7 +16,7 @@ class HistoricalDataFactory:
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs) -> HistoricalDataProvider:  # type: ignore
+    def get_provider(cls, provider_name: str, **kwargs) -> HistoricalDataProvider:
         """
         Get a historical data provider by name
 
@@ -34,7 +34,7 @@ class HistoricalDataFactory:
         if not provider_class:
             raise ValueError(f"Unknown historical data provider: {provider_name}")
 
-        return provider_class(**kwargs)  # type: ignore
+        return provider_class(**kwargs)
 
     @classmethod
     def register_provider(cls, name: str, provider_class: type) -> None:
@@ -45,4 +45,4 @@ class HistoricalDataFactory:
             name: Name to associate with this provider
             provider_class: The provider class to register
         """
-        cls._providers[name.lower()] = provider_class  # type: ignore
+        cls._providers[name.lower()] = provider_class

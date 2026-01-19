@@ -12,7 +12,7 @@ class InfoDataFactory:
     }
 
     @classmethod
-    def get_provider(cls, provider_name: str, **kwargs) -> InfoDataProvider:  # type: ignore
+    def get_provider(cls, provider_name: str, **kwargs) -> InfoDataProvider:
         """
         Get a info data provider by name
 
@@ -41,4 +41,4 @@ class InfoDataFactory:
             name: Name to associate with this provider
             provider_class: The provider class to register
         """
-        cls._providers[name.lower()] = provider_class  # type: ignore
+        cls._providers[name.lower()] = provider_class

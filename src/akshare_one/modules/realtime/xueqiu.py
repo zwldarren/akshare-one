@@ -1,4 +1,4 @@
-import akshare as ak  # type: ignore
+import akshare as ak
 import pandas as pd
 
 from ..cache import cache
@@ -41,7 +41,10 @@ class XueQiuRealtime(RealtimeDataProvider):
             if val is None:
                 return 0.0 if type_func in (float, int) else ""
             try:
-                return type_func(val)
+                result = type_func(val)
+                if isinstance(result, (float, int)):
+                    return float(result)
+                return str(result)
             except (ValueError, TypeError):
                 return 0.0 if type_func in (float, int) else ""
 
