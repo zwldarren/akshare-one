@@ -36,8 +36,10 @@ class EastMoneyHistorical(HistoricalDataProvider):
                 df = self._get_daily_plus_data()
 
             return df
+        except ValueError:
+            raise
         except Exception as e:
-            raise ValueError(f"Failed to fetch historical data: {str(e)}") from e
+            raise ValueError(f"Failed to fetch historical data for {self.symbol}: {str(e)}") from e
 
     def _get_intraday_data(self) -> pd.DataFrame:
         """Fetches intraday data at minute or hour intervals"""

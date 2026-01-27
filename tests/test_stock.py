@@ -113,13 +113,16 @@ class TestRealtimeData:
         with patch(
             "akshare_one.modules.historical.eastmoney.EastMoneyHistorical.get_hist_data"
         ) as mock_get:
-            mock_get.side_effect = Exception("API error")
-            with pytest.raises(Exception, match="API error"):
+            mock_get.side_effect = ValueError(
+                "Failed to fetch historical data for 600000: API error"
+            )
+            with pytest.raises(ValueError, match="API error"):
                 get_hist_data(
                     symbol="600000",
                     interval="day",
                     start_date="2024-01-01",
                     end_date="2024-01-31",
+                    source="eastmoney",
                 )
 
     def test_historical_data_invalid_dates(self):

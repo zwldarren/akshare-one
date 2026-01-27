@@ -31,9 +31,17 @@ class XueQiuRealtime(RealtimeDataProvider):
             - low: 最低
             - prev_close: 昨收
         """
-        raw_df = ak.stock_individual_spot_xq(symbol=convert_xieqiu_symbol(self.symbol))
+        try:
+            raw_df = ak.stock_individual_spot_xq(symbol=convert_xieqiu_symbol(self.symbol))
+        except (KeyError, ValueError, Exception) as e:
+            raise ValueError(
+                f"Failed to get real-time data from XueQiu for {self.symbol}: {str(e)}"
+            ) from e
 
         # Convert to dictionary for easier lookup
+        if raw_df.empty or "item" not in raw_df.columns or "value" not in raw_df.columns:
+            raise ValueError(f"Empty or invalid data returned from XueQiu for {self.symbol}")
+
         data_map = dict(zip(raw_df["item"], raw_df["value"], strict=True))
 
         def _get_value(key: str, type_func: type = float) -> float | str:

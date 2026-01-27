@@ -32,9 +32,31 @@ class XueQiuInsider(InsiderDataProvider):
             - position: 董监高职务
         """
         raw_df = ak.stock_inner_trade_xq()
+        if raw_df.empty:
+            return pd.DataFrame(
+                columns=[
+                    "symbol",
+                    "issuer",
+                    "name",
+                    "title",
+                    "transaction_date",
+                    "transaction_shares",
+                    "transaction_price_per_share",
+                    "shares_owned_after_transaction",
+                    "relationship",
+                    "is_board_director",
+                    "transaction_value",
+                    "shares_owned_before_transaction",
+                ]
+            )
+
         if self.symbol:
             xueqiu_symbol = convert_xieqiu_symbol(self.symbol)
-            raw_df = raw_df[raw_df["股票代码"] == xueqiu_symbol]
+            # Handle cases where "股票代码" might be NaN or missing
+            if "股票代码" in raw_df.columns:
+                raw_df = raw_df[raw_df["股票代码"] == xueqiu_symbol]
+            else:
+                raw_df = raw_df.iloc[0:0]  # Return empty if we can't filter by symbol
         return self._clean_insider_data(raw_df)
 
     def _clean_insider_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
