@@ -116,9 +116,7 @@ class SinaHistorical(HistoricalDataProvider):
             raw_df = raw_df.rename(columns={"day": "date"})
 
             if self.interval_multiplier > 1:
-                raw_df = self._resample_data(
-                    raw_df, self.interval, self.interval_multiplier
-                )
+                raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
         else:
             raw_df = ak.stock_zh_b_daily(
                 symbol=stock,
@@ -127,9 +125,7 @@ class SinaHistorical(HistoricalDataProvider):
                 adjust=self._map_adjust_param(self.adjust),
             )
             if self.interval_multiplier > 1:
-                raw_df = self._resample_data(
-                    raw_df, self.interval, self.interval_multiplier
-                )
+                raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
 
         return self._clean_data(raw_df)
 
@@ -150,9 +146,7 @@ class SinaHistorical(HistoricalDataProvider):
         )
 
         if self.interval_multiplier > 1:
-            raw_df = self._resample_data(
-                raw_df, self.interval, self.interval_multiplier
-            )
+            raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
 
         return self._clean_data(raw_df)
 
@@ -172,9 +166,7 @@ class SinaHistorical(HistoricalDataProvider):
         """Maps adjustment parameters to the required format"""
         return adjust if adjust != "none" else ""
 
-    def _resample_data(
-        self, df: pd.DataFrame, interval: str, multiplier: int
-    ) -> pd.DataFrame:
+    def _resample_data(self, df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:
         """Resamples daily and higher-level data to the specified interval"""
         freq_map = {
             "day": f"{multiplier}D",
@@ -211,9 +203,7 @@ class SinaHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=column_map)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         return self._select_standard_columns(df)
 
@@ -231,9 +221,7 @@ class SinaHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=column_map)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         if "volume" in df.columns:
             df["volume"] = df["volume"].astype("int64")

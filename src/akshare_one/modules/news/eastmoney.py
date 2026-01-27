@@ -28,9 +28,7 @@ class EastMoneyNews(NewsDataProvider):
 
         df = raw_df.rename(columns=column_mapping)
 
-        df["publish_time"] = pd.to_datetime(df["publish_time"]).dt.tz_localize(
-            "Asia/Shanghai"
-        )
+        df["publish_time"] = pd.to_datetime(df["publish_time"]).dt.tz_localize("Asia/Shanghai")
 
         required_columns = [
             "keyword",

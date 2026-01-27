@@ -28,9 +28,7 @@ from .modules.options.factory import OptionsDataFactory
 from .modules.realtime.factory import RealtimeDataFactory
 
 
-def get_basic_info(
-    symbol: str, source: Literal["eastmoney"] = "eastmoney"
-) -> pd.DataFrame:
+def get_basic_info(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd.DataFrame:
     """获取股票基础信息
 
     Args:
@@ -122,9 +120,7 @@ def get_realtime_data(
     return provider.get_current_data()
 
 
-def get_news_data(
-    symbol: str, source: Literal["eastmoney"] = "eastmoney"
-) -> pd.DataFrame:
+def get_news_data(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd.DataFrame:
     """获取个股新闻数据
 
     Args:
@@ -202,9 +198,7 @@ def get_financial_metrics(
     return provider.get_financial_metrics()
 
 
-def get_inner_trade_data(
-    symbol: str, source: Literal["xueqiu"] = "xueqiu"
-) -> pd.DataFrame:
+def get_inner_trade_data(symbol: str, source: Literal["xueqiu"] = "xueqiu") -> pd.DataFrame:
     """获取雪球内部交易数据
 
     Args:
@@ -347,22 +341,20 @@ def get_options_chain(
         - open_interest: 持仓量
         - implied_volatility: 隐含波动率
     """
-    provider = OptionsDataFactory.get_provider(
-        source, underlying_symbol=underlying_symbol
-    )
+    provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
     return provider.get_options_chain()
 
 
 def get_options_realtime(
     symbol: str | None = None,
-    underlying_symbol: str = "510300",
+    underlying_symbol: str | None = None,
     source: Literal["sina"] = "sina",
 ) -> pd.DataFrame:
     """获取期权实时行情数据
 
     Args:
-        symbol: 期权代码 (如 "10004005")，为 None 时返回标的下所有期权
-        underlying_symbol: 标的代码 (e.g., '510300' for 300ETF期权)
+        symbol: 期权代码 (如 "10004005")
+        underlying_symbol: 标的代码 (e.g., '510300' for 300ETF期权)，获取该标的所有期权
         source: 数据源 ('sina')
 
     Returns:
@@ -376,16 +368,22 @@ def get_options_realtime(
         - volume: 成交量
         - open_interest: 持仓量
         - iv: 隐含波动率
+
+    Raises:
+        ValueError: 当同时提供或都不提供 symbol 和 underlying_symbol 时
     """
-    if symbol:
-        provider = OptionsDataFactory.get_provider(
-            source, underlying_symbol=underlying_symbol
+    if symbol is not None and underlying_symbol is not None:
+        raise ValueError(
+            "Cannot specify both 'symbol' and 'underlying_symbol'. Provide one or the other."
         )
+    if symbol is None and underlying_symbol is None:
+        raise ValueError("Must specify either 'symbol' or 'underlying_symbol'.")
+
+    if symbol:
+        provider = OptionsDataFactory.get_provider(source, underlying_symbol="")
         return provider.get_options_realtime(symbol)
     else:
-        provider = OptionsDataFactory.get_provider(
-            source, underlying_symbol=underlying_symbol
-        )
+        provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
         return provider.get_options_realtime("")
 
 
@@ -402,9 +400,7 @@ def get_options_expirations(
     Returns:
         list[str]: 可用的到期日列表
     """
-    from .modules.options.sina import SinaOptionsProvider
-
-    provider = SinaOptionsProvider(underlying_symbol=underlying_symbol)
+    provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
     return provider.get_options_expirations(underlying_symbol)
 
 
@@ -434,10 +430,9 @@ def get_options_hist(
         - open_interest: 持仓量
         - settlement: 结算价
     """
-    kwargs = {
-        "symbol": symbol,
-        "start_date": start_date,
-        "end_date": end_date,
-    }
     provider = OptionsDataFactory.get_provider(source, underlying_symbol="")
-    return provider.get_options_history(**kwargs)
+    return provider.get_options_history(
+        symbol=symbol,
+        start_date=start_date,
+        end_date=end_date,
+    )

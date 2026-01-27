@@ -42,9 +42,7 @@ import pandas as pd
 from .modules.indicators.factory import IndicatorFactory
 
 
-def get_sma(
-    df: pd.DataFrame, window: int = 20, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_sma(df: pd.DataFrame, window: int = 20, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Simple Moving Average
 
     Args:
@@ -56,9 +54,7 @@ def get_sma(
     return calculator.calculate_sma(df, window)
 
 
-def get_ema(
-    df: pd.DataFrame, window: int = 20, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_ema(df: pd.DataFrame, window: int = 20, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Exponential Moving Average
 
     Args:
@@ -70,9 +66,7 @@ def get_ema(
     return calculator.calculate_ema(df, window)
 
 
-def get_rsi(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_rsi(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Relative Strength Index
 
     Args:
@@ -142,9 +136,7 @@ def get_stoch(
     return calculator.calculate_stoch(df, window, smooth_d, smooth_k)
 
 
-def get_atr(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_atr(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Average True Range
 
     Args:
@@ -156,9 +148,7 @@ def get_atr(
     return calculator.calculate_atr(df, window)
 
 
-def get_cci(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_cci(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Commodity Channel Index
 
     Args:
@@ -170,9 +160,7 @@ def get_cci(
     return calculator.calculate_cci(df, window)
 
 
-def get_adx(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_adx(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Average Directional Index
 
     Args:
@@ -184,9 +172,7 @@ def get_adx(
     return calculator.calculate_adx(df, window)
 
 
-def get_willr(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_willr(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Williams' %R"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_willr(df, window)
@@ -215,9 +201,7 @@ def get_obv(df: pd.DataFrame, calculator_type: str = "talib") -> pd.DataFrame:
     return calculator.calculate_obv(df)
 
 
-def get_mom(
-    df: pd.DataFrame, window: int = 10, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_mom(df: pd.DataFrame, window: int = 10, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Momentum"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_mom(df, window)
@@ -234,9 +218,7 @@ def get_sar(
     return calculator.calculate_sar(df, acceleration, maximum)
 
 
-def get_tsf(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_tsf(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Time Series Forecast"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_tsf(df, window)
@@ -254,9 +236,7 @@ def get_apo(
     return calculator.calculate_apo(df, fast_period, slow_period, ma_type)
 
 
-def get_aroon(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_aroon(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Aroon"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_aroon(df, window)
@@ -276,25 +256,19 @@ def get_bop(df: pd.DataFrame, calculator_type: str = "talib") -> pd.DataFrame:
     return calculator.calculate_bop(df)
 
 
-def get_cmo(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_cmo(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Chande Momentum Oscillator"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_cmo(df, window)
 
 
-def get_dx(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_dx(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Directional Movement Index"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_dx(df, window)
 
 
-def get_mfi(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_mfi(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Money Flow Index"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_mfi(df, window)
@@ -316,17 +290,13 @@ def get_minus_dm(
     return calculator.calculate_minus_dm(df, window)
 
 
-def get_plus_di(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_plus_di(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Plus Directional Indicator"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_plus_di(df, window)
 
 
-def get_plus_dm(
-    df: pd.DataFrame, window: int = 14, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_plus_dm(df: pd.DataFrame, window: int = 14, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Plus Directional Movement"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_plus_dm(df, window)
@@ -344,41 +314,31 @@ def get_ppo(
     return calculator.calculate_ppo(df, fast_period, slow_period, ma_type)
 
 
-def get_roc(
-    df: pd.DataFrame, window: int = 10, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_roc(df: pd.DataFrame, window: int = 10, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Rate of change"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_roc(df, window)
 
 
-def get_rocp(
-    df: pd.DataFrame, window: int = 10, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_rocp(df: pd.DataFrame, window: int = 10, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Rate of change Percentage"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_rocp(df, window)
 
 
-def get_rocr(
-    df: pd.DataFrame, window: int = 10, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_rocr(df: pd.DataFrame, window: int = 10, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Rate of change ratio"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_rocr(df, window)
 
 
-def get_rocr100(
-    df: pd.DataFrame, window: int = 10, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_rocr100(df: pd.DataFrame, window: int = 10, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate Rate of change ratio 100 scale"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_rocr100(df, window)
 
 
-def get_trix(
-    df: pd.DataFrame, window: int = 30, calculator_type: str = "talib"
-) -> pd.DataFrame:
+def get_trix(df: pd.DataFrame, window: int = 30, calculator_type: str = "talib") -> pd.DataFrame:
     """Calculate 1-day Rate of Change (ROC) of a Triple Smooth EMA"""
     calculator = IndicatorFactory.get_calculator(calculator_type)
     return calculator.calculate_trix(df, window)

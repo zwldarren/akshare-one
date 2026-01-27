@@ -54,9 +54,7 @@ class XueQiuRealtime(RealtimeDataProvider):
             "price": _get_value("现价"),
             "change": _get_value("涨跌"),
             "pct_change": _get_value("涨幅"),
-            "timestamp": pd.to_datetime(_get_value("时间", str)).tz_localize(
-                "Asia/Shanghai"
-            ),
+            "timestamp": pd.to_datetime(_get_value("时间", str)).tz_localize("Asia/Shanghai"),
             "volume": float(_get_value("成交量", int)) / 100,
             "amount": _get_value("成交额"),
             "open": _get_value("今开"),

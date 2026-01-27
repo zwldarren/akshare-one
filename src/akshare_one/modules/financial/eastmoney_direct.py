@@ -81,14 +81,10 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             merged = pd.merge(merged, cash_flow, on="report_date", how="outer")
 
         # Convert report_date to datetime and format as YYYY-MM-DD
-        merged["report_date"] = pd.to_datetime(merged["report_date"]).dt.strftime(
-            "%Y-%m-%d"
-        )
+        merged["report_date"] = pd.to_datetime(merged["report_date"]).dt.strftime("%Y-%m-%d")
 
         # Sort by report_date in descending order (most recent first)
-        merged = merged.sort_values("report_date", ascending=False).reset_index(
-            drop=True
-        )
+        merged = merged.sort_values("report_date", ascending=False).reset_index(drop=True)
 
         return merged
 
@@ -120,9 +116,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 df.rename(columns=self._balance_sheet_rename_map, inplace=True)
                 return df
             else:
-                logger.warning(
-                    "No balance sheet data found in API response for %s", self.symbol
-                )
+                logger.warning("No balance sheet data found in API response for %s", self.symbol)
                 return pd.DataFrame()
 
         except Exception as e:
@@ -157,15 +151,11 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 df.rename(columns=self._income_statement_rename_map, inplace=True)
                 return df
             else:
-                logger.warning(
-                    "No income statement data found in API response for %s", self.symbol
-                )
+                logger.warning("No income statement data found in API response for %s", self.symbol)
                 return pd.DataFrame()
 
         except Exception as e:
-            logger.error(
-                "Error fetching income statement for %s: %s", self.symbol, str(e)
-            )
+            logger.error("Error fetching income statement for %s: %s", self.symbol, str(e))
             return pd.DataFrame()
 
     def _fetch_cash_flow(self) -> pd.DataFrame:
@@ -203,7 +193,5 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
                 return pd.DataFrame()
 
         except Exception as e:
-            logger.error(
-                "Error fetching cash flow statement for %s: %s", self.symbol, str(e)
-            )
+            logger.error("Error fetching cash flow statement for %s: %s", self.symbol, str(e))
             return pd.DataFrame()

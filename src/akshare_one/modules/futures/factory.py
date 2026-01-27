@@ -33,9 +33,7 @@ class FuturesDataFactory:
         """
         provider_class = cls._historical_providers.get(provider_name.lower())
         if not provider_class:
-            raise ValueError(
-                f"Unknown historical futures data provider: {provider_name}"
-            )
+            raise ValueError(f"Unknown historical futures data provider: {provider_name}")
 
         return provider_class(**kwargs)
 

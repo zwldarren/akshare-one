@@ -39,9 +39,7 @@ class SinaOptionsProvider(OptionsDataProvider):
         """
         try:
             # Get expiration dates
-            expirations = ak.option_sse_list_sina(
-                symbol=self.underlying_symbol, exchange="null"
-            )
+            expirations = ak.option_sse_list_sina(symbol=self.underlying_symbol, exchange="null")
 
             if not expirations:
                 raise ValueError(
@@ -153,9 +151,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                     try:
                         raw_df = ak.option_sse_spot_price_sina(symbol=option_symbol)
                         if not raw_df.empty:
-                            realtime_df = self._clean_single_option(
-                                raw_df, option_symbol
-                            )
+                            realtime_df = self._clean_single_option(raw_df, option_symbol)
                             all_realtime.append(realtime_df)
                     except Exception:
                         # Skip options that fail to fetch
@@ -210,13 +206,9 @@ class SinaOptionsProvider(OptionsDataProvider):
             list[str]: 可用的到期日列表
         """
         try:
-            expirations = ak.option_sse_list_sina(
-                symbol=underlying_symbol, exchange="null"
-            )
+            expirations = ak.option_sse_list_sina(symbol=underlying_symbol, exchange="null")
             if not expirations:
-                raise ValueError(
-                    f"No options found for underlying symbol: {underlying_symbol}"
-                )
+                raise ValueError(f"No options found for underlying symbol: {underlying_symbol}")
 
             # Validate by trying to get option codes for the first expiration
             # This ensures the symbol is actually valid
@@ -227,9 +219,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                     underlying=underlying_symbol,
                 )
                 if test_codes.empty:
-                    raise ValueError(
-                        f"No options found for underlying symbol: {underlying_symbol}"
-                    )
+                    raise ValueError(f"No options found for underlying symbol: {underlying_symbol}")
             except Exception:
                 raise ValueError(
                     f"No options found for underlying symbol: {underlying_symbol}"
@@ -415,9 +405,7 @@ class SinaOptionsProvider(OptionsDataProvider):
         df = raw_df.rename(columns=available_columns)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         df["symbol"] = symbol
 

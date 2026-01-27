@@ -41,9 +41,7 @@ class TestInnerTradeData:
         """测试交易金额计算正确性"""
         df = get_inner_trade_data(symbol="600405")
         sample = df.iloc[0]
-        calculated_value = (
-            sample["transaction_shares"] * sample["transaction_price_per_share"]
-        )
+        calculated_value = sample["transaction_shares"] * sample["transaction_price_per_share"]
         assert abs(sample["transaction_value"] - calculated_value) < 0.01
 
     def test_invalid_source(self):

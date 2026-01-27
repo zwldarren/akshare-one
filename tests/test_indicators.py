@@ -86,9 +86,7 @@ class TestIndicators(unittest.TestCase):
     def test_simple_bollinger_bands(self):
         result = get_bollinger_bands(self.df, 20, 2, calculator_type="simple")
         self.assertEqual(len(result), len(self.df))
-        self.assertEqual(
-            set(result.columns), {"upper_band", "middle_band", "lower_band"}
-        )
+        self.assertEqual(set(result.columns), {"upper_band", "middle_band", "lower_band"})
         self.assertTrue(result.iloc[:19]["upper_band"].isna().all())
         self.assertFalse(result.iloc[19:]["upper_band"].isna().any())
 
@@ -101,9 +99,7 @@ class TestIndicators(unittest.TestCase):
         df_zero_range["high"] = df_zero_range["low"]
         result_zero = get_stoch(df_zero_range, 14, 3, 3, calculator_type="simple")
         self.assertEqual(len(result_zero), len(df_zero_range))
-        self.assertTrue(
-            not result_zero["slow_k"].isna().all()
-        )  # Should handle zero range
+        self.assertTrue(not result_zero["slow_k"].isna().all())  # Should handle zero range
 
     def test_simple_atr(self):
         result = get_atr(self.df, 14, calculator_type="simple")
@@ -178,9 +174,7 @@ class TestIndicators(unittest.TestCase):
     def test_talib_bollinger_bands(self):
         result = get_bollinger_bands(self.df, 20, 2, calculator_type="talib")
         self.assertEqual(len(result), len(self.df))
-        self.assertEqual(
-            set(result.columns), {"upper_band", "middle_band", "lower_band"}
-        )
+        self.assertEqual(set(result.columns), {"upper_band", "middle_band", "lower_band"})
         self.assertTrue(result.iloc[:19]["upper_band"].isna().all())
         self.assertFalse(result.iloc[19:]["upper_band"].isna().any())
 
@@ -382,9 +376,7 @@ class TestIndicators(unittest.TestCase):
         df_constant_price["close"] = 100  # All prices are the same
         result_zero = get_mfi(df_constant_price, 14, calculator_type="simple")
         self.assertEqual(len(result_zero), len(df_constant_price))
-        self.assertTrue(
-            not result_zero["mfi"].isna().all()
-        )  # Should handle zero negative flow
+        self.assertTrue(not result_zero["mfi"].isna().all())  # Should handle zero negative flow
 
     def test_simple_dx_edge_case(self):
         result = get_dx(self.df, 14, calculator_type="simple")
@@ -406,9 +398,7 @@ class TestIndicators(unittest.TestCase):
         df_flat["close"] = 100  # No price movement
         result_zero = get_cmo(df_flat, 14, calculator_type="simple")
         self.assertEqual(len(result_zero), len(df_flat))
-        self.assertTrue(
-            not result_zero["cmo"].isna().all()
-        )  # Should handle zero movement
+        self.assertTrue(not result_zero["cmo"].isna().all())  # Should handle zero movement
 
     def test_simple_ultosc_edge_case(self):
         result = get_ultosc(self.df, 7, 14, 28, calculator_type="simple")
@@ -430,9 +420,7 @@ class TestIndicators(unittest.TestCase):
         df_flat["high"] = df_flat["low"] = df_flat["close"]  # Flat market
         result_zero = get_sar(df_flat, 0.02, 0.2, calculator_type="simple")
         self.assertEqual(len(result_zero), len(df_flat))
-        self.assertTrue(
-            not result_zero["sar"].isna().all()
-        )  # Should handle flat market
+        self.assertTrue(not result_zero["sar"].isna().all())  # Should handle flat market
 
     # Tests for other simple implementation functions not covered above
     def test_simple_adosc(self):

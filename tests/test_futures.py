@@ -139,9 +139,7 @@ class TestFuturesRealtimeData:
         # Test with a unique symbol to avoid cache hits
         with (
             patch("akshare_one.modules.futures.sina.ak.futures_zh_spot") as mock_spot,
-            patch(
-                "akshare_one.modules.futures.sina.ak.futures_zh_realtime"
-            ) as mock_realtime,
+            patch("akshare_one.modules.futures.sina.ak.futures_zh_realtime") as mock_realtime,
         ):
             mock_spot.side_effect = Exception("API error")
             mock_realtime.side_effect = Exception("API error")

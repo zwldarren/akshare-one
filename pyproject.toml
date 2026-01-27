@@ -42,7 +42,7 @@ python_functions = "test_*"
 addopts = "-v --cov=akshare_one --cov-report=term-missing"
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 
 [tool.ruff.lint]
 select = [
