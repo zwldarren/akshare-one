@@ -5,15 +5,18 @@
 ## 函数签名
 
 ```python
-def get_realtime_data(symbol=None, **kwargs) -> pd.DataFrame
+def get_realtime_data(
+    symbol: str | None = None,
+    source: str = "eastmoney_direct"
+) -> pd.DataFrame
 ```
 
 ## 参数说明
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 否 | None | 股票代码(如: "600000")，不传则返回所有股票 |
-| `source` | str | 否 | "eastmoney_direct" | 数据源("eastmoney", "eastmoney_direct", "xueqiu") |
+| `symbol` | str | 否 | None | 股票代码 (如: "600000")，不传则返回所有股票 |
+| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "xueqiu") |
 
 !!! warning "重要提示"
     使用 `xueqiu` 数据源时，必须提供 `symbol` 参数
@@ -31,10 +34,10 @@ def get_realtime_data(symbol=None, **kwargs) -> pd.DataFrame
 | `symbol` | str | 股票代码 |
 | `price` | float | 最新价 |
 | `change` | float | 涨跌额 |
-| `pct_change` | float | 涨跌幅(%) |
+| `pct_change` | float | 涨跌幅 (%) |
 | `timestamp` | datetime | 时间戳 |
-| `volume` | int | 成交量(手) |
-| `amount` | float | 成交额(元) |
+| `volume` | int | 成交量 (手) |
+| `amount` | float | 成交额 (元) |
 | `open` | float | 今开 |
 | `high` | float | 最高 |
 | `low` | float | 最低 |

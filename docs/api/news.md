@@ -5,15 +5,18 @@
 ## 函数签名
 
 ```python
-def get_news_data(symbol, **kwargs) -> pd.DataFrame
+def get_news_data(
+    symbol: str,
+    source: str = "eastmoney"
+) -> pd.DataFrame
 ```
 
 ## 参数说明
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 是 | - | 股票代码(如: "300059") |
-| `source` | str | 否 | "eastmoney" | 数据源(目前仅支持"eastmoney") |
+| `symbol` | str | 是 | - | 股票代码 (如: "300059") |
+| `source` | str | 否 | "eastmoney" | 数据源 (目前仅支持 "eastmoney") |
 
 ## 返回值
 

@@ -5,7 +5,7 @@ AKShare One 提供了一套简洁统一的 API 接口，用于获取中国金融
 ## 🏗️ 设计原则
 
 ### 统一的参数格式
-- **symbol**: 股票代码，统一使用6位数字格式（如 "600000"）
+- **symbol**: 股票代码，统一使用 6 位数字格式（如 "600000"）
 - **source**: 数据源选择，支持多个数据提供商
 - **时间参数**: 统一使用 ISO 格式日期字符串
 
@@ -18,10 +18,10 @@ AKShare One 提供了一套简洁统一的 API 接口，用于获取中国金融
 
 | 数据源 | 标识符 | 支持的接口 | 特点 |
 |--------|--------|------------|------|
-| 东方财富 | `eastmoney` | 历史数据、实时数据、基础信息、财务数据、新闻数据 | 调用AKShare，更新及时 |
-| 东方财富直连 | `eastmoney_direct` | 历史数据、实时数据、财务数据 | 支持A股、B股、港股 |
-| 新浪财经 | `sina` | 历史数据、财务数据 | 调用AKShare，更新及时 |
-| 雪球 | `xueqiu` | 实时数据、内部交易 | 调用AKShare，更新及时 |
+| 东方财富 | `eastmoney` | 历史数据、实时数据、基础信息、财务数据、新闻数据 | 调用 AKShare，更新及时 |
+| 东方财富直连 | `eastmoney_direct` | 历史数据、实时数据、财务数据 | 支持 A 股、B 股、港股 |
+| 新浪财经 | `sina` | 历史数据、财务数据、期货数据、期权数据 | 调用 AKShare，更新及时 |
+| 雪球 | `xueqiu` | 实时数据、内部交易 | 调用 AKShare，更新及时 |
 
 ## 🔧 核心模块
 
@@ -65,6 +65,29 @@ from akshare_one import (
 )
 ```
 
+### 期货数据模块
+获取期货的历史和实时行情数据。
+
+```python
+from akshare_one import (
+    get_futures_hist_data,
+    get_futures_realtime_data,
+    get_futures_main_contracts
+)
+```
+
+### 期权数据模块
+获取期权的期权链、实时行情、历史数据等到期日信息。
+
+```python
+from akshare_one import (
+    get_options_chain,
+    get_options_realtime,
+    get_options_expirations,
+    get_options_hist
+)
+```
+
 ### 内部交易模块
 获取上市公司内部人员的交易数据。
 
@@ -89,6 +112,8 @@ from akshare_one.indicators import (
 - **[基础信息](basic-info.md)** - 获取股票基础信息
 - **[新闻数据](news.md)** - 获取个股新闻数据
 - **[财务数据](financial.md)** - 获取财务报表数据
+- **[期货数据](futures.md)** - 获取期货行情数据
+- **[期权数据](options.md)** - 获取期权行情数据
 - **[内部交易](insider.md)** - 获取内部交易数据
 - **[技术指标](indicators.md)** - 技术分析指标
 

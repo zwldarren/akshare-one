@@ -5,15 +5,18 @@
 ## 函数签名
 
 ```python
-def get_inner_trade_data(symbol, **kwargs) -> pd.DataFrame
+def get_inner_trade_data(
+    symbol: str,
+    source: str = "xueqiu"
+) -> pd.DataFrame
 ```
 
 ## 参数说明
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 是 | - | 股票代码(如: "600000") |
-| `source` | str | 否 | "xueqiu" | 数据源(目前支持"xueqiu") |
+| `symbol` | str | 是 | - | 股票代码 (如: "600000") |
+| `source` | str | 否 | "xueqiu" | 数据源 (目前支持 "xueqiu") |
 
 ## 返回值
 
@@ -31,7 +34,7 @@ def get_inner_trade_data(symbol, **kwargs) -> pd.DataFrame
 | `shares_owned_after_transaction` | int | 变动后持股数 |
 | `relationship` | str | 与董监高关系 |
 | `is_board_director` | bool | 是否为董事会成员 |
-| `transaction_value` | float | 交易金额(变动股数*成交均价) |
+| `transaction_value` | float | 交易金额 (变动股数*成交均价) |
 | `shares_owned_before_transaction` | int | 变动前持股数 |
 
 ## 使用示例

@@ -22,6 +22,8 @@
 | 实时行情 | `get_realtime_data` |
 | 个股新闻 | `get_news_data` |
 | 财务数据 | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
+| 期货数据 | `get_futures_hist_data`/`get_futures_realtime_data` |
+| 期权数据 | `get_options_chain`/`get_options_realtime`/`get_options_hist` |
 | 内部交易 | `get_inner_trade_data` |
 | 股票基本信息 | `get_basic_info` |
 | 财务指标 | `get_financial_metrics` |

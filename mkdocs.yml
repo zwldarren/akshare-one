@@ -41,8 +41,11 @@ nav:
     - 基础信息: api/basic-info.md
     - 新闻数据: api/news.md
     - 财务数据: api/financial.md
+    - 期货数据: api/futures.md
     - 内部交易: api/insider.md
     - 技术指标: api/indicators.md
+    - 期权数据: api/options.md
+    - 债券数据: api/bonds.md
   - 示例: examples.md
 
 markdown_extensions:
