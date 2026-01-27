@@ -32,9 +32,7 @@ class OptionsDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(
-        cls, name: str, provider_class: type[OptionsDataProvider]
-    ) -> None:
+    def register_provider(cls, name: str, provider_class: type[OptionsDataProvider]) -> None:
         """Register a new options data provider
 
         Args:

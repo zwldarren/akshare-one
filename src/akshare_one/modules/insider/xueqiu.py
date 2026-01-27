@@ -68,33 +68,23 @@ class XueQiuInsider(InsiderDataProvider):
         df["is_board_director"] = df["title"].str.contains("董事")
 
         # Calculate transaction_value
-        if (
-            "transaction_shares" in df.columns
-            and "transaction_price_per_share" in df.columns
-        ):
-            df["transaction_value"] = (
-                df["transaction_shares"] * df["transaction_price_per_share"]
-            )
+        if "transaction_shares" in df.columns and "transaction_price_per_share" in df.columns:
+            df["transaction_value"] = df["transaction_shares"] * df["transaction_price_per_share"]
 
         # Add shares_owned_before_transaction if possible
-        if (
-            "shares_owned_after_transaction" in df.columns
-            and "transaction_shares" in df.columns
-        ):
+        if "shares_owned_after_transaction" in df.columns and "transaction_shares" in df.columns:
             df["shares_owned_before_transaction"] = (
                 df["shares_owned_after_transaction"] - df["transaction_shares"]
             )
 
         # Convert date format
         if "transaction_date" in df.columns:
-            df["transaction_date"] = pd.to_datetime(
-                df["transaction_date"]
-            ).dt.tz_localize("Asia/Shanghai")
-
-        if "filing_date" in df.columns:
-            df["filing_date"] = pd.to_datetime(df["filing_date"]).dt.tz_localize(
+            df["transaction_date"] = pd.to_datetime(df["transaction_date"]).dt.tz_localize(
                 "Asia/Shanghai"
             )
+
+        if "filing_date" in df.columns:
+            df["filing_date"] = pd.to_datetime(df["filing_date"]).dt.tz_localize("Asia/Shanghai")
 
         # Convert numeric columns
         numeric_cols = [

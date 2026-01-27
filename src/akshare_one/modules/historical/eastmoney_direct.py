@@ -43,8 +43,7 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
 
             if raw_data.get("rc") != 0:
                 raise ValueError(
-                    f"API returned error: {raw_data.get('msg')}, "
-                    f"rc: {raw_data.get('rc')}"
+                    f"API returned error: {raw_data.get('msg')}, rc: {raw_data.get('rc')}"
                 )
 
             df = parse_kline_data(raw_data)
@@ -54,9 +53,7 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
             return df
 
         except Exception as e:
-            raise ValueError(
-                f"Failed to fetch historical data for {self.symbol}: {e}"
-            ) from e
+            raise ValueError(f"Failed to fetch historical data for {self.symbol}: {e}") from e
 
     def _get_kline_type(self) -> str:
         """Get K-line type based on interval."""

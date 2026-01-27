@@ -9,9 +9,7 @@ def parse_kline_data(data: dict[str, Any]) -> pd.DataFrame:
     """
     klines = data.get("data", {}).get("klines", [])
     if not klines:
-        return pd.DataFrame(
-            columns=["timestamp", "open", "high", "low", "close", "volume"]
-        )
+        return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
 
     records = []
     for kline in klines:
@@ -64,9 +62,7 @@ def parse_realtime_data(data: dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-def resample_historical_data(
-    df: pd.DataFrame, interval: str, multiplier: int
-) -> pd.DataFrame:
+def resample_historical_data(df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:
     """
     Resamples historical data to a specified frequency.
     """

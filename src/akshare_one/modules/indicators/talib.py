@@ -37,9 +37,7 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
         rsi = talib.RSI(close, timeperiod=window)
         return pd.DataFrame({"rsi": rsi}, index=df.index)
 
-    def calculate_macd(
-        self, df: pd.DataFrame, fast: int, slow: int, signal: int
-    ) -> pd.DataFrame:
+    def calculate_macd(self, df: pd.DataFrame, fast: int, slow: int, signal: int) -> pd.DataFrame:
         close = df["close"].values.astype(np.float64)
         macd, signal_line, histogram = talib.MACD(
             close, fastperiod=fast, slowperiod=slow, signalperiod=signal
@@ -49,9 +47,7 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
             index=df.index,
         )
 
-    def calculate_bollinger_bands(
-        self, df: pd.DataFrame, window: int, std: int
-    ) -> pd.DataFrame:
+    def calculate_bollinger_bands(self, df: pd.DataFrame, window: int, std: int) -> pd.DataFrame:
         close = df["close"].values.astype(np.float64)
         upper, middle, lower = talib.BBANDS(
             close, timeperiod=window, nbdevup=std, nbdevdn=std, matype=MA_Type.SMA
@@ -115,9 +111,7 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
         ad = talib.AD(high, low, close, volume)
         return pd.DataFrame({"ad": ad}, index=df.index)
 
-    def calculate_adosc(
-        self, df: pd.DataFrame, fast_period: int, slow_period: int
-    ) -> pd.DataFrame:
+    def calculate_adosc(self, df: pd.DataFrame, fast_period: int, slow_period: int) -> pd.DataFrame:
         high = df["high"].values.astype(np.float64)
         low = df["low"].values.astype(np.float64)
         close = df["close"].values.astype(np.float64)
@@ -138,9 +132,7 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
         mom = talib.MOM(close, timeperiod=window)
         return pd.DataFrame({"mom": mom}, index=df.index)
 
-    def calculate_sar(
-        self, df: pd.DataFrame, acceleration: float, maximum: float
-    ) -> pd.DataFrame:
+    def calculate_sar(self, df: pd.DataFrame, acceleration: float, maximum: float) -> pd.DataFrame:
         high = df["high"].values.astype(np.float64)
         low = df["low"].values.astype(np.float64)
         sar = talib.SAR(high, low, acceleration=acceleration, maximum=maximum)
@@ -157,18 +149,14 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
         close = df["close"].values.astype(np.float64)
         # Convert integer to MA_Type enum value
         ma_type_enum = MA_TYPE_MAPPING.get(ma_type, MA_Type.SMA)
-        apo = talib.APO(
-            close, fastperiod=fast_period, slowperiod=slow_period, matype=ma_type_enum
-        )
+        apo = talib.APO(close, fastperiod=fast_period, slowperiod=slow_period, matype=ma_type_enum)
         return pd.DataFrame({"apo": apo}, index=df.index)
 
     def calculate_aroon(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
         high = df["high"].values.astype(np.float64)
         low = df["low"].values.astype(np.float64)
         aroon_down, aroon_up = talib.AROON(high, low, timeperiod=window)
-        return pd.DataFrame(
-            {"aroon_down": aroon_down, "aroon_up": aroon_up}, index=df.index
-        )
+        return pd.DataFrame({"aroon_down": aroon_down, "aroon_up": aroon_up}, index=df.index)
 
     def calculate_aroonosc(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
         high = df["high"].values.astype(np.float64)
@@ -236,9 +224,7 @@ class TalibIndicatorCalculator(BaseIndicatorCalculator):
         close = df["close"].values.astype(np.float64)
         # Convert integer to MA_Type enum value
         ma_type_enum = MA_TYPE_MAPPING.get(ma_type, MA_Type.SMA)
-        ppo = talib.PPO(
-            close, fastperiod=fast_period, slowperiod=slow_period, matype=ma_type_enum
-        )
+        ppo = talib.PPO(close, fastperiod=fast_period, slowperiod=slow_period, matype=ma_type_enum)
         return pd.DataFrame({"ppo": ppo}, index=df.index)
 
     def calculate_roc(self, df: pd.DataFrame, window: int) -> pd.DataFrame:

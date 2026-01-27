@@ -33,9 +33,7 @@ class EastmoneyInfo(InfoDataProvider):
             info_df["symbol"] = info_df["symbol"].astype(str)
 
         if "listing_date" in info_df.columns:
-            info_df["listing_date"] = pd.to_datetime(
-                info_df["listing_date"], format="%Y%m%d"
-            )
+            info_df["listing_date"] = pd.to_datetime(info_df["listing_date"], format="%Y%m%d")
 
         numeric_cols = [
             "price",

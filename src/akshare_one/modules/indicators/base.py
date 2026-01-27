@@ -19,15 +19,11 @@ class BaseIndicatorCalculator(ABC):
         pass
 
     @abstractmethod
-    def calculate_macd(
-        self, df: pd.DataFrame, fast: int, slow: int, signal: int
-    ) -> pd.DataFrame:
+    def calculate_macd(self, df: pd.DataFrame, fast: int, slow: int, signal: int) -> pd.DataFrame:
         pass
 
     @abstractmethod
-    def calculate_bollinger_bands(
-        self, df: pd.DataFrame, window: int, std: int
-    ) -> pd.DataFrame:
+    def calculate_bollinger_bands(self, df: pd.DataFrame, window: int, std: int) -> pd.DataFrame:
         pass
 
     @abstractmethod
@@ -57,9 +53,7 @@ class BaseIndicatorCalculator(ABC):
         pass
 
     @abstractmethod
-    def calculate_adosc(
-        self, df: pd.DataFrame, fast_period: int, slow_period: int
-    ) -> pd.DataFrame:
+    def calculate_adosc(self, df: pd.DataFrame, fast_period: int, slow_period: int) -> pd.DataFrame:
         pass
 
     @abstractmethod
@@ -71,9 +65,7 @@ class BaseIndicatorCalculator(ABC):
         pass
 
     @abstractmethod
-    def calculate_sar(
-        self, df: pd.DataFrame, acceleration: float, maximum: float
-    ) -> pd.DataFrame:
+    def calculate_sar(self, df: pd.DataFrame, acceleration: float, maximum: float) -> pd.DataFrame:
         pass
 
     @abstractmethod

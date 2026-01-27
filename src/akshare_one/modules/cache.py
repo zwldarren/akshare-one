@@ -37,9 +37,7 @@ def cache(cache_key: str, key: Callable[..., Any] | None = None) -> Callable[[F]
                         f"Available keys: {list(CACHE_CONFIG.keys())}"
                     )
                 if key is not None:
-                    return cached(CACHE_CONFIG[cache_key], key=key)(func)(
-                        *args, **kwargs
-                    )
+                    return cached(CACHE_CONFIG[cache_key], key=key)(func)(*args, **kwargs)
                 else:
                     return cached(CACHE_CONFIG[cache_key])(func)(*args, **kwargs)
             return func(*args, **kwargs)

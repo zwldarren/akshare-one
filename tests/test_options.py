@@ -77,9 +77,19 @@ class TestOptionsRealtime:
     @pytest.mark.skip(reason="Requires valid specific option symbol")
     def test_specific_option_realtime(self):
         """测试特定期权的实时数据"""
-        df = get_options_realtime(symbol="10004005", underlying_symbol="510300")
+        df = get_options_realtime(symbol="10004005")
         if not df.empty:
             assert "symbol" in df.columns
+
+    def test_realtime_invalid_params_both(self):
+        """测试同时提供 symbol 和 underlying_symbol 时抛出异常"""
+        with pytest.raises(ValueError, match="Cannot specify both"):
+            get_options_realtime(symbol="10004005", underlying_symbol="510300")
+
+    def test_realtime_invalid_params_none(self):
+        """测试都不提供 symbol 和 underlying_symbol 时抛出异常"""
+        with pytest.raises(ValueError, match="Must specify either"):
+            get_options_realtime()
 
 
 class TestOptionsExpirations:
@@ -202,9 +212,7 @@ class TestOptionsErrorHandling:
         os.environ["AKSHARE_ONE_CACHE_ENABLED"] = "false"
 
         try:
-            with patch(
-                "akshare_one.modules.options.sina.ak.option_sse_list_sina"
-            ) as mock_get:
+            with patch("akshare_one.modules.options.sina.ak.option_sse_list_sina") as mock_get:
                 mock_get.side_effect = Exception("API error")
                 with pytest.raises(Exception, match="API error"):
                     get_options_chain(underlying_symbol="510300")
@@ -222,9 +230,7 @@ class TestOptionsErrorHandling:
         os.environ["AKSHARE_ONE_CACHE_ENABLED"] = "false"
 
         try:
-            with patch(
-                "akshare_one.modules.options.sina.ak.option_sse_list_sina"
-            ) as mock_get:
+            with patch("akshare_one.modules.options.sina.ak.option_sse_list_sina") as mock_get:
                 # Return empty list to test error handling
                 mock_get.return_value = []
                 with pytest.raises(ValueError, match="No options found"):
@@ -247,10 +253,7 @@ class TestOptionsIntegration:
             # Check that symbols from chain appear in realtime data
             chain_symbols = set(chain_df["symbol"].tolist())
             realtime_symbols = set(realtime_df["symbol"].tolist())
-            assert (
-                chain_symbols.issubset(realtime_symbols)
-                or chain_symbols & realtime_symbols
-            )
+            assert chain_symbols.issubset(realtime_symbols) or chain_symbols & realtime_symbols
 
     def test_expirations_in_chain(self):
         """测试到期日在期权链数据中出现"""

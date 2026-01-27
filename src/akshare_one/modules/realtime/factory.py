@@ -16,9 +16,7 @@ class RealtimeDataFactory:
     }
 
     @classmethod
-    def get_provider(
-        cls, provider_name: str, **kwargs: object
-    ) -> "RealtimeDataProvider":
+    def get_provider(cls, provider_name: str, **kwargs: object) -> "RealtimeDataProvider":
         """
         Get a realtime data provider by name
 

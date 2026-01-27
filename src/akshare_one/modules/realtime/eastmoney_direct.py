@@ -35,6 +35,4 @@ class EastMoneyDirectRealtime(RealtimeDataProvider):
             return df
 
         except Exception as e:
-            raise ValueError(
-                f"Failed to get real-time data for {self.symbol}: {e}"
-            ) from e
+            raise ValueError(f"Failed to get real-time data for {self.symbol}: {e}") from e

@@ -22,20 +22,10 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         return series.ewm(alpha=1 / window, adjust=False, min_periods=window).mean()
 
     def calculate_sma(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
-        return (
-            df["close"]
-            .rolling(window=window, min_periods=window)
-            .mean()
-            .to_frame("sma")
-        )
+        return df["close"].rolling(window=window, min_periods=window).mean().to_frame("sma")
 
     def calculate_ema(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
-        return (
-            df["close"]
-            .ewm(span=window, adjust=False, min_periods=window)
-            .mean()
-            .to_frame("ema")
-        )
+        return df["close"].ewm(span=window, adjust=False, min_periods=window).mean().to_frame("ema")
 
     def calculate_rsi(self, df: pd.DataFrame, window: int) -> pd.DataFrame:
         delta = df["close"].diff()
@@ -50,17 +40,13 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
 
         return rsi.clip(0, 100).to_frame("rsi")
 
-    def calculate_macd(
-        self, df: pd.DataFrame, fast: int, slow: int, signal: int
-    ) -> pd.DataFrame:
+    def calculate_macd(self, df: pd.DataFrame, fast: int, slow: int, signal: int) -> pd.DataFrame:
         close = df["close"]
         ema_fast = close.ewm(span=fast, adjust=False, min_periods=fast).mean()
         ema_slow = close.ewm(span=slow, adjust=False, min_periods=slow).mean()
 
         macd_line = ema_fast - ema_slow
-        signal_line = macd_line.ewm(
-            span=signal, adjust=False, min_periods=signal
-        ).mean()
+        signal_line = macd_line.ewm(span=signal, adjust=False, min_periods=signal).mean()
 
         return pd.DataFrame(
             {
@@ -70,9 +56,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
             }
         )
 
-    def calculate_bollinger_bands(
-        self, df: pd.DataFrame, window: int, std: int
-    ) -> pd.DataFrame:
+    def calculate_bollinger_bands(self, df: pd.DataFrame, window: int, std: int) -> pd.DataFrame:
         close = df["close"]
         sma = close.rolling(window=window, min_periods=window).mean()
         rolling_std = close.rolling(window=window, min_periods=window).std()
@@ -150,9 +134,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         ad = mfv.cumsum()
         return ad.to_frame("ad")
 
-    def calculate_adosc(
-        self, df: pd.DataFrame, fast_period: int, slow_period: int
-    ) -> pd.DataFrame:
+    def calculate_adosc(self, df: pd.DataFrame, fast_period: int, slow_period: int) -> pd.DataFrame:
         ad = self.calculate_ad(df)["ad"]
         ema_fast = ad.ewm(span=fast_period, adjust=False).mean()
         ema_slow = ad.ewm(span=slow_period, adjust=False).mean()
@@ -162,9 +144,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
     def calculate_obv(self, df: pd.DataFrame) -> pd.DataFrame:
         close = df["close"]
         volume = df["volume"]
-        sign = (close > close.shift(1)).astype(int) - (close < close.shift(1)).astype(
-            int
-        )
+        sign = (close > close.shift(1)).astype(int) - (close < close.shift(1)).astype(int)
         obv = (volume * sign).cumsum()
         return obv.to_frame("obv")
 
@@ -173,9 +153,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
         mom = close.diff(periods=window)
         return mom.to_frame("mom")
 
-    def calculate_sar(
-        self, df: pd.DataFrame, acceleration: float, maximum: float
-    ) -> pd.DataFrame:
+    def calculate_sar(self, df: pd.DataFrame, acceleration: float, maximum: float) -> pd.DataFrame:
         high, low = df["high"], df["low"]
         sar = pd.Series(index=df.index, dtype=float)
         uptrend = True
@@ -231,9 +209,7 @@ class SimpleIndicatorCalculator(BaseIndicatorCalculator):
             result = a + b * len(y)
             return float(result)
 
-        tsf = close.rolling(window=window, min_periods=window).apply(
-            linear_reg_forecast, raw=True
-        )
+        tsf = close.rolling(window=window, min_periods=window).apply(linear_reg_forecast, raw=True)
         return tsf.to_frame("tsf")
 
     def calculate_apo(

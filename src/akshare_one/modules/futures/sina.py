@@ -49,18 +49,14 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
 
             return df
         except Exception as e:
-            raise ValueError(
-                f"Failed to fetch futures historical data: {str(e)}"
-            ) from e
+            raise ValueError(f"Failed to fetch futures historical data: {str(e)}") from e
 
     def _get_intraday_data(self) -> pd.DataFrame:
         """Fetches intraday data at minute or hour intervals"""
         raw_df = ak.futures_zh_minute_sina(symbol=self._normalize_contract())
 
         if raw_df.empty:
-            raise ValueError(
-                f"No intraday data found for futures {self.symbol}:{self.contract}"
-            )
+            raise ValueError(f"No intraday data found for futures {self.symbol}:{self.contract}")
 
         # Filter by date range if needed
         if hasattr(raw_df, "index"):
@@ -97,9 +93,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
                 raw_df = raw_df[(raw_df.index >= start_dt) & (raw_df.index <= end_dt)]
 
         if self.interval_multiplier > 1:
-            raw_df = self._resample_data(
-                raw_df, self.interval, self.interval_multiplier
-            )
+            raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
 
         return self._clean_daily_data(raw_df)
 
@@ -152,9 +146,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         )
         return resampled.reset_index()
 
-    def _resample_data(
-        self, df: pd.DataFrame, interval: str, multiplier: int
-    ) -> pd.DataFrame:
+    def _resample_data(self, df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:
         """Resamples daily and higher-level data to the specified interval"""
         freq_map = {
             "day": f"{multiplier}D",
@@ -208,9 +200,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if "timestamp" not in df.columns and hasattr(df, "index"):
             df["timestamp"] = df.index
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         df["symbol"] = self.symbol
         df["contract"] = self.contract
@@ -243,9 +233,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if "timestamp" not in df.columns and hasattr(df, "index"):
             df["timestamp"] = df.index
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         df["symbol"] = self.symbol
         df["contract"] = self.contract
@@ -339,9 +327,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         """Cleans and standardizes main contracts from real-time data fallback"""
         if "symbol" in raw_df.columns:
             # Extract variety codes
-            raw_df["symbol_root"] = (
-                raw_df["symbol"].astype(str).str.extract(r"([A-Z]+)")[0]
-            )
+            raw_df["symbol_root"] = raw_df["symbol"].astype(str).str.extract(r"([A-Z]+)")[0]
             raw_df["exchange"] = raw_df.get("exchange", "")
 
             # Get unique varieties
@@ -408,9 +394,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
                     df = df[df["symbol_root"] == symbol_upper].reset_index(drop=True)
                 else:
                     # Fallback to prefix match
-                    df = df[df["symbol"].str.startswith(symbol_upper)].reset_index(
-                        drop=True
-                    )
+                    df = df[df["symbol"].str.startswith(symbol_upper)].reset_index(drop=True)
 
         return df
 
@@ -480,11 +464,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             df["prev_settlement"] = raw_df["presettlement"]
 
         # Calculate change if not present
-        if (
-            "change" not in df.columns
-            and "price" in df.columns
-            and "prev_settlement" in df.columns
-        ):
+        if "change" not in df.columns and "price" in df.columns and "prev_settlement" in df.columns:
             df["change"] = df["price"] - df["prev_settlement"]
 
         # Calculate pct_change if not present
@@ -507,9 +487,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             # Extract alphabetic prefix as symbol_root (variety code)
             df["symbol_root"] = df["symbol"].str.extract(r"^([A-Z]+)", expand=False)
             # Extract numeric suffix as contract
-            df["contract"] = (
-                df["symbol"].str.extract(r"([0-9]+)$", expand=False).fillna("")
-            )
+            df["contract"] = df["symbol"].str.extract(r"([0-9]+)$", expand=False).fillna("")
 
         required_columns = [
             "symbol",

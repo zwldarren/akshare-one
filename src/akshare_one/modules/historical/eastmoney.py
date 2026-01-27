@@ -93,9 +93,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
             self.interval_multiplier *= 12
 
         if self.interval_multiplier > 1:
-            raw_df = self._resample_data(
-                raw_df, self.interval, self.interval_multiplier
-            )
+            raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
 
         return self._clean_data(raw_df)
 
@@ -137,9 +135,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
         )
         return resampled.reset_index()
 
-    def _resample_data(
-        self, df: pd.DataFrame, interval: str, multiplier: int
-    ) -> pd.DataFrame:
+    def _resample_data(self, df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:
         """Resamples daily and higher-level data to the specified interval"""
         freq_map = {
             "day": f"{multiplier}D",
@@ -194,9 +190,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=mapping)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         return self._select_standard_columns(df)
 
@@ -228,9 +222,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
         df = raw_df.rename(columns=available_columns)
 
         if "timestamp" in df.columns:
-            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize(
-                "Asia/Shanghai"
-            )
+            df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
         if "volume" in df.columns:
             df["volume"] = df["volume"].astype("int64")
