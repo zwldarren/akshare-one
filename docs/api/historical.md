@@ -5,20 +5,28 @@
 ## 函数签名
 
 ```python
-def get_hist_data(symbol, **kwargs) -> pd.DataFrame
+def get_hist_data(
+    symbol: str,
+    interval: str = "day",
+    interval_multiplier: int = 1,
+    start_date: str = "1970-01-01",
+    end_date: str = "2030-12-31",
+    adjust: str = "none",
+    source: str = "eastmoney_direct"
+) -> pd.DataFrame
 ```
 
 ## 参数说明
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 是 | - | 股票代码(如: "600000") |
-| `interval` | str | 否 | "day" | 时间粒度('minute','hour','day','week','month','year') |
+| `symbol` | str | 是 | - | 股票代码 (如: "600000") |
+| `interval` | str | 否 | "day" | 时间粒度 ("minute", "hour", "day", "week", "month", "year") |
 | `interval_multiplier` | int | 否 | 1 | 时间间隔倍数 |
-| `start_date` | str | 否 | "1970-01-01" | 开始日期(YYYY-MM-DD) |
-| `end_date` | str | 否 | "2030-12-31" | 结束日期(YYYY-MM-DD) |
-| `adjust` | str | 否 | "none" | 复权类型("none","qfq","hfq") |
-| `source` | str | 否 | "eastmoney_direct" | 数据源("eastmoney","eastmoney_direct","sina") |
+| `start_date` | str | 否 | "1970-01-01" | 开始日期 (YYYY-MM-DD) |
+| `end_date` | str | 否 | "2030-12-31" | 结束日期 (YYYY-MM-DD) |
+| `adjust` | str | 否 | "none" | 复权类型 ("none", "qfq", "hfq") |
+| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "sina") |
 
 !!! note "时间间隔说明"
     如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线

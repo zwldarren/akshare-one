@@ -22,6 +22,8 @@
 | Real-time quotes | `get_realtime_data` |
 | Stock news | `get_news_data` |
 | Financial data | `get_balance_sheet`/`get_income_statement`/`get_cash_flow` |
+| Futures data | `get_futures_hist_data`/`get_futures_realtime_data` |
+| Options data | `get_options_chain`/`get_options_realtime`/`get_options_hist` |
 | Internal transactions | `get_inner_trade_data` |
 | Basic stock info | `get_basic_info` |
 | Financial metrics | `get_financial_metrics` |

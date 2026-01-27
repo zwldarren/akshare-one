@@ -11,17 +11,24 @@ AKShare One 提供多个函数用于获取上市公司财务数据：
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 是 | - | 股票代码(如: "600000") |
-| `source` | str | 否 | "sina" | 数据源("sina", "eastmoney_direct") |
+| `symbol` | str | 是 | - | 股票代码 (如: "600000") |
+| `source` | str | 否 | "sina" | 数据源 ("sina", "eastmoney_direct") |
 
-## 资产负债表 { #资产负债表 }
+## 资产负债表
+
+`get_balance_sheet()` 函数用于获取资产负债表数据。
 
 ### 函数签名
+
 ```python
-def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
+def get_balance_sheet(
+    symbol: str,
+    source: Literal["sina"] = "sina"
+) -> pd.DataFrame
 ```
 
 ### 返回值字段
+
 | 字段名 | 描述 |
 |--------|------|
 | `report_date` | 报告日期 |
@@ -37,7 +44,7 @@ def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataF
 | `goodwill_and_intangible_assets` | 商誉 |
 | `investments` | 长期股权投资 |
 | `non_current_investments` | 其他非流动金融资产 |
-| `outstanding_shares` | 实收资本(或股本) |
+| `outstanding_shares` | 实收资本 (或股本) |
 | `tax_assets` | 递延所得税资产 |
 | `total_liabilities` | 负债合计 |
 | `current_liabilities` | 流动负债合计 |
@@ -48,7 +55,7 @@ def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataF
 | `non_current_liabilities` | 非流动负债合计 |
 | `non_current_debt` | 长期借款 |
 | `tax_liabilities` | 递延所得税负债 |
-| `shareholders_equity` | 所有者权益(或股东权益)合计 |
+| `shareholders_equity` | 所有者权益 (或股东权益) 合计 |
 | `retained_earnings` | 未分配利润 |
 | `accumulated_other_comprehensive_income` | 其他综合收益 |
 | `accounts_receivable` | 应收账款 |
@@ -61,14 +68,21 @@ def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataF
 | `debt_to_assets` | 资产负债率 |
 | `minority_interest` | 少数股东权益 |
 
-## 利润表 { #利润表 }
+## 利润表
+
+`get_income_statement()` 函数用于获取利润表数据。
 
 ### 函数签名
+
 ```python
-def get_income_statement(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
+def get_income_statement(
+    symbol: str,
+    source: Literal["sina"] = "sina"
+) -> pd.DataFrame
 ```
 
 ### 返回值字段
+
 | 字段名 | 描述 |
 |--------|------|
 | `report_date` | 报告日期 |
@@ -97,14 +111,21 @@ def get_income_statement(symbol: str, source: Literal["sina"] = "sina") -> pd.Da
 | `other_comprehensive_income` | 其他综合收益 |
 | `total_comprehensive_income` | 综合收益总额 |
 
-## 现金流量表 { #现金流量表 }
+## 现金流量表
+
+`get_cash_flow()` 函数用于获取现金流量表数据。
 
 ### 函数签名
+
 ```python
-def get_cash_flow(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
+def get_cash_flow(
+    symbol: str,
+    source: Literal["sina"] = "sina"
+) -> pd.DataFrame
 ```
 
 ### 返回值字段
+
 | 字段名 | 描述 |
 |--------|------|
 | `report_date` | 报告日期 |
@@ -138,14 +159,21 @@ def get_cash_flow(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
 | `ending_cash` | 现金的期末余额 |
 | `ending_cash_equivalents` | 现金等价物的期末余额 |
 
-## 财务关键指标 { #财务关键指标 }
+## 财务关键指标
+
+`get_financial_metrics()` 函数用于获取财务关键指标数据。
 
 ### 函数签名
+
 ```python
-def get_financial_metrics(symbol: str, source: Literal["eastmoney_direct"] = "eastmoney_direct") -> pd.DataFrame
+def get_financial_metrics(
+    symbol: str,
+    source: Literal["eastmoney_direct"] = "eastmoney_direct"
+) -> pd.DataFrame
 ```
 
 ### 返回值字段
+
 | 字段名 | 描述 |
 |--------|------|
 | `report_date` | 报告日期 |

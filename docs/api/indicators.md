@@ -1,6 +1,8 @@
 # 技术指标
 
-技术指标模块提供常见的技术分析指标计算功能，需要通过`akshare_one.indicators`模块调用：
+技术指标模块提供常见的技术分析指标计算功能，需要通过 `akshare_one.indicators` 模块调用。
+
+## 导入模块
 
 ```python
 from akshare_one.indicators import (
@@ -12,47 +14,199 @@ from akshare_one.indicators import (
 )
 ```
 
-!!! note
-    - `calculator_type`参数可以是`talib`或`simple`，默认值为`simple`
-    - `simple`使用python实现，可能会有错误，但不需要额外依赖，`talib`需要额外安装[TA-Lib](https://ta-lib.org/install/)依赖并使用`pip install akshare-one[talib]`安装
-    - 目前只实现了部分常用指标，后续会逐步完善
+!!! note "注意事项"
+    - 大部分指标函数支持 `calculator_type` 参数，可以是 `talib` 或 `simple`，默认值为 `simple`。
+    - `simple` 使用 Python 实现，不需要额外依赖。
+    - `talib` 需要额外安装 [TA-Lib](https://ta-lib.org/install/) 依赖并使用 `pip install akshare-one[talib]` 安装。
 
-- **简单移动平均线(SMA)**: `get_sma(df, window=20)`
-- **指数移动平均线(EMA)**: `get_ema(df, window=20)`
-- **相对强弱指数(RSI)**: `get_rsi(df, window=14)`
-- **移动平均收敛发散指标(MACD)**: `get_macd(df, fast=12, slow=26, signal=9)`
-- **布林带(Bollinger Bands)**: `get_bollinger_bands(df, window=20, std=2)`
-- **随机指标(Stochastic Oscillator)**: `get_stoch(df, window=14, smooth_d=3, smooth_k=3)`
-- **平均真实波幅(ATR)**: `get_atr(df, window=14)`
-- **商品通道指数(CCI)**: `get_cci(df, window=14)`
-- **平均方向性指标(ADX)**: `get_adx(df, window=14)`
-- **威廉指标(Williams' %R)**: `get_willr(df, window=14)`
-- **蔡金A/D线(Chaikin A/D Line)**: `get_ad(df)`
-- **蔡金A/D振荡器(Chaikin A/D Oscillator)**: `get_adosc(df, fast_period=3, slow_period=10)`
-- **能量潮(On Balance Volume)**: `get_obv(df)`
-- **动量指标(Momentum)**: `get_mom(df, window=10)`
-- **抛物线转向指标(Parabolic SAR)**: `get_sar(df, acceleration=0.02, maximum=0.2)`
-- **时间序列预测(Time Series Forecast)**: `get_tsf(df, window=14)`
-- **绝对价格振荡器(Absolute Price Oscillator)**: `get_apo(df, fast_period=12, slow_period=26, ma_type=0)`
-- **阿隆指标(Aroon)**: `get_aroon(df, window=14)`
-- **阿隆振荡器(Aroon Oscillator)**: `get_aroonosc(df, window=14)`
-- **均势指标(Balance of Power)**: `get_bop(df)`
-- **钱德动量振荡器(Chande Momentum Oscillator)**: `get_cmo(df, window=14)`
-- **动向指标(Directional Movement Index)**: `get_dx(df, window=14)`
-- **资金流量指标(Money Flow Index)**: `get_mfi(df, window=14)`
-- **负方向指标(-DI)**: `get_minus_di(df, window=14)`
-- **负方向运动(-DM)**: `get_minus_dm(df, window=14)`
-- **正方向指标(+DI)**: `get_plus_di(df, window=14)`
-- **正方向运动(+DM)**: `get_plus_dm(df, window=14)`
-- **价格振荡器百分比(Percentage Price Oscillator)**: `get_ppo(df, fast_period=12, slow_period=26, ma_type=0)`
-- **变动率(Rate of change)**: `get_roc(df, window=10)`
-- **变动率百分比(Rate of change Percentage)**: `get_rocp(df, window=10)`
-- **变动率比率(Rate of change ratio)**: `get_rocr(df, window=10)`
-- **变动率比率100刻度(Rate of change ratio 100 scale)**: `get_rocr100(df, window=10)`
-- **三重指数平滑平均线的1日变动率(TRIX)**: `get_trix(df, window=30)`
-- **终极振荡器(Ultimate Oscillator)**: `get_ultosc(df, window1=7, window2=14, window3=28)`
+## 趋势指标
 
-## 示例
+### 简单移动平均线 (SMA)
+
+```python
+def get_sma(df: pd.DataFrame, window: int = 20) -> pd.DataFrame
+```
+
+### 指数移动平均线 (EMA)
+
+```python
+def get_ema(df: pd.DataFrame, window: int = 20) -> pd.DataFrame
+```
+
+### 移动平均收敛发散指标 (MACD)
+
+```python
+def get_macd(df: pd.DataFrame, fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame
+```
+
+### 抛物线转向指标 (Parabolic SAR)
+
+```python
+def get_sar(df: pd.DataFrame, acceleration: float = 0.02, maximum: float = 0.2) -> pd.DataFrame
+```
+
+### 时间序列预测 (Time Series Forecast)
+
+```python
+def get_tsf(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 平均方向性指标 (ADX)
+
+```python
+def get_adx(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 动向指标 (DMI/DX)
+
+```python
+def get_dx(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 正/负方向指标 (+DI/-DI)
+
+```python
+def get_plus_di(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+def get_minus_di(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 正/负方向运动 (+DM/-DM)
+
+```python
+def get_plus_dm(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+def get_minus_dm(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 阿隆指标 (Aroon)
+
+```python
+def get_aroon(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+## 动量指标
+
+### 相对强弱指数 (RSI)
+
+```python
+def get_rsi(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 随机指标 (Stochastic Oscillator)
+
+```python
+def get_stoch(df: pd.DataFrame, window: int = 14, smooth_d: int = 3, smooth_k: int = 3) -> pd.DataFrame
+```
+
+### 商品通道指数 (CCI)
+
+```python
+def get_cci(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 威廉指标 (Williams' %R)
+
+```python
+def get_willr(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 动量指标 (Momentum)
+
+```python
+def get_mom(df: pd.DataFrame, window: int = 10) -> pd.DataFrame
+```
+
+### 变动率 (ROC)
+
+```python
+def get_roc(df: pd.DataFrame, window: int = 10) -> pd.DataFrame
+def get_rocp(df: pd.DataFrame, window: int = 10) -> pd.DataFrame
+def get_rocr(df: pd.DataFrame, window: int = 10) -> pd.DataFrame
+def get_rocr100(df: pd.DataFrame, window: int = 10) -> pd.DataFrame
+```
+
+### 终极振荡器 (Ultimate Oscillator)
+
+```python
+def get_ultosc(df: pd.DataFrame, window1: int = 7, window2: int = 14, window3: int = 28) -> pd.DataFrame
+```
+
+### 钱德动量振荡器 (CMO)
+
+```python
+def get_cmo(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+### 均势指标 (BOP)
+
+```python
+def get_bop(df: pd.DataFrame) -> pd.DataFrame
+```
+
+### 三重指数平滑平均线的1日变动率 (TRIX)
+
+```python
+def get_trix(df: pd.DataFrame, window: int = 30) -> pd.DataFrame
+```
+
+### 绝对价格振荡器 (APO)
+
+```python
+def get_apo(df: pd.DataFrame, fast_period: int = 12, slow_period: int = 26, ma_type: int = 0) -> pd.DataFrame
+```
+
+### 价格振荡器百分比 (PPO)
+
+```python
+def get_ppo(df: pd.DataFrame, fast_period: int = 12, slow_period: int = 26, ma_type: int = 0) -> pd.DataFrame
+```
+
+### 阿隆振荡器 (Aroon Oscillator)
+
+```python
+def get_aroonosc(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+## 波动率指标
+
+### 布林带 (Bollinger Bands)
+
+```python
+def get_bollinger_bands(df: pd.DataFrame, window: int = 20, std: int = 2) -> pd.DataFrame
+```
+
+### 平均真实波幅 (ATR)
+
+```python
+def get_atr(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+## 成交量指标
+
+### 能量潮 (OBV)
+
+```python
+def get_obv(df: pd.DataFrame) -> pd.DataFrame
+```
+
+### 蔡金 A/D 线 (Chaikin A/D Line)
+
+```python
+def get_ad(df: pd.DataFrame) -> pd.DataFrame
+```
+
+### 蔡金 A/D 振荡器 (Chaikin A/D Oscillator)
+
+```python
+def get_adosc(df: pd.DataFrame, fast_period: int = 3, slow_period: int = 10) -> pd.DataFrame
+```
+
+### 资金流量指标 (MFI)
+
+```python
+def get_mfi(df: pd.DataFrame, window: int = 14) -> pd.DataFrame
+```
+
+## 使用示例
 
 ```python
 from akshare_one import get_hist_data
@@ -63,7 +217,9 @@ df = get_hist_data(symbol="600000", interval="day")
 
 # 计算20日简单移动平均
 df_sma = get_sma(df, window=20)
+print(df_sma.tail())
 
 # 计算MACD指标
 df_macd = get_macd(df)
+print(df_macd.tail())
 ```
