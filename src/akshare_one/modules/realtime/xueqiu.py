@@ -33,9 +33,12 @@ class XueQiuRealtime(RealtimeDataProvider):
         """
         try:
             raw_df = ak.stock_individual_spot_xq(symbol=convert_xieqiu_symbol(self.symbol))
-        except (KeyError, ValueError, Exception) as e:
+        except Exception as e:
             raise ValueError(
-                f"Failed to get real-time data from XueQiu for {self.symbol}: {str(e)}"
+                f"Failed to fetch XueQiu realtime quote for {self.symbol}: {e}. "
+                "XueQiu now requires an xq_a_token cookie that it no longer issues "
+                "to anonymous clients (and returns HTTP 418 when rate limited); "
+                "use source='eastmoney_direct' instead."
             ) from e
 
         # Convert to dictionary for easier lookup

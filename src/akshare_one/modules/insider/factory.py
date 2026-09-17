@@ -7,7 +7,7 @@ class InsiderDataFactory:
     Factory class for creating insider data providers
     """
 
-    _providers = {
+    _providers: dict[str, type[InsiderDataProvider]] = {
         "xueqiu": XueQiuInsider,
     }
 
@@ -33,7 +33,7 @@ class InsiderDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[InsiderDataProvider]) -> None:
         """
         Register a new insider data provider
 

@@ -1,5 +1,7 @@
-name: Deploy MkDocs via GitHub Pages
+name: Deploy docs via GitHub Pages
 
+# Docs are built with Zensical, the successor to Material for MkDocs. It reads
+# the existing mkdocs.yml, so no config migration was required.
 on:
   push:
     branches: ["main"]
@@ -16,29 +18,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Set up build cache
-        uses: actions/cache/restore@v4
-        with:
-          key: mkdocs-material-${{ hashfiles('pyproject.toml') }}
-          path: ~/.cache
-          restore-keys: |
-            mkdocs-material-
-
-      - name: Install dependencies
+      - name: Install Zensical
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs-material
-          pip install .
-          sudo apt-get install pngquant
+          pip install zensical
 
       - name: Build documentation
         run: |
-          mkdocs build --clean
-          mkdocs --version
+          zensical build --clean
+          zensical --version
 
       - name: Adjust permissions
         run: |
@@ -53,9 +45,3 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-
-      - name: Save build cache
-        uses: actions/cache/save@v4
-        with:
-          key: mkdocs-material-${{ hashfiles('pyproject.toml') }}
-          path: ~/.cache

@@ -1,49 +1,49 @@
-import akshare as ak
 import pandas as pd
+
+from akshare_one.eastmoney.client import EastMoneyClient
+from akshare_one.eastmoney.utils import parse_basic_info
 
 from ..cache import cache
 from .base import InfoDataProvider
 
 
 class EastmoneyInfo(InfoDataProvider):
-    _basic_info_rename_map = {
-        "最新": "price",
-        "股票代码": "symbol",
-        "股票简称": "name",
-        "总股本": "total_shares",
-        "流通股": "float_shares",
-        "总市值": "total_market_cap",
-        "流通市值": "float_market_cap",
-        "行业": "industry",
-        "上市时间": "listing_date",
-    }
+    """Basic stock info from EastMoney's direct quote API.
+
+    This used to go through ``akshare.stock_individual_info_em``, which hits
+    ``push2.eastmoney.com`` directly and therefore broke whenever that host
+    answered with a gateway error. The direct client falls back across hosts.
+    """
+
+    def __init__(self, symbol: str) -> None:
+        super().__init__(symbol)
+        self.client = EastMoneyClient()
 
     @cache(
         "info_cache",
         key=lambda self: f"eastmoney_{self.symbol}",
     )
     def get_basic_info(self) -> pd.DataFrame:
-        """获取东方财富个股信息"""
-        info_df = ak.stock_individual_info_em(symbol=self.symbol)
-        info_df = info_df.set_index("item").T
-        info_df.reset_index(drop=True, inplace=True)
-        info_df.rename(columns=self._basic_info_rename_map, inplace=True)
+        """获取东方财富个股信息
 
-        if "symbol" in info_df.columns:
-            info_df["symbol"] = info_df["symbol"].astype(str)
+        Returns:
+            pd.DataFrame:
+            - price: 最新价
+            - symbol: 股票代码
+            - name: 股票简称
+            - total_shares: 总股本
+            - float_shares: 流通股
+            - total_market_cap: 总市值
+            - float_market_cap: 流通市值
+            - industry: 行业
+            - listing_date: 上市时间
+        """
+        try:
+            raw = self.client.fetch_basic_info(self.symbol)
+        except Exception as e:
+            raise ValueError(f"Failed to fetch basic info for {self.symbol}: {e}") from e
 
-        if "listing_date" in info_df.columns:
-            info_df["listing_date"] = pd.to_datetime(info_df["listing_date"], format="%Y%m%d")
+        if raw.get("rc") != 0 or not raw.get("data"):
+            raise ValueError(f"No basic info found for symbol {self.symbol}")
 
-        numeric_cols = [
-            "price",
-            "total_shares",
-            "float_shares",
-            "total_market_cap",
-            "float_market_cap",
-        ]
-        for col in numeric_cols:
-            if col in info_df.columns:
-                info_df[col] = pd.to_numeric(info_df[col], errors="coerce")
-
-        return info_df
+        return parse_basic_info(raw)

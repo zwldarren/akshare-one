@@ -57,3 +57,24 @@ df_sma = get_sma(df, window=20)
 完整API文档现已迁移至GitHub Pages：
 
 https://zwldarren.github.io/akshare-one/
+
+## 🧪 测试
+
+默认情况下测试完全离线运行。会访问在线数据源（东方财富、新浪、雪球、各交易所）
+的测试模块默认跳过，因为这些接口有严格的速率限制，全量运行可能导致 IP 被临时封禁：
+
+```bash
+pytest                    # 仅离线单元测试
+pytest --run-network      # 包含在线数据源测试
+```
+
+## ⚠️ 数据源说明
+
+- 实时行情与基本信息会在多个东方财富域名间自动重试，因为
+  `push2.eastmoney.com` 会间歇性返回 `502`（境外访问时尤其明显）。
+- `xueqiu` 实时行情依赖 `xq_a_token` Cookie，而雪球已不再向匿名客户端下发该
+  Cookie；触发限流时雪球会返回 `418`。
+- `get_options_chain` 只返回期权合约列表，行情字段为空；请使用
+  `get_options_realtime` / `get_options_hist` 获取价格。
+- `get_futures_main_contracts()` 基于各交易所静态快照，首次调用可能较慢
+  （中金所）；结果会缓存 24 小时。

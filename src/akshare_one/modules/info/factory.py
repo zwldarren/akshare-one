@@ -7,7 +7,7 @@ class InfoDataFactory:
     Factory class for creating info data providers
     """
 
-    _providers = {
+    _providers: dict[str, type[InfoDataProvider]] = {
         "eastmoney": EastmoneyInfo,
     }
 
@@ -33,7 +33,7 @@ class InfoDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[InfoDataProvider]) -> None:
         """
         Register a new info data provider
 

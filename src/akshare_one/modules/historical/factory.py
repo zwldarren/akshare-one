@@ -9,7 +9,7 @@ class HistoricalDataFactory:
     Factory class for creating historical data providers
     """
 
-    _providers = {
+    _providers: dict[str, type[HistoricalDataProvider]] = {
         "eastmoney": EastMoneyHistorical,
         "eastmoney_direct": EastMoneyDirectHistorical,
         "sina": SinaHistorical,
@@ -37,7 +37,7 @@ class HistoricalDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[HistoricalDataProvider]) -> None:
         """
         Register a new historical data provider
 

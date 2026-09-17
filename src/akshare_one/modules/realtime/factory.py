@@ -44,7 +44,7 @@ class RealtimeDataFactory:
         return provider_class(symbol=symbol)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[RealtimeDataProvider]) -> None:
         """
         Register a new realtime data provider
 

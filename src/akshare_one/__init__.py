@@ -302,9 +302,9 @@ def get_futures_main_contracts(
 
     Returns:
         pd.DataFrame:
-        - symbol: 期货代码
-        - name: 期货名称
-        - contract: 主力合约代码
+        - symbol: 期货品种代码
+        - name: 期货品种名称
+        - contract: 主力合约代码 (占位符，目前与 symbol 相同)
         - exchange: 交易所
     """
     from .modules.futures.sina import SinaFuturesHistorical

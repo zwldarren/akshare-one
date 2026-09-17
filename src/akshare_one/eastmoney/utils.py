@@ -62,6 +62,64 @@ def parse_realtime_data(data: dict[str, Any]) -> pd.DataFrame:
     return df
 
 
+_BASIC_INFO_COLUMNS = [
+    "price",
+    "symbol",
+    "name",
+    "total_shares",
+    "float_shares",
+    "total_market_cap",
+    "float_market_cap",
+    "industry",
+    "listing_date",
+]
+
+
+def parse_basic_info(data: dict[str, Any]) -> pd.DataFrame:
+    """
+    Parses stock basic info from the EastMoney quote response.
+    """
+    info = data.get("data")
+    if not info:
+        return pd.DataFrame(columns=_BASIC_INFO_COLUMNS)
+
+    df = pd.DataFrame(
+        [
+            {
+                "price": info.get("f43"),
+                "symbol": info.get("f57"),
+                "name": info.get("f58"),
+                "total_shares": info.get("f84"),
+                "float_shares": info.get("f85"),
+                "total_market_cap": info.get("f116"),
+                "float_market_cap": info.get("f117"),
+                "industry": info.get("f127"),
+                "listing_date": info.get("f189"),
+            }
+        ]
+    )
+
+    if "symbol" in df.columns:
+        df["symbol"] = df["symbol"].astype(str)
+
+    if "listing_date" in df.columns:
+        df["listing_date"] = pd.to_datetime(
+            df["listing_date"].astype("string"), format="%Y%m%d", errors="coerce"
+        )
+
+    numeric_cols = [
+        "price",
+        "total_shares",
+        "float_shares",
+        "total_market_cap",
+        "float_market_cap",
+    ]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df[_BASIC_INFO_COLUMNS]
+
+
 def resample_historical_data(df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:
     """
     Resamples historical data to a specified frequency.

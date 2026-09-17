@@ -8,7 +8,7 @@ class FinancialDataFactory:
     Factory class for creating financial data providers
     """
 
-    _providers = {
+    _providers: dict[str, type[FinancialDataProvider]] = {
         "sina": SinaFinancialReport,
         "eastmoney_direct": EastMoneyDirectFinancialReport,
     }
@@ -35,7 +35,7 @@ class FinancialDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[FinancialDataProvider]) -> None:
         """
         Register a new financial data provider
 

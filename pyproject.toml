@@ -5,8 +5,18 @@ description = "Standardized interface for Chinese financial market data, built o
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "akshare>=1.17.80",
+    "akshare>=1.18.0",
+    # Imported directly by akshare_one (akshare also pulls these in, but we
+    # depend on them explicitly so the package keeps working if akshare
+    # changes its dependency set).
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "requests>=2.28",
     "cachetools>=5.5.0",
+    # akshare requests `Accept-Encoding: gzip, deflate, br` on some endpoints
+    # (e.g. XueQiu) but does not declare brotli; without it those responses
+    # cannot be decoded and JSON parsing fails.
+    "brotli>=1.1.0",
 ]
 license = "MIT"
 keywords = ["akshare", "financial-data", "stock-data", "quant"]
@@ -20,11 +30,12 @@ talib = ["ta-lib>=0.6.4"]
 
 [dependency-groups]
 dev = [
-    "mkdocs-material>=9.6.15",
+    "zensical>=0.0.62",
     "pandas-stubs>=2.3.0.250703",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
+    "pytest-timeout>=2.3.1",
     "ruff>=0.12.1",
     "ty>=0.0.10",
     "types-cachetools>=6.1.0.20250717",
@@ -40,6 +51,10 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
 addopts = "-v --cov=akshare_one --cov-report=term-missing"
+# Live-provider tests are skipped unless --run-network is passed (see
+# tests/conftest.py). The timeout keeps a hung upstream request from stalling
+# the whole run.
+timeout = 180
 
 [tool.ruff]
 line-length = 100

@@ -9,6 +9,8 @@ from .base import FinancialDataProvider
 
 logger = logging.getLogger(__name__)
 
+_HTTP_TIMEOUT = 15.0
+
 
 class EastMoneyDirectFinancialReport(FinancialDataProvider):
     _balance_sheet_rename_map = {
@@ -106,7 +108,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             }
 
             # Fetch data from API
-            response = requests.get(api_url, params=params)
+            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
             response.raise_for_status()
             data = response.json()
 
@@ -141,7 +143,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             }
 
             # Fetch data from API
-            response = requests.get(api_url, params=params)
+            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
             response.raise_for_status()
             data = response.json()
 
@@ -176,7 +178,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             }
 
             # Fetch data from API
-            response = requests.get(api_url, params=params)
+            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
             response.raise_for_status()
             data = response.json()
 

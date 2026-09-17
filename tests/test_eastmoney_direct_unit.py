@@ -1,0 +1,215 @@
+"""Offline tests for the EastMoney direct client and the providers built on it.
+
+Everything here is mocked -- no network access. These cover:
+
+- host fallback when ``push2.eastmoney.com`` returns 502 / an HTML body;
+- basic-info parsing from the raw quote payload;
+- single-symbol realtime using one request instead of the full A-share snapshot.
+"""
+
+from unittest.mock import patch
+
+import pandas as pd
+import pytest
+import requests
+
+from akshare_one.eastmoney.client import EastMoneyClient
+from akshare_one.eastmoney.utils import parse_basic_info
+from akshare_one.modules.info.eastmoney import EastmoneyInfo
+from akshare_one.modules.realtime.eastmoney import EastmoneyRealtime
+
+
+@pytest.fixture(autouse=True)
+def _disable_cache(monkeypatch):
+    monkeypatch.setenv("AKSHARE_ONE_CACHE_ENABLED", "false")
+
+
+class _Response:
+    def __init__(self, payload=None, status=200):
+        self._payload = payload
+        self.status_code = status
+        self.text = "<html>502 Bad Gateway</html>" if payload is None else "{}"
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.HTTPError(f"{self.status_code} error")
+
+    def json(self):
+        if self._payload is None:
+            raise ValueError("Expecting value: line 1 column 1 (char 0)")
+        return self._payload
+
+
+class TestSecurityId:
+    @pytest.mark.parametrize(
+        ("symbol", "expected"),
+        [
+            ("600000", "1.600000"),
+            ("000001", "0.000001"),
+            ("300750", "0.300750"),
+            ("688981", "1.688981"),
+            ("510300", "1.510300"),
+            ("00700", "116.00700"),
+            ("SH600000", "1.600000"),
+            ("SZ000001", "0.000001"),
+            ("HK00700", "116.00700"),
+        ],
+    )
+    def test_security_id(self, symbol, expected):
+        assert EastMoneyClient()._get_security_id(symbol) == expected
+
+
+class TestHostFallback:
+    def test_falls_back_on_502(self):
+        calls = []
+
+        def fake_get(url, params=None, timeout=None):
+            calls.append(url)
+            if "push2.eastmoney.com" in url or "82.push2" in url:
+                return _Response(status=502)
+            return _Response(payload={"rc": 0, "data": {"f57": "600000"}})
+
+        client = EastMoneyClient()
+        client.session.get = fake_get
+        result = client.fetch_realtime_quote("600000")
+
+        assert result["rc"] == 0
+        assert len(calls) == 3
+        assert "push2delay.eastmoney.com" in calls[-1]
+
+    def test_falls_back_on_html_200(self):
+        calls = []
+
+        def fake_get(url, params=None, timeout=None):
+            calls.append(url)
+            if "push2delay" not in url:
+                # 200 OK but the body is a gateway error page.
+                return _Response(payload=None)
+            return _Response(payload={"rc": 0, "data": {"f57": "600000"}})
+
+        client = EastMoneyClient()
+        client.session.get = fake_get
+        result = client.fetch_realtime_quote("600000")
+
+        assert result["rc"] == 0
+        assert len(calls) == 3
+
+    def test_raises_when_every_host_fails(self):
+        client = EastMoneyClient()
+        client.session.get = lambda *a, **k: _Response(status=502)
+        with pytest.raises(ConnectionError, match="All EastMoney hosts failed"):
+            client.fetch_realtime_quote("600000")
+
+
+class TestParseBasicInfo:
+    def test_parses_and_coerces(self):
+        payload = {
+            "rc": 0,
+            "data": {
+                "f43": 9.07,
+                "f57": "600000",
+                "f58": "浦发银行",
+                "f84": 29352108000,
+                "f85": 29352108000,
+                "f116": 266000000000,
+                "f117": 266000000000,
+                "f127": "银行",
+                "f189": 19991110,
+            },
+        }
+        df = parse_basic_info(payload)
+
+        assert list(df.columns) == [
+            "price",
+            "symbol",
+            "name",
+            "total_shares",
+            "float_shares",
+            "total_market_cap",
+            "float_market_cap",
+            "industry",
+            "listing_date",
+        ]
+        row = df.iloc[0]
+        assert row["symbol"] == "600000"
+        assert row["name"] == "浦发银行"
+        assert row["price"] == pytest.approx(9.07)
+        assert row["total_market_cap"] == 266000000000
+        assert row["listing_date"] == pd.Timestamp("1999-11-10")
+
+    def test_empty_payload(self):
+        df = parse_basic_info({"rc": 0, "data": None})
+        assert df.empty
+        assert "symbol" in df.columns
+
+
+class TestInfoProvider:
+    def test_uses_direct_client(self):
+        payload = {
+            "rc": 0,
+            "data": {"f43": 1.0, "f57": "600000", "f58": "浦发银行", "f189": 19991110},
+        }
+        with patch(
+            "akshare_one.modules.info.eastmoney.EastMoneyClient.fetch_basic_info",
+            return_value=payload,
+        ) as mock_fetch:
+            df = EastmoneyInfo("600000").get_basic_info()
+
+        mock_fetch.assert_called_once_with("600000")
+        assert df.iloc[0]["name"] == "浦发银行"
+
+    def test_raises_on_error_payload(self):
+        with (
+            patch(
+                "akshare_one.modules.info.eastmoney.EastMoneyClient.fetch_basic_info",
+                return_value={"rc": 1, "data": None},
+            ),
+            pytest.raises(ValueError, match="No basic info found"),
+        ):
+            EastmoneyInfo("600000").get_basic_info()
+
+
+class TestRealtimeProvider:
+    def _payload(self):
+        return {
+            "rc": 0,
+            "data": {"f57": "600000", "f43": 9.07, "f169": 0.01, "f170": 0.11, "f60": 9.06},
+        }
+
+    def test_single_symbol_skips_full_snapshot(self):
+        with (
+            patch(
+                "akshare_one.modules.realtime.eastmoney.EastMoneyClient.fetch_realtime_quote",
+                return_value=self._payload(),
+            ) as mock_fetch,
+            patch("akshare_one.modules.realtime.eastmoney.ak.stock_zh_a_spot_em") as mock_spot,
+        ):
+            df = EastmoneyRealtime("600000").get_current_data()
+
+        mock_fetch.assert_called_once_with("600000")
+        mock_spot.assert_not_called()
+        assert df.iloc[0]["symbol"] == "600000"
+
+    def test_no_symbol_uses_full_snapshot(self):
+        raw = pd.DataFrame(
+            {
+                "代码": ["600000"],
+                "最新价": [9.07],
+                "涨跌额": [0.01],
+                "涨跌幅": [0.11],
+                "成交量": [100],
+                "成交额": [1000],
+                "今开": [9.0],
+                "最高": [9.1],
+                "最低": [8.9],
+                "昨收": [9.06],
+            }
+        )
+        with patch(
+            "akshare_one.modules.realtime.eastmoney.ak.stock_zh_a_spot_em",
+            return_value=raw,
+        ) as mock_spot:
+            df = EastmoneyRealtime("").get_current_data()
+
+        mock_spot.assert_called_once()
+        assert list(df["symbol"]) == ["600000"]

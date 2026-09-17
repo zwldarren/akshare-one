@@ -7,7 +7,11 @@ repo_name: 'zwldarren/akshare-one'
 repo_url: 'https://github.com/zwldarren/akshare-one'
 
 theme:
+  # ``name: material`` is kept so the config stays readable by MkDocs too;
+  # Zensical maps it to its ``classic`` variant, which preserves the Material
+  # for MkDocs look (set explicitly to be robust if the mapping changes).
   name: material
+  variant: classic
   language: zh
   palette:
     - scheme: default
@@ -45,7 +49,6 @@ nav:
     - 内部交易: api/insider.md
     - 技术指标: api/indicators.md
     - 期权数据: api/options.md
-    - 债券数据: api/bonds.md
   - 示例: examples.md
 
 markdown_extensions:
@@ -64,6 +67,12 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+      # Keep non-ASCII (e.g. Chinese) heading text in anchors. Without this,
+      # Python Markdown strips CJK characters and headings get ids like `_2`,
+      # so links such as `api/financial.md#资产负债表` break.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
 
 plugins:
   - search:

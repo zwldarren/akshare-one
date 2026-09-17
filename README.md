@@ -57,3 +57,28 @@ df_sma = get_sma(df, window=20)
 Full API documentation is now available on GitHub Pages:
 
 https://zwldarren.github.io/akshare-one/
+
+## 🧪 Testing
+
+Tests run fully offline by default. Test modules that call live upstream data
+providers (EastMoney, Sina, XueQiu, the exchanges) are skipped unless you opt
+in, because those endpoints apply aggressive rate limits and a full run can get
+your IP temporarily blocked:
+
+```bash
+pytest                    # offline unit tests only
+pytest --run-network      # include live-provider tests
+```
+
+## ⚠️ Data source notes
+
+- Realtime quotes and basic info fall back across several EastMoney hosts,
+  because `push2.eastmoney.com` intermittently returns `502` (notably from
+  outside mainland China).
+- `xueqiu` realtime quotes need an `xq_a_token` cookie that XueQiu no longer
+  hands to anonymous clients, and XueQiu returns `418` once rate-limited.
+- `get_options_chain` returns the option contract list with the market-data
+  columns left empty; use `get_options_realtime` / `get_options_hist` for
+  prices.
+- `get_futures_main_contracts()` reflects static exchange snapshots and may be
+  slow on the first call (CFFEX); the result is cached for 24 hours.

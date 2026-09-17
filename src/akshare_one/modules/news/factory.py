@@ -7,7 +7,7 @@ class NewsDataFactory:
     Factory class for creating news data providers
     """
 
-    _providers = {
+    _providers: dict[str, type[NewsDataProvider]] = {
         "eastmoney": EastMoneyNews,
     }
 
@@ -33,7 +33,7 @@ class NewsDataFactory:
         return provider_class(**kwargs)
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: type) -> None:
+    def register_provider(cls, name: str, provider_class: type[NewsDataProvider]) -> None:
         """
         Register a new news data provider
 

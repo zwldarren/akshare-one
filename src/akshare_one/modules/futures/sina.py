@@ -1,8 +1,34 @@
+import logging
+from functools import lru_cache
+
 import akshare as ak
 import pandas as pd
 
 from ..cache import cache
 from .base import HistoricalFuturesDataProvider, RealtimeFuturesDataProvider
+
+logger = logging.getLogger(__name__)
+
+# Roots whose quotes Sina serves with the non-commodity column layout.
+_CFFEX_ROOTS = frozenset({"IF", "IH", "IC", "IM", "T", "TF", "TS", "TL"})
+
+# Columns every realtime futures frame is expected to expose.
+_REALTIME_COLUMNS = [
+    "symbol",
+    "symbol_root",
+    "contract",
+    "price",
+    "change",
+    "pct_change",
+    "timestamp",
+    "volume",
+    "open_interest",
+    "open",
+    "high",
+    "low",
+    "prev_settlement",
+    "settlement",
+]
 
 
 class SinaFuturesHistorical(HistoricalFuturesDataProvider):
@@ -58,13 +84,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if raw_df.empty:
             raise ValueError(f"No intraday data found for futures {self.symbol}:{self.contract}")
 
-        # Filter by date range if needed
-        if hasattr(raw_df, "index"):
-            raw_df.index = pd.to_datetime(raw_df.index)
-            if self.start_date and self.end_date:
-                start_dt = pd.to_datetime(self.start_date)
-                end_dt = pd.to_datetime(self.end_date) + pd.Timedelta(days=1)
-                raw_df = raw_df[(raw_df.index >= start_dt) & (raw_df.index <= end_dt)]
+        raw_df = self._filter_by_date(raw_df)
 
         if self.interval_multiplier > 1:
             freq = (
@@ -84,13 +104,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if raw_df.empty:
             raise ValueError(f"No data found for futures {self.symbol}:{self.contract}")
 
-        # Filter by date range if needed
-        if hasattr(raw_df, "index"):
-            raw_df.index = pd.to_datetime(raw_df.index)
-            if self.start_date and self.end_date:
-                start_dt = pd.to_datetime(self.start_date)
-                end_dt = pd.to_datetime(self.end_date) + pd.Timedelta(days=1)
-                raw_df = raw_df[(raw_df.index >= start_dt) & (raw_df.index <= end_dt)]
+        raw_df = self._filter_by_date(raw_df)
 
         if self.interval_multiplier > 1:
             raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
@@ -106,6 +120,30 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if self.contract.lower() == "main":
             return f"{self.symbol}0"
         return f"{self.symbol}{self.contract}"
+
+    def _filter_by_date(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Restrict a raw Sina futures frame to ``[start_date, end_date]``.
+
+        Sina returns the date in a column (``date`` for daily data, ``datetime``
+        for intraday data) together with a default ``RangeIndex``. Converting
+        that index to datetimes yields 1970 timestamps, so the filter must use
+        the date column instead -- otherwise every real date range returns an
+        empty frame while the default 1970 range silently passes.
+        """
+        if df.empty or not (self.start_date and self.end_date):
+            return df
+
+        date_col = next((col for col in ("datetime", "date") if col in df.columns), None)
+        if date_col is None:
+            return df
+
+        dates = pd.to_datetime(df[date_col], errors="coerce")
+        start_dt = pd.to_datetime(self.start_date)
+        # Half-open upper bound so the whole end day is included but the next
+        # day is not.
+        end_dt = pd.to_datetime(self.end_date) + pd.Timedelta(days=1)
+        mask = ((dates >= start_dt) & (dates < end_dt)).to_numpy()
+        return df.loc[mask]
 
     def _validate_interval_params(self, interval: str, multiplier: int) -> None:
         """Validates the validity of interval and multiplier"""
@@ -261,84 +299,93 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         # Reset index to avoid displaying the original DataFrame index
         return result.reset_index(drop=True)
 
+    # Column holding the contract code in akshare's exchange listings. The name
+    # differs per exchange ("合约代码" for SHFE/CZCE/CFFEX, "合约" for DCE).
+    _CONTRACT_CODE_COLUMNS = ("合约代码", "合约", "symbol")
+
+    @cache("futures_contracts_cache", key=lambda self: "sina_futures_main_contracts")
     def get_main_contracts(self) -> pd.DataFrame:
-        """Fetches main contract list
+        """Fetches the tradable variety list per exchange.
+
+        akshare's exchange listings name the contract-code column differently
+        per exchange, which the previous implementation did not account for, so
+        it never matched and always fell through to a broken fallback.
+
+        The CFFEX endpoint is often very slow (minutes), so the result is
+        cached for 24 hours. An exchange that errors or returns an unexpected
+        shape is skipped with a warning instead of failing the whole call.
+
+        ``contract`` is a placeholder equal to ``symbol``: resolving the actual
+        front-month contract requires one request per variety via akshare/sina,
+        which is too expensive to do here.
 
         Returns:
             pd.DataFrame:
-            - symbol: 期货代码
-            - name: 期货名称
-            - contract: 主力合约代码
+            - symbol: 期货品种代码
+            - name: 期货品种名称
+            - contract: 主力合约代码 (placeholder, currently == symbol)
             - exchange: 交易所
         """
-        try:
-            # Get futures contract info from different exchanges
-            contracts_list = []
-            exchanges = {
-                "SHFE": "上海期货交易所",
-                "DCE": "大连商品交易所",
-                "CZCE": "郑州商品交易所",
-                "CFFEX": "中国金融期货交易所",
-            }
+        exchanges = {
+            "SHFE": ak.futures_contract_info_shfe,
+            "DCE": ak.futures_contract_info_dce,
+            "CZCE": ak.futures_contract_info_czce,
+            "CFFEX": ak.futures_contract_info_cffex,
+        }
 
-            for exchange_code, _exchange_name in exchanges.items():
-                try:
-                    # Try different API functions for each exchange
-                    if exchange_code == "SHFE":
-                        df = ak.futures_contract_info_shfe()
-                    elif exchange_code == "DCE":
-                        df = ak.futures_contract_info_dce()
-                    elif exchange_code == "CZCE":
-                        df = ak.futures_contract_info_czce()
-                    elif exchange_code == "CFFEX":
-                        df = ak.futures_contract_info_cffex()
+        columns = ["symbol", "name", "contract", "exchange"]
+        frames = []
+        for exchange_code, fetch in exchanges.items():
+            try:
+                raw = fetch()
+            except Exception as exc:
+                logger.warning("Failed to fetch %s contract info: %s", exchange_code, exc)
+                continue
+            if raw is None or raw.empty:
+                continue
 
-                    if not df.empty and "symbol" in df.columns:
-                        # Extract variety codes (usually first 1-2 characters)
-                        df["variety"] = df["symbol"].str.extract(r"([A-Z]+)")[0]
-                        df["exchange"] = exchange_code
-                        contracts_list.append(df)
-                except Exception:
-                    continue
+            code_col = next(
+                (col for col in self._CONTRACT_CODE_COLUMNS if col in raw.columns), None
+            )
+            if code_col is None:
+                logger.warning("%s contract info has no contract-code column", exchange_code)
+                continue
 
-            if contracts_list:
-                raw_df = pd.concat(contracts_list, ignore_index=True)
-                return self._clean_main_contracts(raw_df)
-            else:
-                # Fallback: return available symbols from real-time data
-                raw_df = ak.futures_zh_realtime()
-                return self._clean_main_contracts_from_realtime(raw_df)
-        except Exception as e:
-            raise ValueError(f"Failed to fetch main contracts: {str(e)}") from e
+            # Contract codes look like "CF2601"/"TA601"; the leading letters are
+            # the variety code.
+            varieties = (
+                raw[code_col].astype(str).str.extract(r"^([A-Za-z]+)", expand=False).str.upper()
+            )
+            frames.append(pd.DataFrame({"symbol": varieties, "exchange": exchange_code}))
 
-    def _clean_main_contracts(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Cleans and standardizes main contracts data"""
-        # Get unique varieties
-        if "variety" in raw_df.columns and "symbol" in raw_df.columns:
-            unique_varieties = raw_df[["variety", "exchange"]].drop_duplicates()
-            unique_varieties.columns = ["symbol", "exchange"]
-            unique_varieties["name"] = unique_varieties["symbol"]
-            unique_varieties["contract"] = unique_varieties["symbol"]  # Placeholder
-            return unique_varieties.reset_index(drop=True)
+        if not frames:
+            return pd.DataFrame(columns=columns)
 
-        return pd.DataFrame(columns=["symbol", "name", "contract", "exchange"])
+        all_df = pd.concat(frames, ignore_index=True).dropna(subset=["symbol"])
+        all_df = all_df[all_df["symbol"] != ""]
+        all_df = all_df.drop_duplicates(subset=["symbol", "exchange"]).reset_index(drop=True)
+        all_df["name"] = all_df["symbol"]
+        all_df["contract"] = all_df["symbol"]
+        return all_df[columns]
 
-    def _clean_main_contracts_from_realtime(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Cleans and standardizes main contracts from real-time data fallback"""
-        if "symbol" in raw_df.columns:
-            # Extract variety codes
-            raw_df["symbol_root"] = raw_df["symbol"].astype(str).str.extract(r"([A-Z]+)")[0]
-            raw_df["exchange"] = raw_df.get("exchange", "")
 
-            # Get unique varieties
-            result = raw_df[["symbol_root", "exchange"]].drop_duplicates()
-            result.columns = ["symbol", "exchange"]
-            result["name"] = result["symbol"]
-            result["contract"] = result["symbol"]
+@lru_cache(maxsize=1)
+def _main_contract_table() -> pd.DataFrame:
+    """Main-continuous contract table (symbol/exchange/name) for all varieties.
 
-            return result.reset_index(drop=True)
-
-        return pd.DataFrame(columns=["symbol", "name", "contract", "exchange"])
+    Sina has no endpoint that returns the whole futures market at once, so this
+    uses akshare's main-contract listing and caches it for the process. The
+    first call issues one request per listed variety.
+    """
+    empty = pd.DataFrame(columns=["symbol", "exchange", "name"])
+    try:
+        table = ak.futures_display_main_sina()
+    except Exception as exc:  # pragma: no cover - network dependent
+        logger.warning("Unable to fetch main futures contracts: %s", exc)
+        return empty
+    if table is None or table.empty or "symbol" not in table.columns:
+        return empty
+    return table
 
 
 def _build_cache_key(provider: "SinaFuturesRealtime") -> str:
@@ -348,16 +395,31 @@ def _build_cache_key(provider: "SinaFuturesRealtime") -> str:
     return f"sina_futures_{symbol_part}_{contract_part}"
 
 
+def _market_for(root: str) -> str:
+    """Sina serves financial (CFFEX) futures with a different column layout."""
+    return "FF" if root.upper() in _CFFEX_ROOTS else "CF"
+
+
 class SinaFuturesRealtime(RealtimeFuturesDataProvider):
     """Adapter for Sina futures realtime data API"""
 
+    def _requested_contract(self) -> str:
+        """Contract code to subscribe to, e.g. ``CF0`` or ``CF2701``."""
+        if self.contract and self.contract.lower() != "main":
+            return f"{self.symbol}{self.contract}"
+        return f"{self.symbol}0"
+
     @cache("futures_realtime_cache", key=_build_cache_key)
     def get_current_data(self) -> pd.DataFrame:
-        """Fetches realtime futures market data
+        """Fetches realtime futures market data for one variety/contract.
+
+        ``ak.futures_zh_spot`` must be told which contract to subscribe to:
+        without an explicit symbol it defaults to a long-expired contract, so
+        the result used to always be an empty frame.
 
         Returns:
             pd.DataFrame:
-            - symbol: 期货代码
+            - symbol: 合约代码
             - contract: 合约代码
             - price: 最新价
             - change: 涨跌额
@@ -371,47 +433,94 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             - prev_settlement: 昨结算
             - settlement: 最新结算价
         """
-        try:
-            raw_df = ak.futures_zh_spot()
-        except Exception:
-            # Fallback to futures_zh_realtime if futures_zh_spot fails
-            raw_df = ak.futures_zh_realtime()
+        if not self.symbol:
+            return self.get_all_quotes()
+
+        contract = self._requested_contract()
+        raw_df = ak.futures_zh_spot(
+            symbol=contract,
+            market=_market_for(self.symbol),
+            adjust="0",
+        )
         df = self._clean_spot_data(raw_df)
-
-        # Filter by symbol if provided
-        if self.symbol:
-            symbol_upper = self.symbol.upper()
-
-            # Check if we have a specific contract (not main)
-            if self.contract and self.contract.lower() != "main":
-                # Filter by specific contract (e.g., "AG2604")
-                full_symbol = f"{symbol_upper}{self.contract}"
-                df = df[df["symbol"] == full_symbol].reset_index(drop=True)
-            else:
-                # Filter by variety code (symbol_root) to get all contracts
-                # This handles cases like symbol="CU", symbol="CU0"
-                if "symbol_root" in df.columns:
-                    df = df[df["symbol_root"] == symbol_upper].reset_index(drop=True)
-                else:
-                    # Fallback to prefix match
-                    df = df[df["symbol"].str.startswith(symbol_upper)].reset_index(drop=True)
-
-        return df
+        return self._attach_contract_identity(df, [contract])
 
     def get_all_quotes(self) -> pd.DataFrame:
-        """Fetches all futures quotes
+        """Fetches main-continuous quotes for every listed commodity variety.
+
+        Financial (CFFEX) varieties are handled by :meth:`get_current_data`
+        because Sina reports them with a different column layout.
 
         Returns:
-            pd.DataFrame: All futures market quotes
+            pd.DataFrame: Futures market quotes.
         """
-        return self.get_current_data()
+        table = _main_contract_table()
+        if table.empty:
+            return pd.DataFrame(columns=_REALTIME_COLUMNS)
+
+        commodities = [
+            str(code)
+            for code in table["symbol"].tolist()
+            if str(code).strip().rstrip("0123456789").upper() not in _CFFEX_ROOTS
+        ]
+        if not commodities:
+            return pd.DataFrame(columns=_REALTIME_COLUMNS)
+
+        raw_df = ak.futures_zh_spot(
+            symbol=",".join(commodities),
+            market="CF",
+            adjust="0",
+        )
+        df = self._clean_spot_data(raw_df)
+
+        # futures_zh_spot reports the Chinese contract name, not the code, so
+        # translate it back through the main-contract table.
+        if "name" in df.columns and "name" in table.columns:
+            name_to_code = dict(zip(table["name"], table["symbol"], strict=True))
+            df["symbol"] = df["name"].map(name_to_code).fillna(df["name"])
+        return self._attach_contract_identity(df, [])
+
+    @staticmethod
+    def _attach_contract_identity(df: pd.DataFrame, contracts: list[str]) -> pd.DataFrame:
+        """Derive ``symbol``/``symbol_root``/``contract`` from requested codes."""
+        if df.empty:
+            return df.reset_index(drop=True)
+
+        df = df.reset_index(drop=True)
+        if contracts and len(contracts) == len(df):
+            df["symbol"] = [code.upper() for code in contracts]
+
+        if "symbol" in df.columns:
+            symbols = df["symbol"].astype(str).str.upper()
+            df["symbol"] = symbols
+            df["symbol_root"] = symbols.str.extract(r"^([A-Z]+)", expand=False)
+            df["contract"] = symbols.str.extract(r"([0-9]+)$", expand=False).fillna("")
+
+        return df[[col for col in _REALTIME_COLUMNS if col in df.columns]]
 
     def _clean_spot_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans and standardizes realtime futures data.
 
-        Handle both Chinese column names (futures_zh_spot) and
-        English column names (futures_zh_realtime).
+        Handles the three upstream shapes seen in practice:
+        - ``futures_zh_spot`` (``current_price`` / ``hold`` / ``last_settle_price``);
+        - ``futures_zh_realtime`` (English ``trade`` / ``position`` columns);
+        - legacy Chinese column names.
         """
+        spot_mapping = {
+            # futures_zh_spot reports the Chinese contract name under 'symbol';
+            # the caller re-attaches the real contract code afterwards.
+            "symbol": "name",
+            "current_price": "price",
+            "hold": "open_interest",
+            "last_settle_price": "prev_settlement",
+            "last_close": "prev_close",
+            "avg_price": "vwap",
+            "open": "open",
+            "high": "high",
+            "low": "low",
+            "volume": "volume",
+        }
+
         chinese_mapping = {
             "代码": "symbol",
             "名称": "name",
@@ -443,8 +552,11 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             "changepercent": "pct_change",
         }
 
-        # Detect which format we have
-        if any(cn in raw_df.columns for cn in chinese_mapping):
+        # Detect which format we have: futures_zh_spot uses 'current_price',
+        # futures_zh_realtime uses English names, the legacy shape uses Chinese.
+        if "current_price" in raw_df.columns:
+            mapping = spot_mapping
+        elif any(cn in raw_df.columns for cn in chinese_mapping):
             mapping = chinese_mapping
         else:
             mapping = english_mapping
@@ -480,29 +592,14 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             settlement=lambda x: x.get("settlement", x.get("price")),
         )
 
-        # Extract contract from symbol (e.g., "cu2401" -> "CU", "2401")
+        # Extract contract from symbol (e.g., "cu2401" -> "CU", "2401").
+        # futures_zh_spot rows carry the Chinese contract name instead and are
+        # identified by the caller via _attach_contract_identity.
         if "symbol" in df.columns:
-            # Handle both lowercase and uppercase symbols
             df["symbol"] = df["symbol"].astype(str).str.upper()
-            # Extract alphabetic prefix as symbol_root (variety code)
             df["symbol_root"] = df["symbol"].str.extract(r"^([A-Z]+)", expand=False)
-            # Extract numeric suffix as contract
             df["contract"] = df["symbol"].str.extract(r"([0-9]+)$", expand=False).fillna("")
 
-        required_columns = [
-            "symbol",
-            "symbol_root",
-            "contract",
-            "price",
-            "change",
-            "pct_change",
-            "timestamp",
-            "volume",
-            "open_interest",
-            "open",
-            "high",
-            "low",
-            "prev_settlement",
-            "settlement",
-        ]
-        return df[[col for col in required_columns if col in df.columns]]
+        # Keep 'name' when present so callers can map the Chinese contract
+        # name back to a code (futures_zh_spot does not return the code).
+        return df[[col for col in [*_REALTIME_COLUMNS, "name"] if col in df.columns]]
