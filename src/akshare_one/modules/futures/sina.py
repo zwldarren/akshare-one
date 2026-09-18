@@ -373,20 +373,8 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
         the result used to always be an empty frame.
 
         Returns:
-            pd.DataFrame:
-            - symbol: 合约代码
-            - contract: 合约代码
-            - price: 最新价
-            - change: 涨跌额
-            - pct_change: 涨跌幅(%)
-            - timestamp: 时间戳
-            - volume: 成交量
-            - open_interest: 持仓量
-            - open: 今开
-            - high: 最高
-            - low: 最低
-            - prev_settlement: 昨结算
-            - settlement: 最新结算价
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.futures.schema`.
         """
         if not self.symbol:
             return self.get_all_quotes()

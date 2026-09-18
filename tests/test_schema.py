@@ -6,7 +6,6 @@ against the declaration instead of letting them drift apart.
 """
 
 import re
-from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -67,20 +66,41 @@ ALL_SCHEMAS = [columns for _, schemas, _ in CONTRACTS for columns in schemas]
 IDS = [name for name, _, _ in CONTRACTS]
 
 
+def _contracts_by_page() -> dict[str, list[tuple[str, tuple[tuple[str, ...], ...]]]]:
+    """The contracts each docs page documents, in the page's own order."""
+    pages: dict[str, list[tuple[str, tuple[tuple[str, ...], ...]]]] = {}
+    for name, schemas, page in CONTRACTS:
+        pages.setdefault(page, []).append((name, schemas))
+    return pages
+
+
+PAGES = _contracts_by_page()
+
+
 def _docstring_columns(func: Any) -> tuple[str, ...]:
     """The `- column: description` bullets of a public function's Returns block."""
     return tuple(re.findall(r"^\s*- (\w+):", func.__doc__ or "", re.MULTILINE))
 
 
-def _documented_spans(page: str) -> list[str]:
-    """Every `` `name` `` code span of a docs page, in file order."""
-    return re.findall(r"`([a-z_][a-z0-9_]*)`", (DOCS / page).read_text(encoding="utf-8"))
+#: A page's column table: the header names the field column, its rows the fields.
+_COLUMN_TABLE_HEAD = re.compile(r"^\|\s*(?:字段名|列名)\s*\|")
+_COLUMN_TABLE_ROW = re.compile(r"^\s*\|\s*`([a-z_][a-z0-9_]*)`\s*\|")
 
 
-def _contains_subsequence(haystack: Sequence[str], needle: Sequence[str]) -> bool:
-    size = len(needle)
-    windows = (haystack[i : i + size] for i in range(len(haystack) - size + 1))
-    return any(tuple(window) == tuple(needle) for window in windows)
+def _documented_column_tables(page: str) -> list[tuple[str, ...]]:
+    """Every column table of a docs page, in file order."""
+    blocks = re.split(r"\n\s*\n", (DOCS / page).read_text(encoding="utf-8"))
+    tables: list[tuple[str, ...]] = []
+    for block in blocks:
+        if not _COLUMN_TABLE_HEAD.match(block):
+            continue
+        rows = [
+            match.group(1)
+            for line in block.splitlines()
+            if (match := _COLUMN_TABLE_ROW.match(line))
+        ]
+        tables.append(tuple(rows))
+    return tables
 
 
 @pytest.mark.parametrize(("name", "schemas", "page"), CONTRACTS, ids=IDS)
@@ -96,14 +116,17 @@ def test_docstring_lists_the_declared_columns(
     )
 
 
-@pytest.mark.parametrize(("name", "schemas", "page"), CONTRACTS, ids=IDS)
-def test_docs_page_lists_the_declared_columns_in_order(
-    name: str, schemas: tuple[tuple[str, ...], ...], page: str
-) -> None:
-    """The published page must show the declared columns, in the declared order."""
-    spans = _documented_spans(page)
-    missing = [columns for columns in schemas if not _contains_subsequence(spans, columns)]
-    assert not missing, f"{page} does not document {name}'s columns: {missing}"
+@pytest.mark.parametrize("page", PAGES)
+def test_docs_page_documents_exactly_the_declared_columns(page: str) -> None:
+    """A page shows its contracts' declared columns, in order, and invents none."""
+    expected = PAGES[page]
+    documented = _documented_column_tables(page)
+    assert len(documented) == len(expected), (
+        f"{page} has {len(documented)} column tables for {len(expected)} contracts "
+        f"({', '.join(name for name, _ in expected)})"
+    )
+    for columns, (name, schemas) in zip(documented, expected, strict=True):
+        assert columns in schemas, f"{page} documents {name} as {columns}, not as {schemas}"
 
 
 @pytest.mark.parametrize("columns", ALL_SCHEMAS, ids=lambda c: c[0])

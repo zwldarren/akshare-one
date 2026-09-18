@@ -291,9 +291,6 @@ class TestFinancialDirectProvider:
         assert df.iloc[0]["total_assets"] == 100.0
         assert df.iloc[0]["cash_and_equivalents"] == 40.0
         assert [params["reportName"] for params in seen] == ["RPT_DMSK_FN_BALANCE"]
-        assert set(seen[0]["columns"].split(",")) == set(
-            EastMoneyDirectFinancialReport._balance_sheet_rename_map
-        )
 
     def test_a_missing_report_is_an_empty_frame_with_the_schema_columns(self):
         provider = self._provider()

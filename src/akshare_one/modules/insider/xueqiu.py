@@ -37,7 +37,7 @@ class XueQiuInsider(InsiderDataProvider):
         """
         raw_df = ak.stock_inner_trade_xq()
         if raw_df.empty:
-            return normalize(raw_df.iloc[0:0], COLUMNS)
+            return normalize(pd.DataFrame(), COLUMNS)
 
         if self.symbol:
             xueqiu_symbol = convert_xieqiu_symbol(self.symbol)

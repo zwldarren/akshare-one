@@ -1,4 +1,5 @@
 import logging
+from typing import NamedTuple
 
 import pandas as pd
 
@@ -13,9 +14,18 @@ from .schema import BALANCE_COLUMNS, CASH_FLOW_COLUMNS, INCOME_COLUMNS, METRICS_
 logger = logging.getLogger(__name__)
 
 
-@provider("financial", "eastmoney_direct")
-class EastMoneyDirectFinancialReport(FinancialDataProvider):
-    _balance_sheet_rename_map = {
+class _Statement(NamedTuple):
+    """One EastMoney statement: upstream report id, field renames, domain columns."""
+
+    report_name: str
+    rename_map: dict[str, str]
+    columns: tuple[str, ...]
+
+
+#: The three statements this provider serves, each carrying what its fetch needs.
+_BALANCE_SHEET = _Statement(
+    "RPT_DMSK_FN_BALANCE",
+    {
         "REPORT_DATE": "report_date",
         "TOTAL_ASSETS": "total_assets",
         "FIXED_ASSET": "fixed_assets_net",
@@ -26,24 +36,37 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         "ACCOUNTS_PAYABLE": "trade_and_non_trade_payables",
         "ADVANCE_RECEIVABLES": "deferred_revenue",
         "TOTAL_EQUITY": "shareholders_equity",
-    }
+    },
+    BALANCE_COLUMNS,
+)
 
-    _income_statement_rename_map = {
+_INCOME_STATEMENT = _Statement(
+    "RPT_DMSK_FN_INCOME",
+    {
         "REPORT_DATE": "report_date",
         "TOTAL_OPERATE_INCOME": "revenue",
         "TOTAL_OPERATE_COST": "total_operating_costs",
         "OPERATE_PROFIT": "operating_profit",
         "PARENT_NETPROFIT": "net_income_common_stock",
-    }
+    },
+    INCOME_COLUMNS,
+)
 
-    _cash_flow_rename_map = {
+_CASH_FLOW_STATEMENT = _Statement(
+    "RPT_DMSK_FN_CASHFLOW",
+    {
         "REPORT_DATE": "report_date",
         "NETCASH_OPERATE": "net_cash_flow_from_operations",
         "NETCASH_INVEST": "net_cash_flow_from_investing",
         "NETCASH_FINANCE": "net_cash_flow_from_financing",
         "CCE_ADD": "change_in_cash_and_equivalents",
-    }
+    },
+    CASH_FLOW_COLUMNS,
+)
 
+
+@provider("financial", "eastmoney_direct")
+class EastMoneyDirectFinancialReport(FinancialDataProvider):
     def __init__(self, symbol: str) -> None:
         super().__init__(symbol)
         self.client = EastMoneyClient()
@@ -95,48 +118,36 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         """
         Get stock balance sheet data from East Money API
         """
-        return self._fetch_statement(
-            report_name="RPT_DMSK_FN_BALANCE",
-            rename_map=self._balance_sheet_rename_map,
-            columns=BALANCE_COLUMNS,
-        )
+        return self._fetch_statement(_BALANCE_SHEET)
 
     @cached("financial")
     def _fetch_income_statement(self) -> pd.DataFrame:
         """
         Get stock income statement data from East Money API
         """
-        return self._fetch_statement(
-            report_name="RPT_DMSK_FN_INCOME",
-            rename_map=self._income_statement_rename_map,
-            columns=INCOME_COLUMNS,
-        )
+        return self._fetch_statement(_INCOME_STATEMENT)
 
     @cached("financial")
     def _fetch_cash_flow(self) -> pd.DataFrame:
         """
         Get stock cash flow statement data from East Money API
         """
-        return self._fetch_statement(
-            report_name="RPT_DMSK_FN_CASHFLOW",
-            rename_map=self._cash_flow_rename_map,
-            columns=CASH_FLOW_COLUMNS,
-        )
+        return self._fetch_statement(_CASH_FLOW_STATEMENT)
 
-    def _fetch_statement(
-        self,
-        report_name: str,
-        rename_map: dict[str, str],
-        columns: tuple[str, ...],
-    ) -> pd.DataFrame:
-        """Fetch one statement and rename its upstream fields onto ``columns``.
+    def _fetch_statement(self, statement: _Statement) -> pd.DataFrame:
+        """Fetch one statement and rename its upstream fields onto its columns.
 
         A report with no rows for this symbol is an empty frame; a transport or
         gateway failure raises rather than masquerading as "no data".
         """
-        rows = self.client.fetch_datacenter_report(report_name, self.symbol, list(rename_map))
+        rows = self.client.fetch_datacenter_report(
+            statement.report_name, self.symbol, list(statement.rename_map)
+        )
         if not rows:
-            logger.warning("No %s data found in API response for %s", report_name, self.symbol)
-            return normalize(pd.DataFrame(), columns)
+            logger.warning(
+                "No %s data found in API response for %s", statement.report_name, self.symbol
+            )
+            return normalize(pd.DataFrame(), statement.columns)
 
-        return normalize(pd.DataFrame(rows).rename(columns=rename_map), columns)
+        renamed = pd.DataFrame(rows).rename(columns=statement.rename_map)
+        return normalize(renamed, statement.columns)
