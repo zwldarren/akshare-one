@@ -1,8 +1,8 @@
 import logging
 
 import pandas as pd
-import requests
 
+from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.modules.cache import cached
 
 from ..registry import provider
@@ -11,8 +11,6 @@ from .base import FinancialDataProvider
 from .schema import BALANCE_COLUMNS, CASH_FLOW_COLUMNS, INCOME_COLUMNS, METRICS_COLUMNS
 
 logger = logging.getLogger(__name__)
-
-_HTTP_TIMEOUT = 15.0
 
 
 @provider("financial", "eastmoney_direct")
@@ -48,6 +46,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
 
     def __init__(self, symbol: str) -> None:
         super().__init__(symbol)
+        self.client = EastMoneyClient()
 
     def get_income_statement(self) -> pd.DataFrame:
         return self._fetch_income_statement()
@@ -91,110 +90,53 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
 
         return normalize(merged, METRICS_COLUMNS)
 
+    @cached("financial")
     def _fetch_balance_sheet(self) -> pd.DataFrame:
         """
         Get stock balance sheet data from East Money API
         """
-        try:
-            # API endpoint and parameters
-            api_url = "https://datacenter-web.eastmoney.com/api/data/v1/get"
-            params = {
-                "reportName": "RPT_DMSK_FN_BALANCE",
-                "filter": f'(SECURITY_CODE="{self.symbol}")',
-                "pageNumber": "1",
-                "pageSize": "1000",
-                "sortColumns": "REPORT_DATE",
-                "sortTypes": "-1",
-                "columns": ",".join(self._balance_sheet_rename_map.keys()),
-            }
+        return self._fetch_statement(
+            report_name="RPT_DMSK_FN_BALANCE",
+            rename_map=self._balance_sheet_rename_map,
+            columns=BALANCE_COLUMNS,
+        )
 
-            # Fetch data from API
-            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
-            response.raise_for_status()
-            data = response.json()
-
-            # Extract the actual data
-            if data.get("result") and data["result"].get("data"):
-                df = pd.DataFrame(data["result"]["data"])
-                df.rename(columns=self._balance_sheet_rename_map, inplace=True)
-                return normalize(df, BALANCE_COLUMNS)
-            else:
-                logger.warning("No balance sheet data found in API response for %s", self.symbol)
-                return normalize(pd.DataFrame(), BALANCE_COLUMNS)
-
-        except Exception as e:
-            logger.error("Error fetching balance sheet for %s: %s", self.symbol, str(e))
-            return normalize(pd.DataFrame(), BALANCE_COLUMNS)
-
+    @cached("financial")
     def _fetch_income_statement(self) -> pd.DataFrame:
         """
         Get stock income statement data from East Money API
         """
-        try:
-            # API endpoint and parameters
-            api_url = "https://datacenter-web.eastmoney.com/api/data/v1/get"
-            params = {
-                "reportName": "RPT_DMSK_FN_INCOME",
-                "filter": f'(SECURITY_CODE="{self.symbol}")',
-                "pageNumber": "1",
-                "pageSize": "1000",
-                "sortColumns": "REPORT_DATE",
-                "sortTypes": "-1",
-                "columns": ",".join(self._income_statement_rename_map.keys()),
-            }
+        return self._fetch_statement(
+            report_name="RPT_DMSK_FN_INCOME",
+            rename_map=self._income_statement_rename_map,
+            columns=INCOME_COLUMNS,
+        )
 
-            # Fetch data from API
-            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
-            response.raise_for_status()
-            data = response.json()
-
-            # Extract the actual data
-            if data.get("result") and data["result"].get("data"):
-                df = pd.DataFrame(data["result"]["data"])
-                df.rename(columns=self._income_statement_rename_map, inplace=True)
-                return normalize(df, INCOME_COLUMNS)
-            else:
-                logger.warning("No income statement data found in API response for %s", self.symbol)
-                return normalize(pd.DataFrame(), INCOME_COLUMNS)
-
-        except Exception as e:
-            logger.error("Error fetching income statement for %s: %s", self.symbol, str(e))
-            return normalize(pd.DataFrame(), INCOME_COLUMNS)
-
+    @cached("financial")
     def _fetch_cash_flow(self) -> pd.DataFrame:
         """
         Get stock cash flow statement data from East Money API
         """
-        try:
-            # API endpoint and parameters
-            api_url = "https://datacenter-web.eastmoney.com/api/data/v1/get"
-            params = {
-                "reportName": "RPT_DMSK_FN_CASHFLOW",
-                "filter": f'(SECURITY_CODE="{self.symbol}")',
-                "pageNumber": "1",
-                "pageSize": "1000",
-                "sortColumns": "REPORT_DATE",
-                "sortTypes": "-1",
-                "columns": ",".join(self._cash_flow_rename_map.keys()),
-            }
+        return self._fetch_statement(
+            report_name="RPT_DMSK_FN_CASHFLOW",
+            rename_map=self._cash_flow_rename_map,
+            columns=CASH_FLOW_COLUMNS,
+        )
 
-            # Fetch data from API
-            response = requests.get(api_url, params=params, timeout=_HTTP_TIMEOUT)
-            response.raise_for_status()
-            data = response.json()
+    def _fetch_statement(
+        self,
+        report_name: str,
+        rename_map: dict[str, str],
+        columns: tuple[str, ...],
+    ) -> pd.DataFrame:
+        """Fetch one statement and rename its upstream fields onto ``columns``.
 
-            # Extract the actual data
-            if data.get("result") and data["result"].get("data"):
-                df = pd.DataFrame(data["result"]["data"])
-                df.rename(columns=self._cash_flow_rename_map, inplace=True)
-                return normalize(df, CASH_FLOW_COLUMNS)
-            else:
-                logger.warning(
-                    "No cash flow statement data found in API response for %s",
-                    self.symbol,
-                )
-                return normalize(pd.DataFrame(), CASH_FLOW_COLUMNS)
+        A report with no rows for this symbol is an empty frame; a transport or
+        gateway failure raises rather than masquerading as "no data".
+        """
+        rows = self.client.fetch_datacenter_report(report_name, self.symbol, list(rename_map))
+        if not rows:
+            logger.warning("No %s data found in API response for %s", report_name, self.symbol)
+            return normalize(pd.DataFrame(), columns)
 
-        except Exception as e:
-            logger.error("Error fetching cash flow statement for %s: %s", self.symbol, str(e))
-            return normalize(pd.DataFrame(), CASH_FLOW_COLUMNS)
+        return normalize(pd.DataFrame(rows).rename(columns=rename_map), columns)

@@ -12,6 +12,9 @@ _QUOTE_HOSTS = (
     "push2delay.eastmoney.com",
 )
 _KLINE_HOSTS = ("push2his.eastmoney.com",)
+# Financial statements come from the datacenter API, which is a separate host
+# and returns a different envelope (``result.data``).
+_DATACENTER_HOSTS = ("datacenter-web.eastmoney.com",)
 _DEFAULT_TIMEOUT = 15.0
 
 
@@ -122,3 +125,38 @@ class EastMoneyClient:
             "secid": self._get_security_id(symbol),
         }
         return self._get_json("/api/qt/stock/get", params, _QUOTE_HOSTS)
+
+    def fetch_datacenter_report(
+        self, report_name: str, symbol: str, fields: list[str]
+    ) -> list[dict[str, Any]]:
+        """
+        Fetches one financial report body for a single stock.
+
+        Args:
+            report_name: EastMoney report id, e.g. ``"RPT_DMSK_FN_BALANCE"``.
+            symbol: Security code, e.g. ``"600000"``.
+            fields: Upstream field names to request, which is also the set of
+                keys each returned row carries.
+
+        Returns:
+            list[dict]: The report rows, newest first; empty when the report has
+            no rows for ``symbol``.
+
+        Raises:
+            ConnectionError: If every host fails. A transport or gateway failure
+                is deliberately not folded into the empty result, so a caller can
+                tell "this company has no such report" from "the request failed".
+        """
+        params = {
+            "reportName": report_name,
+            "filter": f'(SECURITY_CODE="{symbol}")',
+            "pageNumber": "1",
+            "pageSize": "1000",
+            "sortColumns": "REPORT_DATE",
+            "sortTypes": "-1",
+            "columns": ",".join(fields),
+        }
+        payload = self._get_json("/api/data/v1/get", params, _DATACENTER_HOSTS)
+        result = payload.get("result") or {}
+        rows = result.get("data") or []
+        return list(rows)

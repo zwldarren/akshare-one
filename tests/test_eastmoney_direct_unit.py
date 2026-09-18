@@ -15,6 +15,9 @@ import requests
 
 from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_basic_info
+from akshare_one.modules.cache import clear
+from akshare_one.modules.financial.eastmoney_direct import EastMoneyDirectFinancialReport
+from akshare_one.modules.financial.schema import BALANCE_COLUMNS, INCOME_COLUMNS
 from akshare_one.modules.info.eastmoney import EastmoneyInfo
 from akshare_one.modules.realtime.eastmoney import EastmoneyRealtime
 
@@ -218,3 +221,104 @@ class TestRealtimeProvider:
 
         mock_spot.assert_called_once()
         assert list(df["symbol"]) == ["600000"]
+
+
+class TestDatacenterReport:
+    """The datacenter envelope (`result.data`) is the client's to navigate."""
+
+    def _client(self, payload=None, error=None):
+        client = EastMoneyClient()
+
+        def fake_get(url, params=None, timeout=None):
+            if error is not None:
+                raise error
+            return _Response(payload=payload)
+
+        client.session.get = fake_get
+        return client
+
+    def test_returns_the_rows(self):
+        rows = [{"REPORT_DATE": "2025-12-31", "TOTAL_ASSETS": 1.0}]
+        client = self._client(payload={"result": {"data": rows}})
+
+        fetched = client.fetch_datacenter_report("RPT_DMSK_FN_BALANCE", "600000", ["REPORT_DATE"])
+
+        assert fetched == rows
+
+    def test_no_rows_is_not_an_error(self):
+        client = self._client(payload={"result": None})
+
+        assert client.fetch_datacenter_report("RPT_DMSK_FN_BALANCE", "600000", []) == []
+
+    def test_a_failed_request_is_reported(self):
+        client = self._client(error=requests.ConnectionError("boom"))
+
+        with pytest.raises(ConnectionError):
+            client.fetch_datacenter_report("RPT_DMSK_FN_BALANCE", "600000", ["REPORT_DATE"])
+
+
+class TestFinancialDirectProvider:
+    """Statements come from one request path, renamed onto the domain schema."""
+
+    _ROWS = {
+        "RPT_DMSK_FN_BALANCE": [
+            {"REPORT_DATE": "2025-12-31", "TOTAL_ASSETS": 100.0, "MONETARYFUNDS": 40.0}
+        ],
+        "RPT_DMSK_FN_INCOME": [{"REPORT_DATE": "2025-12-31", "TOTAL_OPERATE_INCOME": 10.0}],
+        "RPT_DMSK_FN_CASHFLOW": [{"REPORT_DATE": "2025-12-31", "NETCASH_OPERATE": 7.0}],
+    }
+
+    def _provider(self, requests_seen=None, error=None):
+        provider = EastMoneyDirectFinancialReport("600000")
+
+        def fake_get(url, params=None, timeout=None):
+            if requests_seen is not None:
+                requests_seen.append(params)
+            if error is not None:
+                raise error
+            return _Response(payload={"result": {"data": self._ROWS[params["reportName"]]}})
+
+        provider.client.session.get = fake_get
+        return provider
+
+    def test_statement_is_renamed_and_projected(self):
+        seen: list[dict] = []
+        provider = self._provider(requests_seen=seen)
+
+        df = provider.get_balance_sheet()
+
+        assert tuple(df.columns) == BALANCE_COLUMNS
+        assert df.iloc[0]["total_assets"] == 100.0
+        assert df.iloc[0]["cash_and_equivalents"] == 40.0
+        assert [params["reportName"] for params in seen] == ["RPT_DMSK_FN_BALANCE"]
+        assert set(seen[0]["columns"].split(",")) == set(
+            EastMoneyDirectFinancialReport._balance_sheet_rename_map
+        )
+
+    def test_a_missing_report_is_an_empty_frame_with_the_schema_columns(self):
+        provider = self._provider()
+        provider.client.session.get = lambda url, params=None, timeout=None: _Response(
+            payload={"result": {"data": []}}
+        )
+
+        df = provider.get_income_statement()
+
+        assert df.empty
+        assert tuple(df.columns) == INCOME_COLUMNS
+
+    def test_a_failed_request_does_not_look_like_no_data(self):
+        provider = self._provider(error=requests.ConnectionError("boom"))
+
+        with pytest.raises(ConnectionError):
+            provider.get_balance_sheet()
+
+    def test_metrics_reuse_the_cached_statements(self, monkeypatch):
+        monkeypatch.setenv("AKSHARE_ONE_CACHE_ENABLED", "true")
+        clear("financial")
+        seen: list[dict] = []
+        provider = self._provider(requests_seen=seen)
+
+        provider.get_balance_sheet()
+        provider.get_financial_metrics()
+
+        assert [params["reportName"] for params in seen] == list(self._ROWS)
