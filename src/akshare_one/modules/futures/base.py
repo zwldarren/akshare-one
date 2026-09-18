@@ -58,6 +58,16 @@ def parse_futures_symbol(symbol: str, contract: str = "main") -> tuple[str, str]
 
 
 class HistoricalFuturesDataProvider(ABC):
+    #: Parameters that change the answer; the cache key is built from these.
+    CACHE_PARAMS = (
+        "symbol",
+        "contract",
+        "interval",
+        "interval_multiplier",
+        "start_date",
+        "end_date",
+    )
+
     def __init__(
         self,
         symbol: str,
@@ -69,7 +79,7 @@ class HistoricalFuturesDataProvider(ABC):
     ) -> None:
         # Parse and normalize symbol/contract
         self.symbol, self.contract = parse_futures_symbol(symbol, contract)
-        self.interval = interval
+        self.interval = interval.lower()
         self.interval_multiplier = interval_multiplier
         self.start_date = start_date
         self.end_date = end_date
@@ -120,6 +130,9 @@ class HistoricalFuturesDataProvider(ABC):
 
 
 class RealtimeFuturesDataProvider(ABC):
+    #: Parameters that change the answer; the cache key is built from these.
+    CACHE_PARAMS = ("symbol", "contract")
+
     symbol: str | None
     contract: str | None
     original_symbol: str | None

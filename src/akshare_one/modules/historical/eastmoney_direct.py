@@ -5,7 +5,7 @@ import pandas as pd
 from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_kline_data, resample_historical_data
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import HistoricalDataProvider
 
@@ -18,15 +18,9 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
         super().__init__(*args, **kwargs)
         self.client = EastMoneyClient()
 
-    @cache(
-        "hist_data_cache",
-        key=lambda self: (
-            f"eastmoney_direct_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}"
-        ),
-    )
+    @cached("hist_data")
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches EastMoney historical market data directly from API"""
-        self.interval = self.interval.lower()
         self._validate_interval_params()
 
         try:

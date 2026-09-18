@@ -377,11 +377,11 @@ def get_options_realtime(
         raise ValueError("Must specify either 'symbol' or 'underlying_symbol'.")
 
     if symbol:
-        provider = resolve("options", source, underlying_symbol="")
-        return provider.get_options_realtime(symbol)
+        provider = resolve("options", source, symbol=symbol)
+        return provider.get_options_realtime()
     else:
         provider = resolve("options", source, underlying_symbol=underlying_symbol)
-        return provider.get_options_realtime("")
+        return provider.get_options_realtime()
 
 
 def get_options_expirations(
@@ -398,7 +398,7 @@ def get_options_expirations(
         list[str]: 可用的到期日列表
     """
     provider = resolve("options", source, underlying_symbol=underlying_symbol)
-    return provider.get_options_expirations(underlying_symbol)
+    return provider.get_options_expirations()
 
 
 def get_options_hist(
@@ -427,9 +427,8 @@ def get_options_hist(
         - open_interest: 持仓量
         - settlement: 结算价
     """
-    provider = resolve("options", source, underlying_symbol="")
+    provider = resolve("options", source, symbol=symbol)
     return provider.get_options_history(
-        symbol=symbol,
         start_date=start_date,
         end_date=end_date,
     )

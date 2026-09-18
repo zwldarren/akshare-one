@@ -1,10 +1,9 @@
 import logging
-from functools import lru_cache
 
 import akshare as ak
 import pandas as pd
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import HistoricalFuturesDataProvider, RealtimeFuturesDataProvider
 
@@ -43,13 +42,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         "ZCE": "CZCE",
     }
 
-    @cache(
-        "futures_hist_cache",
-        key=lambda self: (
-            f"sina_futures_hist_{self.symbol}_{self.contract}_{self.interval}_"
-            f"{self.interval_multiplier}"
-        ),
-    )
+    @cached("futures_hist")
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches Sina historical futures market data
 
@@ -66,7 +59,6 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
             - open_interest: 持仓量
             - settlement: 结算价
         """
-        self.interval = self.interval.lower()
         self._validate_interval_params(self.interval, self.interval_multiplier)
 
         try:
@@ -305,7 +297,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
     # differs per exchange ("合约代码" for SHFE/CZCE/CFFEX, "合约" for DCE).
     _CONTRACT_CODE_COLUMNS = ("合约代码", "合约", "symbol")
 
-    @cache("futures_contracts_cache", key=lambda self: "sina_futures_main_contracts")
+    @cached("futures_contracts")
     def get_main_contracts(self) -> pd.DataFrame:
         """Fetches the tradable variety list per exchange.
 
@@ -371,13 +363,15 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         return all_df[columns]
 
 
-@lru_cache(maxsize=1)
+@cached("futures_varieties")
 def _main_contract_table() -> pd.DataFrame:
     """Main-continuous contract table (symbol/exchange/name) for all varieties.
 
     Sina has no endpoint that returns the whole futures market at once, so this
-    uses akshare's main-contract listing and caches it for the process. The
-    first call issues one request per listed variety.
+    uses akshare's main-contract listing and caches it under the
+    ``futures_varieties`` namespace — its key is constant, so the table holds
+    one entry no matter how many provider instances ask for it. The first call
+    issues one request per listed variety.
     """
     empty = pd.DataFrame(columns=["symbol", "exchange", "name"])
     try:
@@ -388,13 +382,6 @@ def _main_contract_table() -> pd.DataFrame:
     if table is None or table.empty or "symbol" not in table.columns:
         return empty
     return table
-
-
-def _build_cache_key(provider: "SinaFuturesRealtime") -> str:
-    """Build cache key for SinaFuturesRealtime."""
-    symbol_part = provider.symbol if provider.symbol else "all"
-    contract_part = provider.contract if provider.contract else "all"
-    return f"sina_futures_{symbol_part}_{contract_part}"
 
 
 def _market_for(root: str) -> str:
@@ -412,7 +399,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             return f"{self.symbol}{self.contract}"
         return f"{self.symbol}0"
 
-    @cache("futures_realtime_cache", key=_build_cache_key)
+    @cached("futures_realtime")
     def get_current_data(self) -> pd.DataFrame:
         """Fetches realtime futures market data for one variety/contract.
 

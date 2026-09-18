@@ -4,6 +4,9 @@ import pandas as pd
 
 
 class InsiderDataProvider(ABC):
+    #: Parameters that change the answer; the cache key is built from these.
+    CACHE_PARAMS = ("symbol",)
+
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
 

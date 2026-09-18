@@ -1,7 +1,7 @@
 import akshare as ak
 import pandas as pd
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import HistoricalDataProvider
 
@@ -10,12 +10,7 @@ from .base import HistoricalDataProvider
 class SinaHistorical(HistoricalDataProvider):
     """Adapter for Sina historical stock data API"""
 
-    @cache(
-        "hist_data_cache",
-        key=lambda self: (
-            f"sina_hist_{self.symbol}_{self.interval}_{self.interval_multiplier}_{self.adjust}"
-        ),
-    )
+    @cached("hist_data")
     def get_hist_data(self) -> pd.DataFrame:
         """Fetches Sina historical market data
 
@@ -28,7 +23,6 @@ class SinaHistorical(HistoricalDataProvider):
                 - close
                 - volume
         """
-        self.interval = self.interval.lower()
         self._validate_interval_params(self.interval, self.interval_multiplier)
 
         try:

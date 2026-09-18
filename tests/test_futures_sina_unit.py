@@ -15,19 +15,21 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
+from akshare_one.modules.cache import clear
 from akshare_one.modules.futures.sina import (
     SinaFuturesHistorical,
     SinaFuturesRealtime,
-    _main_contract_table,
 )
 
 
 @pytest.fixture(autouse=True)
 def _disable_cache(monkeypatch):
     monkeypatch.setenv("AKSHARE_ONE_CACHE_ENABLED", "false")
-    _main_contract_table.cache_clear()
+    clear("futures_varieties")
+    clear("futures_contracts")
     yield
-    _main_contract_table.cache_clear()
+    clear("futures_varieties")
+    clear("futures_contracts")
 
 
 def _daily_frame() -> pd.DataFrame:

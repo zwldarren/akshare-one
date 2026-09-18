@@ -1,7 +1,7 @@
 import akshare as ak
 import pandas as pd
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import OptionsDataProvider
 
@@ -17,10 +17,7 @@ class SinaOptionsProvider(OptionsDataProvider):
     - option_sse_daily_sina: Get historical data for a specific option
     """
 
-    @cache(
-        "options_chain_cache",
-        key=lambda self: f"sina_options_chain_{self.underlying_symbol}",
-    )
+    @cached("options_chain")
     def get_options_chain(self) -> pd.DataFrame:
         """Fetches options chain data
 
@@ -105,15 +102,12 @@ class SinaOptionsProvider(OptionsDataProvider):
         except Exception as e:
             raise ValueError(f"Failed to fetch options chain: {str(e)}") from e
 
-    @cache(
-        "options_realtime_cache",
-        key=lambda self, symbol: f"sina_options_realtime_{symbol}",
-    )
-    def get_options_realtime(self, symbol: str) -> pd.DataFrame:
+    @cached("options_realtime")
+    def get_options_realtime(self) -> pd.DataFrame:
         """Fetches realtime options quote data
 
-        Args:
-            symbol: 期权代码 (e.g., '10010459'), 传空字符串则获取该标的下的所有期权
+        The option code comes from the constructor's ``symbol``; an empty one
+        fetches every option of the underlying.
 
         Returns:
             pd.DataFrame:
@@ -128,7 +122,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             - iv: 隐含波动率
         """
         try:
-            if not symbol:
+            if not self.symbol:
                 # Get all options for the underlying
                 # First get the option chain
                 chain_df = self.get_options_chain()
@@ -177,7 +171,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                 return pd.concat(all_realtime, ignore_index=True)
 
             # Get specific option data
-            raw_df = ak.option_sse_spot_price_sina(symbol=symbol)
+            raw_df = ak.option_sse_spot_price_sina(symbol=self.symbol)
 
             if raw_df.empty:
                 return pd.DataFrame(
@@ -194,20 +188,18 @@ class SinaOptionsProvider(OptionsDataProvider):
                     ]
                 )
 
-            return self._clean_single_option(raw_df, symbol)
+            return self._clean_single_option(raw_df, self.symbol)
         except Exception as e:
             raise ValueError(f"Failed to fetch options realtime data: {str(e)}") from e
 
-    def get_options_expirations(self, underlying_symbol: str) -> list[str]:
+    def get_options_expirations(self) -> list[str]:
         """Fetches available expiration dates for options
-
-        Args:
-            underlying_symbol: 标的代码
 
         Returns:
             list[str]: 可用的到期日列表
         """
         try:
+            underlying_symbol = self.underlying_symbol
             expirations = ak.option_sse_list_sina(symbol=underlying_symbol, exchange="null")
             if not expirations:
                 raise ValueError(f"No options found for underlying symbol: {underlying_symbol}")
@@ -235,14 +227,14 @@ class SinaOptionsProvider(OptionsDataProvider):
 
     def get_options_history(
         self,
-        symbol: str,
         start_date: str = "1970-01-01",
         end_date: str = "2030-12-31",
     ) -> pd.DataFrame:
         """Fetches options historical data
 
+        The option code comes from the constructor's ``symbol``.
+
         Args:
-            symbol: 期权代码
             start_date: 开始日期
             end_date: 结束日期
 
@@ -259,7 +251,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             - settlement: 结算价
         """
         try:
-            raw_df = ak.option_sse_daily_sina(symbol=symbol)
+            raw_df = ak.option_sse_daily_sina(symbol=self.symbol)
 
             if raw_df.empty:
                 return pd.DataFrame(
@@ -282,7 +274,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             end_dt = pd.to_datetime(end_date)
             raw_df = raw_df[(raw_df["日期"] >= start_dt) & (raw_df["日期"] <= end_dt)]
 
-            return self._clean_options_history(raw_df, symbol)
+            return self._clean_options_history(raw_df, self.symbol)
         except Exception as e:
             raise ValueError(f"Failed to fetch options history: {str(e)}") from e
 

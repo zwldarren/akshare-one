@@ -1,48 +1,123 @@
+"""Cache seam.
+
+This module owns the policy: which namespaces exist, how long each lives, and
+the ``AKSHARE_ONE_CACHE_ENABLED`` switch. Providers only declare what their
+cache key must contain, via ``CACHE_PARAMS`` on the domain's base class::
+
+    class HistoricalDataProvider(ABC):
+        CACHE_PARAMS = ("symbol", "interval", "start_date", "end_date", "adjust")
+
+    class SinaHistorical(HistoricalDataProvider):
+        @cached("hist_data")
+        def get_hist_data(self) -> pd.DataFrame:
+            ...
+
+A key is ``(method, declared parameter values, call arguments)``, so neither a
+constructor parameter that changes the answer nor a call argument can be
+dropped from the key by accident: whatever the provider declares in
+``CACHE_PARAMS`` is read off the instance, and everything passed to the call is
+included. The wrapper is built once, at import, and preserves the wrapped
+method's name and docstring.
+"""
+
+from __future__ import annotations
+
+import functools
+import inspect
 import os
 from collections.abc import Callable
 from typing import Any, TypeVar
 
-from cachetools import TTLCache, cached
+from cachetools import TTLCache
 
 F = TypeVar("F", bound=Callable[..., Any])
 
-# 缓存配置
-CACHE_CONFIG: dict[str, TTLCache[Any, Any]] = {
-    "hist_data_cache": TTLCache(maxsize=1000, ttl=3600),  # 历史数据缓存1小时
-    "realtime_cache": TTLCache(maxsize=500, ttl=60),  # 实时数据缓存1分钟
-    "news_cache": TTLCache(maxsize=500, ttl=3600),  # 新闻数据缓存1小时
-    "financial_cache": TTLCache(maxsize=500, ttl=86400),  # 财务数据缓存24小时
-    "info_cache": TTLCache(maxsize=500, ttl=86400),  # 信息数据缓存24小时
-    "futures_hist_cache": TTLCache(maxsize=1000, ttl=3600),  # 期货历史数据缓存1小时
-    "futures_contracts_cache": TTLCache(maxsize=10, ttl=86400),  # 期货合约信息缓存24小时
-    "futures_realtime_cache": TTLCache(maxsize=500, ttl=60),  # 期货实时数据缓存1分钟
-    "options_chain_cache": TTLCache(maxsize=1000, ttl=3600),  # 期权链数据缓存1小时
-    "options_realtime_cache": TTLCache(maxsize=500, ttl=60),  # 期权实时数据缓存1分钟
+#: ``namespace -> (maxsize, ttl seconds)``. The only place cache policy lives.
+NAMESPACES: dict[str, tuple[int, int]] = {
+    "hist_data": (1000, 3600),
+    "realtime": (500, 60),
+    "news": (500, 3600),
+    "financial": (500, 86400),
+    "info": (500, 86400),
+    "insider": (500, 86400),
+    "futures_hist": (1000, 3600),
+    "futures_contracts": (10, 86400),
+    "futures_varieties": (10, 86400),
+    "futures_realtime": (500, 60),
+    "options_chain": (1000, 3600),
+    "options_realtime": (500, 60),
 }
 
+_CACHES: dict[str, TTLCache[Any, Any]] = {
+    name: TTLCache(maxsize=maxsize, ttl=ttl) for name, (maxsize, ttl) in NAMESPACES.items()
+}
 
-def cache(cache_key: str, key: Callable[..., Any] | None = None) -> Callable[[F], F]:
+_TRUTHY = ("1", "true", "yes", "on")
+
+
+def enabled() -> bool:
+    """Whether caching is on, per ``AKSHARE_ONE_CACHE_ENABLED`` (default on)."""
+    return os.getenv("AKSHARE_ONE_CACHE_ENABLED", "true").lower() in _TRUTHY
+
+
+def clear(namespace: str | None = None) -> None:
+    """Drop every entry in one namespace, or in all of them."""
+    if namespace is None:
+        for cache in _CACHES.values():
+            cache.clear()
+        return
+    _CACHES[namespace].clear()
+
+
+def cached(namespace: str) -> Callable[[F], F]:
+    """Cache calls to the decorated method or function.
+
+    Args:
+        namespace: An entry of :data:`NAMESPACES`, resolved at import time.
+
+    Returns:
+        The decorator.
+
+    Raises:
+        KeyError: If the namespace is not declared in :data:`NAMESPACES` — at
+            import, not on first call.
+    """
+    if namespace not in _CACHES:
+        raise KeyError(f"Unknown cache namespace {namespace!r}; declared: {sorted(_CACHES)}")
+
+    cache = _CACHES[namespace]
+
     def decorator(func: F) -> F:
+        takes_receiver = next(iter(inspect.signature(func).parameters), None) == "self"
+
+        @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            cache_enabled = os.getenv("AKSHARE_ONE_CACHE_ENABLED", "true").lower() in (
-                "1",
-                "true",
-                "yes",
-                "on",
+            if not enabled():
+                return func(*args, **kwargs)
+
+            key = (
+                func.__qualname__,
+                _declared_params(args) if takes_receiver else (),
+                args[1:] if takes_receiver else args,
+                tuple(sorted(kwargs.items())),
             )
+            try:
+                return cache[key]
+            except KeyError:
+                value = func(*args, **kwargs)
+                cache[key] = value
+                return value
 
-            if cache_enabled:
-                if cache_key not in CACHE_CONFIG:
-                    raise KeyError(
-                        f"Cache configuration '{cache_key}' not found. "
-                        f"Available keys: {list(CACHE_CONFIG.keys())}"
-                    )
-                if key is not None:
-                    return cached(CACHE_CONFIG[cache_key], key=key)(func)(*args, **kwargs)
-                else:
-                    return cached(CACHE_CONFIG[cache_key])(func)(*args, **kwargs)
-            return func(*args, **kwargs)
-
-        return wrapper  # type: ignore
+        return wrapper  # type: ignore[return-value]
 
     return decorator
+
+
+def _declared_params(args: tuple[Any, ...]) -> tuple[Any, ...]:
+    """Read the values of the receiver's ``CACHE_PARAMS``, if it declares any."""
+    if not args:
+        return ()
+    declared = getattr(type(args[0]), "CACHE_PARAMS", None)
+    if declared is None:
+        return ()
+    return tuple(getattr(args[0], name) for name in declared)

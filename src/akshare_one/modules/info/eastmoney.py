@@ -3,7 +3,7 @@ import pandas as pd
 from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_basic_info
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import InfoDataProvider
 
@@ -21,10 +21,7 @@ class EastmoneyInfo(InfoDataProvider):
         super().__init__(symbol)
         self.client = EastMoneyClient()
 
-    @cache(
-        "info_cache",
-        key=lambda self: f"eastmoney_{self.symbol}",
-    )
+    @cached("info")
     def get_basic_info(self) -> pd.DataFrame:
         """获取东方财富个股信息
 

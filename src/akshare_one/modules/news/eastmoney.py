@@ -1,17 +1,14 @@
 import akshare as ak
 import pandas as pd
 
-from ..cache import cache
+from ..cache import cached
 from ..registry import provider
 from .base import NewsDataProvider
 
 
 @provider("news", "eastmoney")
 class EastMoneyNews(NewsDataProvider):
-    @cache(
-        "news_cache",
-        key=lambda self: f"eastmoney_news_{self.symbol}",
-    )
+    @cached("news")
     def get_news_data(self) -> pd.DataFrame:
         """获取东方财富个股新闻数据"""
         raw_df = ak.stock_news_em(symbol=self.symbol)
