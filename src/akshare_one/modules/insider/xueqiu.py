@@ -75,8 +75,10 @@ class XueQiuInsider(InsiderDataProvider):
         if "symbol" in df.columns:
             df["symbol"] = df["symbol"].str.replace(r"^[A-Z]{2}", "", regex=True)
 
-        # Add is_board_director column
-        df["is_board_director"] = df["title"].str.contains("董事")
+        # Add is_board_director column when the upstream row carries the title;
+        # the schema fills it with NaN otherwise.
+        if "title" in df.columns:
+            df["is_board_director"] = df["title"].str.contains("董事")
 
         # Calculate transaction_value
         if "transaction_shares" in df.columns and "transaction_price_per_share" in df.columns:

@@ -130,9 +130,10 @@ def test_a_source_that_supplies_part_of_the_schema_still_returns_every_column(
     assert df["industry"].isna().all()
 
 
-def _insider_frame(empty: bool) -> pd.DataFrame:
-    if empty:
-        return pd.DataFrame()
+def _insider_frame(partial: bool) -> pd.DataFrame:
+    """A frame as XueQiu sends it: full, or missing fields the schema promises."""
+    if partial:
+        return pd.DataFrame({"股票代码": ["SH600000"], "股票名称": ["浦发银行"]})
     return pd.DataFrame(
         {
             "股票代码": ["SH600000"],
@@ -148,17 +149,18 @@ def _insider_frame(empty: bool) -> pd.DataFrame:
     )
 
 
-@pytest.mark.parametrize("empty", [True, False], ids=["empty", "filled"])
-def test_an_empty_answer_has_the_same_columns_as_a_filled_one(
-    monkeypatch: pytest.MonkeyPatch, empty: bool
-) -> None:
-    """The bug the schema exists to fix: the two answers used to disagree."""
+@pytest.mark.parametrize("frame", ["empty", "partial", "filled"])
+def test_insider_answers_differ_only_in_rows(monkeypatch: pytest.MonkeyPatch, frame: str) -> None:
+    """Empty, partial and filled upstream answers all carry the declared columns."""
     monkeypatch.setattr(
         "akshare_one.modules.insider.xueqiu.ak.stock_inner_trade_xq",
-        lambda: _insider_frame(empty),
+        lambda: pd.DataFrame() if frame == "empty" else _insider_frame(partial=frame == "partial"),
     )
     clear("insider")
 
     df = get_inner_trade_data("600000")
     assert tuple(df.columns) == INSIDER_COLUMNS
-    assert df.empty is empty
+    assert df.empty is (frame == "empty")
+    if frame == "partial":
+        assert df["title"].isna().all()
+        assert df["is_board_director"].isna().all()
