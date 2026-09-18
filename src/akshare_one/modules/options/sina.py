@@ -3,7 +3,9 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import OptionsDataProvider
+from .schema import CHAIN_COLUMNS, HISTORY_COLUMNS, REALTIME_COLUMNS
 
 
 @provider("options", "sina")
@@ -98,7 +100,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             df["open_interest"] = None
             df["implied_volatility"] = None
 
-            return self._select_options_columns(df)
+            return normalize(df, CHAIN_COLUMNS)
         except Exception as e:
             raise ValueError(f"Failed to fetch options chain: {str(e)}") from e
 
@@ -127,19 +129,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                 # First get the option chain
                 chain_df = self.get_options_chain()
                 if chain_df.empty:
-                    return pd.DataFrame(
-                        columns=[
-                            "symbol",
-                            "underlying",
-                            "price",
-                            "change",
-                            "pct_change",
-                            "timestamp",
-                            "volume",
-                            "open_interest",
-                            "iv",
-                        ]
-                    )
+                    return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
                 # Get realtime data for each option
                 all_realtime = []
@@ -154,19 +144,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                         continue
 
                 if not all_realtime:
-                    return pd.DataFrame(
-                        columns=[
-                            "symbol",
-                            "underlying",
-                            "price",
-                            "change",
-                            "pct_change",
-                            "timestamp",
-                            "volume",
-                            "open_interest",
-                            "iv",
-                        ]
-                    )
+                    return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
                 return pd.concat(all_realtime, ignore_index=True)
 
@@ -174,19 +152,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             raw_df = ak.option_sse_spot_price_sina(symbol=self.symbol)
 
             if raw_df.empty:
-                return pd.DataFrame(
-                    columns=[
-                        "symbol",
-                        "underlying",
-                        "price",
-                        "change",
-                        "pct_change",
-                        "timestamp",
-                        "volume",
-                        "open_interest",
-                        "iv",
-                    ]
-                )
+                return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
             return self._clean_single_option(raw_df, self.symbol)
         except Exception as e:
@@ -254,19 +220,7 @@ class SinaOptionsProvider(OptionsDataProvider):
             raw_df = ak.option_sse_daily_sina(symbol=self.symbol)
 
             if raw_df.empty:
-                return pd.DataFrame(
-                    columns=[
-                        "timestamp",
-                        "symbol",
-                        "open",
-                        "high",
-                        "low",
-                        "close",
-                        "volume",
-                        "open_interest",
-                        "settlement",
-                    ]
-                )
+                return normalize(pd.DataFrame(), HISTORY_COLUMNS)
 
             # Filter by date range
             raw_df["日期"] = pd.to_datetime(raw_df["日期"])
@@ -288,19 +242,7 @@ class SinaOptionsProvider(OptionsDataProvider):
         We need to pivot this into a single row DataFrame
         """
         if raw_df.empty or "字段" not in raw_df.columns or "值" not in raw_df.columns:
-            return pd.DataFrame(
-                columns=[
-                    "symbol",
-                    "underlying",
-                    "price",
-                    "change",
-                    "pct_change",
-                    "timestamp",
-                    "volume",
-                    "open_interest",
-                    "iv",
-                ]
-            )
+            return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
         # Create a dictionary from the key-value pairs
         data_dict = dict(zip(raw_df["字段"], raw_df["值"], strict=True))
@@ -359,24 +301,7 @@ class SinaOptionsProvider(OptionsDataProvider):
         # Create DataFrame
         df = pd.DataFrame([result])
 
-        # Ensure all required columns exist
-        required_columns = [
-            "symbol",
-            "underlying",
-            "price",
-            "change",
-            "pct_change",
-            "timestamp",
-            "volume",
-            "open_interest",
-            "iv",
-        ]
-
-        for col in required_columns:
-            if col not in df.columns:
-                df[col] = None
-
-        return df[required_columns]
+        return normalize(df, REALTIME_COLUMNS)
 
     def _clean_options_history(self, raw_df: pd.DataFrame, symbol: str) -> pd.DataFrame:
         """Cleans and standardizes options historical data"""
@@ -415,37 +340,4 @@ class SinaOptionsProvider(OptionsDataProvider):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        return self._select_history_columns(df)
-
-    def _select_options_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Selects and orders the standard options chain columns"""
-        standard_columns = [
-            "underlying",
-            "symbol",
-            "name",
-            "option_type",
-            "strike",
-            "expiration",
-            "price",
-            "change",
-            "pct_change",
-            "volume",
-            "open_interest",
-            "implied_volatility",
-        ]
-        return df[[col for col in standard_columns if col in df.columns]]
-
-    def _select_history_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Selects and orders the standard options history columns"""
-        standard_columns = [
-            "timestamp",
-            "symbol",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-            "open_interest",
-            "settlement",
-        ]
-        return df[[col for col in standard_columns if col in df.columns]]
+        return normalize(df, HISTORY_COLUMNS)

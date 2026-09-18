@@ -68,6 +68,15 @@ pytest                    # 仅离线单元测试
 pytest --run-network      # 包含在线数据源测试
 ```
 
+## 🧩 公开接口
+
+对外公开的接口只有 `akshare_one` 与 `akshare_one.indicators`。
+`akshare_one.modules` 下的内容属于内部实现，可能不经过弃用流程直接变更。
+
+每个领域的输出列只在 `akshare_one.modules.<domain>.schema` 中声明一次。所有
+数据源返回的 DataFrame 都会投影到这些列上，因此文档中承诺的列始终存在
+——数据源无法提供时为 `NaN`——且顺序与文档一致。
+
 ## ⚠️ 数据源说明
 
 - 实时行情与基本信息会在多个东方财富域名间自动重试，因为

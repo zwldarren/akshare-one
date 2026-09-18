@@ -5,7 +5,9 @@ from akshare_one.eastmoney.utils import parse_realtime_data
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import RealtimeDataProvider
+from .schema import COLUMNS
 
 
 @provider("realtime", "eastmoney_direct")
@@ -25,7 +27,7 @@ class EastMoneyDirectRealtime(RealtimeDataProvider):
             if raw_data.get("rc") != 0:
                 raise ValueError(f"API returned error: {raw_data.get('msg')}")
 
-            df = parse_realtime_data(raw_data)
+            df = normalize(parse_realtime_data(raw_data), COLUMNS)
 
             # Ensure the output matches the base class definition
             if self.symbol:

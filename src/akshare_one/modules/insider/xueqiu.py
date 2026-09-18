@@ -3,8 +3,10 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from ..utils import convert_xieqiu_symbol
 from .base import InsiderDataProvider
+from .schema import COLUMNS
 
 
 @provider("insider", "xueqiu")
@@ -21,33 +23,21 @@ class XueQiuInsider(InsiderDataProvider):
         Returns:
             Standardized DataFrame with insider trading data:
             - symbol: 股票代码
-            - name: 股票名称
-            - change_date: 变动日期
-            - insider: 变动人
-            - shares_changed: 变动股数
-            - avg_price: 成交均价
-            - shares_after: 变动后持股数
+            - issuer: 股票名称
+            - name: 变动人
+            - title: 董监高职务
+            - transaction_date: 变动日期
+            - transaction_shares: 变动股数
+            - transaction_price_per_share: 成交均价
+            - shares_owned_after_transaction: 变动后持股数
             - relationship: 与董监高关系
-            - position: 董监高职务
+            - is_board_director: 是否为董事会成员
+            - transaction_value: 交易金额(变动股数*成交均价)
+            - shares_owned_before_transaction: 变动前持股数
         """
         raw_df = ak.stock_inner_trade_xq()
         if raw_df.empty:
-            return pd.DataFrame(
-                columns=[
-                    "symbol",
-                    "issuer",
-                    "name",
-                    "title",
-                    "transaction_date",
-                    "transaction_shares",
-                    "transaction_price_per_share",
-                    "shares_owned_after_transaction",
-                    "relationship",
-                    "is_board_director",
-                    "transaction_value",
-                    "shares_owned_before_transaction",
-                ]
-            )
+            return normalize(raw_df.iloc[0:0], COLUMNS)
 
         if self.symbol:
             xueqiu_symbol = convert_xieqiu_symbol(self.symbol)
@@ -119,4 +109,4 @@ class XueQiuInsider(InsiderDataProvider):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        return df.reset_index(drop=True)
+        return normalize(df.reset_index(drop=True), COLUMNS)

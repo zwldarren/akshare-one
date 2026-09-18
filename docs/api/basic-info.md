@@ -24,9 +24,9 @@ def get_basic_info(
 
 | 列名 | 类型 | 描述 |
 |------|------|------|
+| `price` | float | 最新价 |
 | `symbol` | str | 股票代码 |
 | `name` | str | 股票简称 |
-| `price` | float | 最新价 |
 | `total_shares` | float | 总股本 (万股) |
 | `float_shares` | float | 流通股 (万股) |
 | `total_market_cap` | float | 总市值 (亿元) |

@@ -40,12 +40,7 @@ class HistoricalDataProvider(ABC):
         """Fetches historical market data
 
         Returns:
-            pd.DataFrame:
-            - timestamp
-            - open
-            - high
-            - low
-            - close
-            - volume
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.historical.schema`.
         """
         pass

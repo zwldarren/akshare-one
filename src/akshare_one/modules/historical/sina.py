@@ -3,7 +3,9 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import HistoricalDataProvider
+from .schema import COLUMNS
 
 
 @provider("historical", "sina")
@@ -201,7 +203,7 @@ class SinaHistorical(HistoricalDataProvider):
         if "timestamp" in df.columns:
             df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.tz_localize("Asia/Shanghai")
 
-        return self._select_standard_columns(df)
+        return normalize(df, COLUMNS)
 
     def _clean_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans and standardizes daily and higher-level data"""
@@ -222,16 +224,4 @@ class SinaHistorical(HistoricalDataProvider):
         if "volume" in df.columns:
             df["volume"] = df["volume"].astype("int64")
 
-        return self._select_standard_columns(df)
-
-    def _select_standard_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Selects and orders the standard output columns"""
-        standard_columns = [
-            "timestamp",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-        ]
-        return df[[col for col in standard_columns if col in df.columns]]
+        return normalize(df, COLUMNS)

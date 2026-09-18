@@ -12,7 +12,7 @@ AKShare One 提供多个函数用于获取上市公司财务数据：
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | `symbol` | str | 是 | - | 股票代码 (如: "600000") |
-| `source` | str | 否 | "sina" | 数据源 ("sina", "eastmoney_direct") |
+| `source` | str | 否 | 见各函数签名 | 数据源 ("sina", "eastmoney_direct")；三张报表默认 `sina`，`get_financial_metrics` 默认 `eastmoney_direct` |
 
 ## 资产负债表
 
@@ -23,7 +23,7 @@ AKShare One 提供多个函数用于获取上市公司财务数据：
 ```python
 def get_balance_sheet(
     symbol: str,
-    source: Literal["sina"] = "sina"
+    source: Literal["sina", "eastmoney_direct"] = "sina"
 ) -> pd.DataFrame
 ```
 
@@ -77,7 +77,7 @@ def get_balance_sheet(
 ```python
 def get_income_statement(
     symbol: str,
-    source: Literal["sina"] = "sina"
+    source: Literal["sina", "eastmoney_direct"] = "sina"
 ) -> pd.DataFrame
 ```
 
@@ -120,7 +120,7 @@ def get_income_statement(
 ```python
 def get_cash_flow(
     symbol: str,
-    source: Literal["sina"] = "sina"
+    source: Literal["sina", "eastmoney_direct"] = "sina"
 ) -> pd.DataFrame
 ```
 
@@ -168,7 +168,7 @@ def get_cash_flow(
 ```python
 def get_financial_metrics(
     symbol: str,
-    source: Literal["eastmoney_direct"] = "eastmoney_direct"
+    source: Literal["sina", "eastmoney_direct"] = "eastmoney_direct"
 ) -> pd.DataFrame
 ```
 

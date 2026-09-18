@@ -7,7 +7,9 @@ from akshare_one.eastmoney.utils import parse_kline_data, resample_historical_da
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import HistoricalDataProvider
+from .schema import COLUMNS
 
 
 @provider("historical", "eastmoney_direct")
@@ -44,9 +46,9 @@ class EastMoneyDirectHistorical(HistoricalDataProvider):
 
             df = parse_kline_data(raw_data)
 
-            df = resample_historical_data(df, self.interval, self.interval_multiplier)
+            resampled = resample_historical_data(df, self.interval, self.interval_multiplier)
 
-            return df
+            return normalize(resampled, COLUMNS)
 
         except Exception as e:
             raise ValueError(f"Failed to fetch historical data for {self.symbol}: {e}") from e

@@ -15,12 +15,7 @@ class NewsDataProvider(ABC):
         """Fetches news data for given symbol
 
         Returns:
-            pd.DataFrame:
-            - keyword: 关键词
-            - title: 新闻标题
-            - content: 新闻内容
-            - publish_time: 发布时间
-            - source: 文章来源
-            - url: 新闻链接
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.news.schema`.
         """
         pass

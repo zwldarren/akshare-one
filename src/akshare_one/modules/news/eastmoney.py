@@ -3,7 +3,9 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import NewsDataProvider
+from .schema import COLUMNS
 
 
 @provider("news", "eastmoney")
@@ -29,12 +31,4 @@ class EastMoneyNews(NewsDataProvider):
 
         df["publish_time"] = pd.to_datetime(df["publish_time"]).dt.tz_localize("Asia/Shanghai")
 
-        required_columns = [
-            "keyword",
-            "title",
-            "content",
-            "publish_time",
-            "source",
-            "url",
-        ]
-        return df[required_columns]
+        return normalize(df, COLUMNS)

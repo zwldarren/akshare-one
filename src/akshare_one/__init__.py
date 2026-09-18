@@ -272,6 +272,7 @@ def get_futures_realtime_data(
     Returns:
         pd.DataFrame:
         - symbol: 期货代码
+        - symbol_root: 品种代码
         - contract: 合约代码
         - price: 最新价
         - change: 涨跌额
@@ -284,6 +285,7 @@ def get_futures_realtime_data(
         - low: 最低
         - prev_settlement: 昨结算
         - settlement: 最新结算价
+        - name: 合约名称
     """
     provider = resolve("futures", source, capability="realtime", symbol=symbol or "")
     if symbol:

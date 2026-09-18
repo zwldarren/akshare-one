@@ -6,7 +6,9 @@ from akshare_one.eastmoney.utils import parse_realtime_data
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import RealtimeDataProvider
+from .schema import COLUMNS
 
 
 @provider("realtime", "eastmoney")
@@ -44,7 +46,7 @@ class EastmoneyRealtime(RealtimeDataProvider):
             raw = self.client.fetch_realtime_quote(self.symbol)
             if raw.get("rc") != 0 or not raw.get("data"):
                 raise ValueError(f"No realtime data found for symbol {self.symbol}")
-            return parse_realtime_data(raw)
+            return normalize(parse_realtime_data(raw), COLUMNS)
 
         raw_df = ak.stock_zh_a_spot_em()
         return self._clean_spot_data(raw_df)
@@ -68,17 +70,4 @@ class EastmoneyRealtime(RealtimeDataProvider):
 
         df = df.assign(timestamp=lambda x: pd.Timestamp.now(tz="Asia/Shanghai"))
 
-        required_columns = [
-            "symbol",
-            "price",
-            "change",
-            "pct_change",
-            "timestamp",
-            "volume",
-            "amount",
-            "open",
-            "high",
-            "low",
-            "prev_close",
-        ]
-        return df[required_columns]
+        return normalize(df, COLUMNS)

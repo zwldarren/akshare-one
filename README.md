@@ -70,6 +70,17 @@ pytest                    # offline unit tests only
 pytest --run-network      # include live-provider tests
 ```
 
+## 🧩 Public interface
+
+The public surface is `akshare_one` and `akshare_one.indicators`. Everything
+under `akshare_one.modules` is internal and may change without a deprecation
+cycle.
+
+Each domain's output columns are declared in exactly one place,
+`akshare_one.modules.<domain>.schema`. Every provider's frame is projected onto
+those columns, so a documented column is always present — `NaN` when the
+selected source cannot supply it — and always in the documented order.
+
 ## ⚠️ Data source notes
 
 - Realtime quotes and basic info fall back across several EastMoney hosts,

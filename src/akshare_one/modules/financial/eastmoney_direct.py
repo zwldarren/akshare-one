@@ -6,7 +6,9 @@ import requests
 from akshare_one.modules.cache import cached
 
 from ..registry import provider
+from ..schema import normalize
 from .base import FinancialDataProvider
+from .schema import BALANCE_COLUMNS, CASH_FLOW_COLUMNS, INCOME_COLUMNS, METRICS_COLUMNS
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +66,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         cash_flow = self._fetch_cash_flow()
 
         if balance_sheet.empty and income_statement.empty and cash_flow.empty:
-            return pd.DataFrame()
+            return normalize(pd.DataFrame(), METRICS_COLUMNS)
 
         # Start with the non-empty DataFrame
         if not balance_sheet.empty:
@@ -87,7 +89,7 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
         # Sort by report_date in descending order (most recent first)
         merged = merged.sort_values("report_date", ascending=False).reset_index(drop=True)
 
-        return merged
+        return normalize(merged, METRICS_COLUMNS)
 
     def _fetch_balance_sheet(self) -> pd.DataFrame:
         """
@@ -115,14 +117,14 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             if data.get("result") and data["result"].get("data"):
                 df = pd.DataFrame(data["result"]["data"])
                 df.rename(columns=self._balance_sheet_rename_map, inplace=True)
-                return df
+                return normalize(df, BALANCE_COLUMNS)
             else:
                 logger.warning("No balance sheet data found in API response for %s", self.symbol)
-                return pd.DataFrame()
+                return normalize(pd.DataFrame(), BALANCE_COLUMNS)
 
         except Exception as e:
             logger.error("Error fetching balance sheet for %s: %s", self.symbol, str(e))
-            return pd.DataFrame()
+            return normalize(pd.DataFrame(), BALANCE_COLUMNS)
 
     def _fetch_income_statement(self) -> pd.DataFrame:
         """
@@ -150,14 +152,14 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             if data.get("result") and data["result"].get("data"):
                 df = pd.DataFrame(data["result"]["data"])
                 df.rename(columns=self._income_statement_rename_map, inplace=True)
-                return df
+                return normalize(df, INCOME_COLUMNS)
             else:
                 logger.warning("No income statement data found in API response for %s", self.symbol)
-                return pd.DataFrame()
+                return normalize(pd.DataFrame(), INCOME_COLUMNS)
 
         except Exception as e:
             logger.error("Error fetching income statement for %s: %s", self.symbol, str(e))
-            return pd.DataFrame()
+            return normalize(pd.DataFrame(), INCOME_COLUMNS)
 
     def _fetch_cash_flow(self) -> pd.DataFrame:
         """
@@ -185,14 +187,14 @@ class EastMoneyDirectFinancialReport(FinancialDataProvider):
             if data.get("result") and data["result"].get("data"):
                 df = pd.DataFrame(data["result"]["data"])
                 df.rename(columns=self._cash_flow_rename_map, inplace=True)
-                return df
+                return normalize(df, CASH_FLOW_COLUMNS)
             else:
                 logger.warning(
                     "No cash flow statement data found in API response for %s",
                     self.symbol,
                 )
-                return pd.DataFrame()
+                return normalize(pd.DataFrame(), CASH_FLOW_COLUMNS)
 
         except Exception as e:
             logger.error("Error fetching cash flow statement for %s: %s", self.symbol, str(e))
-            return pd.DataFrame()
+            return normalize(pd.DataFrame(), CASH_FLOW_COLUMNS)

@@ -9,7 +9,7 @@ def parse_kline_data(data: dict[str, Any]) -> pd.DataFrame:
     """
     klines = data.get("data", {}).get("klines", [])
     if not klines:
-        return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
+        return pd.DataFrame()
 
     records = []
     for kline in klines:
@@ -30,7 +30,6 @@ def parse_kline_data(data: dict[str, Any]) -> pd.DataFrame:
     if not df.empty:
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         df["timestamp"] = df["timestamp"].dt.tz_localize("Asia/Shanghai")
-        df = df[["timestamp", "open", "high", "low", "close", "volume"]]
     return df
 
 
@@ -62,26 +61,13 @@ def parse_realtime_data(data: dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-_BASIC_INFO_COLUMNS = [
-    "price",
-    "symbol",
-    "name",
-    "total_shares",
-    "float_shares",
-    "total_market_cap",
-    "float_market_cap",
-    "industry",
-    "listing_date",
-]
-
-
 def parse_basic_info(data: dict[str, Any]) -> pd.DataFrame:
     """
     Parses stock basic info from the EastMoney quote response.
     """
     info = data.get("data")
     if not info:
-        return pd.DataFrame(columns=_BASIC_INFO_COLUMNS)
+        return pd.DataFrame()
 
     df = pd.DataFrame(
         [
@@ -117,7 +103,7 @@ def parse_basic_info(data: dict[str, Any]) -> pd.DataFrame:
     for col in numeric_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    return df[_BASIC_INFO_COLUMNS]
+    return df
 
 
 def resample_historical_data(df: pd.DataFrame, interval: str, multiplier: int) -> pd.DataFrame:

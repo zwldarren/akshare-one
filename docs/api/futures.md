@@ -98,6 +98,7 @@ def get_futures_realtime_data(
 | 列名 | 类型 | 描述 |
 |------|------|------|
 | `symbol` | str | 期货代码 (包含合约) |
+| `symbol_root` | str | 品种代码 (不含合约月份) |
 | `contract` | str | 合约代码 |
 | `price` | float | 最新价 |
 | `change` | float | 涨跌额 |
@@ -110,6 +111,7 @@ def get_futures_realtime_data(
 | `low` | float | 最低 |
 | `prev_settlement` | float | 昨结算 |
 | `settlement` | float | 最新结算价 |
+| `name` | str | 合约名称 (上游返回时) |
 
 ### 使用示例
 

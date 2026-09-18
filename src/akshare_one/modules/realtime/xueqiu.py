@@ -3,8 +3,10 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from ..utils import convert_xieqiu_symbol
 from .base import RealtimeDataProvider
+from .schema import COLUMNS
 
 
 @provider("realtime", "xueqiu")
@@ -73,4 +75,4 @@ class XueQiuRealtime(RealtimeDataProvider):
             "prev_close": _get_value("昨收"),
         }
 
-        return pd.DataFrame([data])
+        return normalize(pd.DataFrame([data]), COLUMNS)

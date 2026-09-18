@@ -5,7 +5,9 @@ from akshare_one.eastmoney.utils import parse_basic_info
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import InfoDataProvider
+from .schema import COLUMNS
 
 
 @provider("info", "eastmoney")
@@ -45,4 +47,4 @@ class EastmoneyInfo(InfoDataProvider):
         if raw.get("rc") != 0 or not raw.get("data"):
             raise ValueError(f"No basic info found for symbol {self.symbol}")
 
-        return parse_basic_info(raw)
+        return normalize(parse_basic_info(raw), COLUMNS)

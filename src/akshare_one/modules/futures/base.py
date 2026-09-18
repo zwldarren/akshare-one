@@ -101,17 +101,8 @@ class HistoricalFuturesDataProvider(ABC):
         """Fetches historical futures market data
 
         Returns:
-            pd.DataFrame:
-            - timestamp: 时间戳
-            - symbol: 期货代码
-            - contract: 合约代码
-            - open: 开盘价
-            - high: 最高价
-            - low: 最低价
-            - close: 收盘价
-            - volume: 成交量
-            - open_interest: 持仓量
-            - settlement: 结算价
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.futures.schema`.
         """
         pass
 
@@ -120,11 +111,8 @@ class HistoricalFuturesDataProvider(ABC):
         """Fetches main contract list
 
         Returns:
-            pd.DataFrame:
-            - symbol: 期货代码
-            - name: 期货名称
-            - contract: 主力合约代码
-            - exchange: 交易所
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.futures.schema`.
         """
         pass
 
@@ -159,20 +147,8 @@ class RealtimeFuturesDataProvider(ABC):
         """Fetches realtime futures market data
 
         Returns:
-            pd.DataFrame:
-            - symbol: 期货代码
-            - contract: 合约代码
-            - price: 最新价
-            - change: 涨跌额
-            - pct_change: 涨跌幅(%)
-            - timestamp: 时间戳
-            - volume: 成交量
-            - open_interest: 持仓量
-            - open: 今开
-            - high: 最高
-            - low: 最低
-            - prev_settlement: 昨结算
-            - settlement: 最新结算价
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.futures.schema`.
         """
         pass
 
@@ -181,6 +157,7 @@ class RealtimeFuturesDataProvider(ABC):
         """Fetches all futures quotes
 
         Returns:
-            pd.DataFrame: All futures market quotes
+            pd.DataFrame: the domain's declared columns
+                (:data:`akshare_one.modules.futures.schema.REALTIME_COLUMNS`).
         """
         pass

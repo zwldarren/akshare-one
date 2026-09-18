@@ -3,7 +3,9 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import FinancialDataProvider
+from .schema import BALANCE_COLUMNS, CASH_FLOW_COLUMNS, INCOME_COLUMNS, METRICS_COLUMNS
 
 
 @provider("financial", "sina")
@@ -92,7 +94,7 @@ class SinaFinancialReport(FinancialDataProvider):
             raw_df = raw_df.rename(columns={"报告日": "report_date"})
             raw_df["report_date"] = pd.to_datetime(raw_df["report_date"], format="%Y%m%d")
 
-        # Define column mappings and required columns
+        # Define column mappings
         column_mapping = {
             "币种": "currency",
             "经营活动产生的现金流量净额": "net_cash_flow_from_operations",
@@ -125,8 +127,7 @@ class SinaFinancialReport(FinancialDataProvider):
             "现金等价物的期末余额": "ending_cash_equivalents",
         }
 
-        required_columns = ["report_date"] + list(column_mapping.values())
-        return raw_df.rename(columns=column_mapping).reindex(columns=required_columns)
+        return normalize(raw_df.rename(columns=column_mapping), CASH_FLOW_COLUMNS)
 
     def _clean_balance_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化资产负债表数据
@@ -181,46 +182,6 @@ class SinaFinancialReport(FinancialDataProvider):
             }
         )
 
-        # Select only required columns
-        required_columns = [
-            "report_date",
-            "currency",
-            "total_assets",
-            "current_assets",
-            "cash_and_equivalents",
-            "inventory",
-            "current_investments",
-            "trade_and_non_trade_receivables",
-            "non_current_assets",
-            "property_plant_and_equipment",
-            "goodwill_and_intangible_assets",
-            "investments",
-            "non_current_investments",
-            "outstanding_shares",
-            "tax_assets",
-            "total_liabilities",
-            "current_liabilities",
-            "current_debt",
-            "trade_and_non_trade_payables",
-            "deferred_revenue",
-            "deposit_liabilities",
-            "non_current_liabilities",
-            "non_current_debt",
-            "tax_liabilities",
-            "shareholders_equity",
-            "retained_earnings",
-            "accumulated_other_comprehensive_income",
-            "accounts_receivable",
-            "prepayments",
-            "other_receivables",
-            "fixed_assets_net",
-            "construction_in_progress",
-            "capital_reserve",
-            "current_ratio",
-            "debt_to_assets",
-            "minority_interest",
-        ]
-
         # Calculate financial ratios using vectorized operations
         cols = ["current_debt", "non_current_debt"]
         raw_df[cols] = raw_df[cols].apply(pd.to_numeric, errors="coerce")
@@ -250,7 +211,7 @@ class SinaFinancialReport(FinancialDataProvider):
         )
         raw_df = raw_df.join(ratios.where(cond))
 
-        return raw_df.reindex(columns=required_columns)
+        return normalize(raw_df, BALANCE_COLUMNS)
 
     def _clean_income_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """清理和标准化利润表数据
@@ -266,7 +227,7 @@ class SinaFinancialReport(FinancialDataProvider):
             raw_df = raw_df.rename(columns={"报告日": "report_date"})
             raw_df["report_date"] = pd.to_datetime(raw_df["report_date"], format="%Y%m%d")
 
-        # Define column mappings and required columns
+        # Define column mappings
         column_mapping = {
             "币种": "currency",
             "营业总收入": "revenue",
@@ -294,8 +255,7 @@ class SinaFinancialReport(FinancialDataProvider):
             "综合收益总额": "total_comprehensive_income",
         }
 
-        required_columns = ["report_date"] + list(column_mapping.values())
-        return raw_df.rename(columns=column_mapping).reindex(columns=required_columns)
+        return normalize(raw_df.rename(columns=column_mapping), INCOME_COLUMNS)
 
     @cached("financial")
     def get_financial_metrics(self) -> pd.DataFrame:
@@ -338,4 +298,4 @@ class SinaFinancialReport(FinancialDataProvider):
         if "report_date" in merged.columns:
             merged = merged.sort_values("report_date", ascending=False).reset_index(drop=True)
 
-        return merged
+        return normalize(merged, METRICS_COLUMNS)

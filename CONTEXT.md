@@ -16,7 +16,8 @@ realtime, info, news, financial, insider, futures, options.
 Only the futures domain has more than one: historical and realtime.
 
 **Schema** — the columns, their order, and the types a domain's DataFrame
-promises, independent of which source produced it.
+promises, independent of which source produced it. A column in the schema is
+present in every answer, `NaN` when the selected source cannot supply it.
 
 **Indicator** — a pure calculation over a caller-supplied OHLCV frame. Not a
 domain: no source, no network, no schema of its own.

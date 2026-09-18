@@ -138,9 +138,14 @@ class TestParseBasicInfo:
         assert row["listing_date"] == pd.Timestamp("1999-11-10")
 
     def test_empty_payload(self):
+        """The parser does not own the column contract; the provider projects it.
+
+        The provider-level guarantee that a partial or empty payload still
+        returns every declared column is asserted in ``tests/test_schema.py``.
+        """
         df = parse_basic_info({"rc": 0, "data": None})
         assert df.empty
-        assert "symbol" in df.columns
+        assert list(df.columns) == []
 
 
 class TestInfoProvider:

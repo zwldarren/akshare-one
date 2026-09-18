@@ -5,30 +5,14 @@ import pandas as pd
 
 from ..cache import cached
 from ..registry import provider
+from ..schema import normalize
 from .base import HistoricalFuturesDataProvider, RealtimeFuturesDataProvider
+from .schema import CONTRACT_COLUMNS, HIST_COLUMNS, REALTIME_COLUMNS
 
 logger = logging.getLogger(__name__)
 
 # Roots whose quotes Sina serves with the non-commodity column layout.
 _CFFEX_ROOTS = frozenset({"IF", "IH", "IC", "IM", "T", "TF", "TS", "TL"})
-
-# Columns every realtime futures frame is expected to expose.
-_REALTIME_COLUMNS = [
-    "symbol",
-    "symbol_root",
-    "contract",
-    "price",
-    "change",
-    "pct_change",
-    "timestamp",
-    "volume",
-    "open_interest",
-    "open",
-    "high",
-    "low",
-    "prev_settlement",
-    "settlement",
-]
 
 
 @provider("futures", "sina", capability="historical")
@@ -238,7 +222,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         df["contract"] = self.contract
         df["settlement"] = df.get("close")
 
-        return self._select_standard_columns(df)
+        return normalize(df, HIST_COLUMNS).reset_index(drop=True)
 
     def _clean_daily_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans and standardizes daily data"""
@@ -273,25 +257,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         if "open_interest" in df.columns:
             df["open_interest"] = df["open_interest"].astype("int64")
 
-        return self._select_standard_columns(df)
-
-    def _select_standard_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Selects and orders the standard output columns"""
-        standard_columns = [
-            "timestamp",
-            "symbol",
-            "contract",
-            "open",
-            "high",
-            "low",
-            "close",
-            "volume",
-            "open_interest",
-            "settlement",
-        ]
-        result = df[[col for col in standard_columns if col in df.columns]]
-        # Reset index to avoid displaying the original DataFrame index
-        return result.reset_index(drop=True)
+        return normalize(df, HIST_COLUMNS).reset_index(drop=True)
 
     # Column holding the contract code in akshare's exchange listings. The name
     # differs per exchange ("合约代码" for SHFE/CZCE/CFFEX, "合约" for DCE).
@@ -327,7 +293,6 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
             "CFFEX": ak.futures_contract_info_cffex,
         }
 
-        columns = ["symbol", "name", "contract", "exchange"]
         frames = []
         for exchange_code, fetch in exchanges.items():
             try:
@@ -353,14 +318,14 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
             frames.append(pd.DataFrame({"symbol": varieties, "exchange": exchange_code}))
 
         if not frames:
-            return pd.DataFrame(columns=columns)
+            return normalize(pd.DataFrame(), CONTRACT_COLUMNS)
 
         all_df = pd.concat(frames, ignore_index=True).dropna(subset=["symbol"])
         all_df = all_df[all_df["symbol"] != ""]
         all_df = all_df.drop_duplicates(subset=["symbol", "exchange"]).reset_index(drop=True)
         all_df["name"] = all_df["symbol"]
         all_df["contract"] = all_df["symbol"]
-        return all_df[columns]
+        return normalize(all_df, CONTRACT_COLUMNS)
 
 
 @cached("futures_varieties")
@@ -373,7 +338,7 @@ def _main_contract_table() -> pd.DataFrame:
     one entry no matter how many provider instances ask for it. The first call
     issues one request per listed variety.
     """
-    empty = pd.DataFrame(columns=["symbol", "exchange", "name"])
+    empty = normalize(pd.DataFrame(), CONTRACT_COLUMNS)
     try:
         table = ak.futures_display_main_sina()
     except Exception as exc:  # pragma: no cover - network dependent
@@ -446,7 +411,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
         """
         table = _main_contract_table()
         if table.empty:
-            return pd.DataFrame(columns=_REALTIME_COLUMNS)
+            return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
         commodities = [
             str(code)
@@ -454,7 +419,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             if str(code).strip().rstrip("0123456789").upper() not in _CFFEX_ROOTS
         ]
         if not commodities:
-            return pd.DataFrame(columns=_REALTIME_COLUMNS)
+            return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
         raw_df = ak.futures_zh_spot(
             symbol=",".join(commodities),
@@ -474,7 +439,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
     def _attach_contract_identity(df: pd.DataFrame, contracts: list[str]) -> pd.DataFrame:
         """Derive ``symbol``/``symbol_root``/``contract`` from requested codes."""
         if df.empty:
-            return df.reset_index(drop=True)
+            return normalize(df, REALTIME_COLUMNS)
 
         df = df.reset_index(drop=True)
         if contracts and len(contracts) == len(df):
@@ -486,7 +451,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             df["symbol_root"] = symbols.str.extract(r"^([A-Z]+)", expand=False)
             df["contract"] = symbols.str.extract(r"([0-9]+)$", expand=False).fillna("")
 
-        return df[[col for col in _REALTIME_COLUMNS if col in df.columns]]
+        return normalize(df, REALTIME_COLUMNS)
 
     def _clean_spot_data(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Cleans and standardizes realtime futures data.
@@ -592,4 +557,4 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
 
         # Keep 'name' when present so callers can map the Chinese contract
         # name back to a code (futures_zh_spot does not return the code).
-        return df[[col for col in [*_REALTIME_COLUMNS, "name"] if col in df.columns]]
+        return normalize(df, REALTIME_COLUMNS)

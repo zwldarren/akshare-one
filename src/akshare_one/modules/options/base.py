@@ -28,19 +28,8 @@ class OptionsDataProvider(ABC):
         """Fetches options chain data
 
         Returns:
-            pd.DataFrame:
-            - underlying: 标的代码
-            - symbol: 期权代码
-            - name: 期权名称
-            - option_type: 期权类型 (call/put)
-            - strike: 行权价
-            - expiration: 到期日
-            - price: 最新价
-            - change: 涨跌额
-            - pct_change: 涨跌幅(%)
-            - volume: 成交量
-            - open_interest: 持仓量
-            - implied_volatility: 隐含波动率
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.options.schema`.
         """
         pass
 
@@ -52,16 +41,8 @@ class OptionsDataProvider(ABC):
         means every option of ``underlying_symbol``.
 
         Returns:
-            pd.DataFrame:
-            - symbol: 期权代码
-            - underlying: 标的代码
-            - price: 最新价
-            - change: 涨跌额
-            - pct_change: 涨跌幅(%)
-            - timestamp: 时间戳
-            - volume: 成交量
-            - open_interest: 持仓量
-            - iv: 隐含波动率
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.options.schema`.
         """
         pass
 
@@ -89,15 +70,7 @@ class OptionsDataProvider(ABC):
             end_date: 结束日期
 
         Returns:
-            pd.DataFrame:
-            - timestamp: 时间戳
-            - symbol: 期权代码
-            - open: 开盘价
-            - high: 最高价
-            - low: 最低价
-            - close: 收盘价
-            - volume: 成交量
-            - open_interest: 持仓量
-            - settlement: 结算价
+            pd.DataFrame: the domain's declared columns, see
+                :mod:`akshare_one.modules.options.schema`.
         """
         pass
