@@ -2,10 +2,12 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from ..utils import convert_xieqiu_symbol
 from .base import RealtimeDataProvider
 
 
+@provider("realtime", "xueqiu")
 class XueQiuRealtime(RealtimeDataProvider):
     @cache(
         "realtime_cache",

@@ -2,9 +2,11 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import HistoricalDataProvider
 
 
+@provider("historical", "eastmoney")
 class EastMoneyHistorical(HistoricalDataProvider):
     """Adapter for EastMoney historical stock data API"""
 

@@ -5,6 +5,7 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import HistoricalFuturesDataProvider, RealtimeFuturesDataProvider
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ _REALTIME_COLUMNS = [
 ]
 
 
+@provider("futures", "sina", capability="historical")
 class SinaFuturesHistorical(HistoricalFuturesDataProvider):
     """Adapter for Sina futures historical data API"""
 
@@ -400,6 +402,7 @@ def _market_for(root: str) -> str:
     return "FF" if root.upper() in _CFFEX_ROOTS else "CF"
 
 
+@provider("futures", "sina", capability="realtime")
 class SinaFuturesRealtime(RealtimeFuturesDataProvider):
     """Adapter for Sina futures realtime data API"""
 

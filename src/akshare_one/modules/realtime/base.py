@@ -4,7 +4,12 @@ import pandas as pd
 
 
 class RealtimeDataProvider(ABC):
-    def __init__(self, symbol: str) -> None:
+    def __init__(self, symbol: str | None) -> None:
+        """``None`` means "no symbol filter" and is normalized to an empty string."""
+        if symbol is None:
+            symbol = ""
+        elif not isinstance(symbol, str):
+            raise ValueError("symbol must be a string")
         self.symbol = symbol
 
     @abstractmethod

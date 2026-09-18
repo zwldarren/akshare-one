@@ -4,9 +4,11 @@ from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_basic_info
 
 from ..cache import cache
+from ..registry import provider
 from .base import InfoDataProvider
 
 
+@provider("info", "eastmoney")
 class EastmoneyInfo(InfoDataProvider):
     """Basic stock info from EastMoney's direct quote API.
 

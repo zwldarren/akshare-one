@@ -7,6 +7,7 @@ from akshare_one import get_news_data
 
 
 class TestNewsData:
+    @pytest.mark.network
     def test_basic_news_data(self):
         """测试基本新闻数据获取功能"""
         df = get_news_data(symbol="300059")
@@ -24,6 +25,7 @@ class TestNewsData:
         # 验证发布时间格式
         assert isinstance(df.iloc[0]["publish_time"], datetime)
 
+    @pytest.mark.network
     def test_news_data_time_range(self):
         """测试新闻数据时间范围"""
         df = get_news_data(symbol="300059")
@@ -33,6 +35,7 @@ class TestNewsData:
         # 验证新闻发布时间在合理范围内
         assert all(one_year_ago <= ts <= now for ts in df["publish_time"])
 
+    @pytest.mark.network
     def test_news_content_quality(self):
         """测试新闻内容质量"""
         df = get_news_data(symbol="300059")
@@ -42,6 +45,7 @@ class TestNewsData:
         assert len(sample_news["content"]) > 0
         assert sample_news["url"].startswith("http")
 
+    @pytest.mark.network
     def test_multiple_pages(self):
         """测试多页新闻数据"""
         df = get_news_data(symbol="300059")
@@ -56,12 +60,5 @@ class TestNewsData:
 
     def test_unsupported_source(self):
         """测试不支持的来源"""
-        with pytest.raises(ValueError):
-            get_news_data(symbol="300059", source="invalid")  # type: ignore
-
-    def test_factory_error_handling(self):
-        """测试工厂错误处理"""
-        with patch("akshare_one.modules.news.factory.NewsDataFactory.get_provider") as mock_factory:
-            mock_factory.side_effect = ValueError("Unsupported source")
-            with pytest.raises(ValueError, match="Unsupported source"):
-                get_news_data(symbol="300059", source="invalid")  # type: ignore
+        with pytest.raises(ValueError, match="Unknown news provider"):
+            get_news_data(symbol="300059", source="invalid")  # type: ignore[arg-type]

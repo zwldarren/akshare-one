@@ -5,6 +5,7 @@ import requests
 
 from akshare_one.modules.cache import cache
 
+from ..registry import provider
 from .base import FinancialDataProvider
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 _HTTP_TIMEOUT = 15.0
 
 
+@provider("financial", "eastmoney_direct")
 class EastMoneyDirectFinancialReport(FinancialDataProvider):
     _balance_sheet_rename_map = {
         "REPORT_DATE": "report_date",

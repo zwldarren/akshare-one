@@ -18,14 +18,7 @@ from typing import Literal
 
 import pandas as pd
 
-from .modules.financial.factory import FinancialDataFactory
-from .modules.futures.factory import FuturesDataFactory
-from .modules.historical.factory import HistoricalDataFactory
-from .modules.info.factory import InfoDataFactory
-from .modules.insider.factory import InsiderDataFactory
-from .modules.news.factory import NewsDataFactory
-from .modules.options.factory import OptionsDataFactory
-from .modules.realtime.factory import RealtimeDataFactory
+from .modules.registry import resolve
 
 
 def get_basic_info(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd.DataFrame:
@@ -47,7 +40,7 @@ def get_basic_info(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> p
         - industry: 行业
         - listing_date: 上市时间
     """
-    provider = InfoDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("info", source, symbol=symbol)
     return provider.get_basic_info()
 
 
@@ -88,7 +81,7 @@ def get_hist_data(
         "end_date": end_date,
         "adjust": adjust,
     }
-    provider = HistoricalDataFactory.get_provider(source, **kwargs)
+    provider = resolve("historical", source, **kwargs)
     return provider.get_hist_data()
 
 
@@ -116,7 +109,7 @@ def get_realtime_data(
         - low: 最低
         - prev_close: 昨收
     """
-    provider = RealtimeDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("realtime", source, symbol=symbol)
     return provider.get_current_data()
 
 
@@ -136,11 +129,13 @@ def get_news_data(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd
         - source: 文章来源
         - url: 新闻链接
     """
-    provider = NewsDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("news", source, symbol=symbol)
     return provider.get_news_data()
 
 
-def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame:
+def get_balance_sheet(
+    symbol: str, source: Literal["sina", "eastmoney_direct"] = "sina"
+) -> pd.DataFrame:
     """获取资产负债表数据
 
     Args:
@@ -150,11 +145,13 @@ def get_balance_sheet(symbol: str, source: Literal["sina"] = "sina") -> pd.DataF
     Returns:
         pd.DataFrame: 资产负债表数据
     """
-    provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("financial", source, symbol=symbol)
     return provider.get_balance_sheet()
 
 
-def get_income_statement(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame:
+def get_income_statement(
+    symbol: str, source: Literal["sina", "eastmoney_direct"] = "sina"
+) -> pd.DataFrame:
     """获取利润表数据
 
     Args:
@@ -164,11 +161,13 @@ def get_income_statement(symbol: str, source: Literal["sina"] = "sina") -> pd.Da
     Returns:
         pd.DataFrame: 利润表数据
     """
-    provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("financial", source, symbol=symbol)
     return provider.get_income_statement()
 
 
-def get_cash_flow(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame:
+def get_cash_flow(
+    symbol: str, source: Literal["sina", "eastmoney_direct"] = "sina"
+) -> pd.DataFrame:
     """获取现金流量表数据
 
     Args:
@@ -178,12 +177,12 @@ def get_cash_flow(symbol: str, source: Literal["sina"] = "sina") -> pd.DataFrame
     Returns:
         pd.DataFrame: 现金流量表数据
     """
-    provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("financial", source, symbol=symbol)
     return provider.get_cash_flow()
 
 
 def get_financial_metrics(
-    symbol: str, source: Literal["eastmoney_direct"] = "eastmoney_direct"
+    symbol: str, source: Literal["sina", "eastmoney_direct"] = "eastmoney_direct"
 ) -> pd.DataFrame:
     """获取三大财务报表关键指标
 
@@ -194,7 +193,7 @@ def get_financial_metrics(
     Returns:
         pd.DataFrame: 财务关键指标数据
     """
-    provider = FinancialDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("financial", source, symbol=symbol)
     return provider.get_financial_metrics()
 
 
@@ -208,7 +207,7 @@ def get_inner_trade_data(symbol: str, source: Literal["xueqiu"] = "xueqiu") -> p
     Returns:
         pd.DataFrame: 内部交易数据
     """
-    provider = InsiderDataFactory.get_provider(source, symbol=symbol)
+    provider = resolve("insider", source, symbol=symbol)
     return provider.get_inner_trade_data()
 
 
@@ -256,7 +255,7 @@ def get_futures_hist_data(
         "start_date": start_date,
         "end_date": end_date,
     }
-    provider = FuturesDataFactory.get_historical_provider(source, **kwargs)
+    provider = resolve("futures", source, capability="historical", **kwargs)
     return provider.get_hist_data()
 
 
@@ -286,7 +285,7 @@ def get_futures_realtime_data(
         - prev_settlement: 昨结算
         - settlement: 最新结算价
     """
-    provider = FuturesDataFactory.get_realtime_provider(source, symbol=symbol or "")
+    provider = resolve("futures", source, capability="realtime", symbol=symbol or "")
     if symbol:
         return provider.get_current_data()
     return provider.get_all_quotes()
@@ -307,9 +306,7 @@ def get_futures_main_contracts(
         - contract: 主力合约代码 (占位符，目前与 symbol 相同)
         - exchange: 交易所
     """
-    from .modules.futures.sina import SinaFuturesHistorical
-
-    provider = SinaFuturesHistorical(symbol="")
+    provider = resolve("futures", source, capability="historical", symbol="")
     return provider.get_main_contracts()
 
 
@@ -341,7 +338,7 @@ def get_options_chain(
         - open_interest: 持仓量
         - implied_volatility: 隐含波动率
     """
-    provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
+    provider = resolve("options", source, underlying_symbol=underlying_symbol)
     return provider.get_options_chain()
 
 
@@ -380,10 +377,10 @@ def get_options_realtime(
         raise ValueError("Must specify either 'symbol' or 'underlying_symbol'.")
 
     if symbol:
-        provider = OptionsDataFactory.get_provider(source, underlying_symbol="")
+        provider = resolve("options", source, underlying_symbol="")
         return provider.get_options_realtime(symbol)
     else:
-        provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
+        provider = resolve("options", source, underlying_symbol=underlying_symbol)
         return provider.get_options_realtime("")
 
 
@@ -400,7 +397,7 @@ def get_options_expirations(
     Returns:
         list[str]: 可用的到期日列表
     """
-    provider = OptionsDataFactory.get_provider(source, underlying_symbol=underlying_symbol)
+    provider = resolve("options", source, underlying_symbol=underlying_symbol)
     return provider.get_options_expirations(underlying_symbol)
 
 
@@ -430,7 +427,7 @@ def get_options_hist(
         - open_interest: 持仓量
         - settlement: 结算价
     """
-    provider = OptionsDataFactory.get_provider(source, underlying_symbol="")
+    provider = resolve("options", source, underlying_symbol="")
     return provider.get_options_history(
         symbol=symbol,
         start_date=start_date,

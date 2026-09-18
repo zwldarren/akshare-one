@@ -2,9 +2,11 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import NewsDataProvider
 
 
+@provider("news", "eastmoney")
 class EastMoneyNews(NewsDataProvider):
     @cache(
         "news_cache",

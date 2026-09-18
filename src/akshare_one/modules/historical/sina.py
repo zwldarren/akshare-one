@@ -2,9 +2,11 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import HistoricalDataProvider
 
 
+@provider("historical", "sina")
 class SinaHistorical(HistoricalDataProvider):
     """Adapter for Sina historical stock data API"""
 

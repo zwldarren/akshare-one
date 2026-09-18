@@ -4,13 +4,15 @@ from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_realtime_data
 
 from ..cache import cache
+from ..registry import provider
 from .base import RealtimeDataProvider
 
 
+@provider("realtime", "eastmoney_direct")
 class EastMoneyDirectRealtime(RealtimeDataProvider):
     """Direct implementation for EastMoney realtime stock data API"""
 
-    def __init__(self, symbol: str):
+    def __init__(self, symbol: str | None) -> None:
         super().__init__(symbol)
         self.client = EastMoneyClient()
 

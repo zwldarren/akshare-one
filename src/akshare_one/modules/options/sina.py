@@ -2,9 +2,11 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import OptionsDataProvider
 
 
+@provider("options", "sina")
 class SinaOptionsProvider(OptionsDataProvider):
     """Adapter for Sina/EastMoney options data API
 

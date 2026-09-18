@@ -7,6 +7,7 @@ from akshare_one import get_inner_trade_data
 
 
 class TestInnerTradeData:
+    @pytest.mark.network
     def test_basic_inner_trade(self):
         """测试基本内部交易数据获取功能"""
         df = get_inner_trade_data(symbol="301300")  # Use a symbol that is likely to have data
@@ -28,6 +29,7 @@ class TestInnerTradeData:
         }
         assert required_columns.issubset(df.columns)
 
+    @pytest.mark.network
     def test_transaction_date_range(self):
         """测试交易日期范围"""
         df = get_inner_trade_data(symbol="301300")
@@ -41,6 +43,7 @@ class TestInnerTradeData:
 
         assert all(earliest_reasonable <= ts <= now for ts in transaction_dates_utc)
 
+    @pytest.mark.network
     def test_transaction_value_calculation(self):
         """测试交易金额计算正确性"""
         df = get_inner_trade_data(symbol="301300")
@@ -52,8 +55,8 @@ class TestInnerTradeData:
 
     def test_invalid_source(self):
         """测试无效数据源"""
-        with pytest.raises((ValueError, KeyError)):
-            get_inner_trade_data("600405", source="invalid")  # type: ignore
+        with pytest.raises(ValueError, match="Unknown insider provider"):
+            get_inner_trade_data("600405", source="invalid")  # type: ignore[arg-type]
 
     def test_api_error_handling(self):
         """测试API错误处理"""
@@ -63,12 +66,3 @@ class TestInnerTradeData:
             mock_get.side_effect = Exception("API error")
             with pytest.raises(Exception, match="API error"):
                 get_inner_trade_data(symbol="600405")
-
-    def test_factory_error_handling(self):
-        """测试工厂错误处理"""
-        with patch(
-            "akshare_one.modules.insider.factory.InsiderDataFactory.get_provider"
-        ) as mock_factory:
-            mock_factory.side_effect = ValueError("Unsupported source")
-            with pytest.raises(ValueError, match="Unsupported source"):
-                get_inner_trade_data(symbol="600405", source="invalid")  # type: ignore

@@ -6,6 +6,7 @@ from akshare_one import get_hist_data, get_realtime_data
 
 
 class TestHistData:
+    @pytest.mark.network
     def test_basic_hist_data(self):
         """测试基本历史数据获取功能"""
         df = get_hist_data(
@@ -25,6 +26,7 @@ class TestHistData:
         }
         assert len(df) > 0
 
+    @pytest.mark.network
     def test_hist_data_with_adjust(self):
         """测试复权历史数据"""
         df_qfq = get_hist_data(
@@ -43,6 +45,7 @@ class TestHistData:
         )
         assert not df_qfq.equals(df_hfq)
 
+    @pytest.mark.network
     def test_minute_hist_data(self):
         """测试新浪数据源的分钟级历史数据"""
         df = get_hist_data(
@@ -56,6 +59,7 @@ class TestHistData:
         assert not df.empty
         assert len(df) > 0
 
+    @pytest.mark.network
     def test_hist_data_eastmoney_direct(self):
         """测试 EastMoney Direct 数据源的历史数据"""
         df = get_hist_data(
@@ -78,6 +82,7 @@ class TestHistData:
         assert not df.empty
         assert len(df) > 0
 
+    @pytest.mark.network
     def test_invalid_symbol(self):
         """测试无效股票代码"""
         with pytest.raises((ValueError, KeyError)):
@@ -90,6 +95,7 @@ class TestHistData:
 
 
 class TestRealtimeData:
+    @pytest.mark.network
     def test_basic_realtime_data(self):
         """测试基本实时数据获取"""
         df = get_realtime_data(symbol="600000")
@@ -141,12 +147,14 @@ class TestRealtimeData:
     #     assert not df.empty
     #     assert "600000" in df["symbol"].values
 
+    @pytest.mark.network
     def test_xueqiu_source(self):
         """测试雪球数据源"""
         df = get_realtime_data(symbol="600000", source="xueqiu")
         assert not df.empty
         assert df.iloc[0]["symbol"] == "600000"
 
+    @pytest.mark.network
     def test_eastmoney_direct_source(self):
         """测试 EastMoney Direct 实时数据源"""
         df = get_realtime_data(symbol="000001", source="eastmoney_direct")
@@ -159,9 +167,10 @@ class TestRealtimeData:
 
     def test_invalid_source(self):
         """测试无效数据源"""
-        with pytest.raises((ValueError, KeyError)):
+        with pytest.raises(ValueError, match="Unknown realtime provider"):
             get_realtime_data(symbol="600000", source="invalid")  # type: ignore[arg-type]
 
+    @pytest.mark.network
     def test_b_share_daily_data(self):
         """测试B股日线数据"""
         df = get_hist_data(
@@ -182,6 +191,7 @@ class TestRealtimeData:
         }
         assert len(df) > 0
 
+    @pytest.mark.network
     def test_b_share_minute_data(self):
         """测试B股分钟数据"""
         df = get_hist_data(

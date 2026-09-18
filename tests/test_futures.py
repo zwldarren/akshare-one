@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pytest
 
 from akshare_one import (
@@ -9,6 +7,7 @@ from akshare_one import (
 
 
 class TestFuturesHistData:
+    @pytest.mark.network
     def test_basic_futures_hist_data(self):
         """测试基本期货历史数据获取功能"""
         df = get_futures_hist_data(symbol="AG", contract="2604", interval="day")
@@ -17,6 +16,7 @@ class TestFuturesHistData:
         assert "symbol" in df.columns
         assert "close" in df.columns
 
+    @pytest.mark.network
     def test_futures_daily_data(self):
         """测试日线级别期货数据"""
         df = get_futures_hist_data(
@@ -36,6 +36,7 @@ class TestFuturesHistData:
             }
         )
 
+    @pytest.mark.network
     def test_futures_minute_data(self):
         """测试分钟级期货数据"""
         df = get_futures_hist_data(
@@ -46,6 +47,7 @@ class TestFuturesHistData:
         assert not df.empty
         assert len(df) > 0
 
+    @pytest.mark.network
     def test_invalid_futures_symbol(self):
         """测试无效期货代码"""
         with pytest.raises((ValueError, KeyError)):
@@ -76,11 +78,13 @@ class TestFuturesHistData:
                 end_date="2025-01-31",
             )
 
+    @pytest.mark.network
     def test_weekly_data(self):
         """测试周线期货数据"""
         df = get_futures_hist_data(symbol="RB", interval="week")
         assert not df.empty
 
+    @pytest.mark.network
     def test_monthly_data(self):
         """测试月线期货数据"""
         df = get_futures_hist_data(symbol="RB", interval="month")
@@ -88,6 +92,7 @@ class TestFuturesHistData:
 
 
 class TestFuturesRealtimeData:
+    @pytest.mark.network
     def test_basic_futures_realtime_data(self):
         """测试基本期货实时数据获取"""
         # Note: API may only return certain varieties at different times
@@ -96,6 +101,7 @@ class TestFuturesRealtimeData:
         assert "symbol" in df.columns
         assert "price" in df.columns
 
+    @pytest.mark.network
     def test_specific_contract_realtime(self):
         """测试特定合约的实时数据"""
         # First get available contracts
@@ -107,6 +113,7 @@ class TestFuturesRealtimeData:
             assert not df.empty
             assert "symbol" in df.columns
 
+    @pytest.mark.network
     def test_all_futures_quotes(self):
         """测试获取所有期货实时数据"""
         df = get_futures_realtime_data()
@@ -114,6 +121,7 @@ class TestFuturesRealtimeData:
         assert "symbol" in df.columns
         assert "price" in df.columns
 
+    @pytest.mark.network
     def test_realtime_data_columns(self):
         """测试实时数据字段完整性"""
         df = get_futures_realtime_data()
@@ -134,66 +142,7 @@ class TestFuturesRealtimeData:
             }
             assert expected_columns.issubset(set(df.columns))
 
-    def test_api_error_handling(self):
-        """测试API错误处理"""
-        # Test with a unique symbol to avoid cache hits
-        with (
-            patch("akshare_one.modules.futures.sina.ak.futures_zh_spot") as mock_spot,
-            patch("akshare_one.modules.futures.sina.ak.futures_zh_realtime") as mock_realtime,
-        ):
-            mock_spot.side_effect = Exception("API error")
-            mock_realtime.side_effect = Exception("API error")
-            # Use a unique symbol that won't be cached
-            with pytest.raises(Exception, match="API error"):
-                from akshare_one.modules.futures.sina import SinaFuturesRealtime
-
-                SinaFuturesRealtime(symbol="UNIQUE_TEST_SYMBOL")
-                # Bypass cache by calling the API directly
-                import akshare as ak
-
-                ak.futures_zh_spot()
-
     def test_invalid_source(self):
         """测试无效数据源"""
-        with pytest.raises(ValueError, match="Unknown.*provider"):
-            from akshare_one.modules.futures.factory import FuturesDataFactory
-
-            FuturesDataFactory.get_realtime_provider("invalid", symbol="CU")
-
-
-class TestFuturesDataFactory:
-    def test_register_custom_provider(self):
-        """测试注册自定义数据提供商"""
-        from akshare_one.modules.futures.base import HistoricalFuturesDataProvider
-        from akshare_one.modules.futures.factory import FuturesDataFactory
-
-        class CustomProvider(HistoricalFuturesDataProvider):
-            def get_hist_data(self):
-                import pandas as pd
-
-                return pd.DataFrame()
-
-            def get_main_contracts(self):
-                import pandas as pd
-
-                return pd.DataFrame()
-
-        FuturesDataFactory.register_historical_provider("custom", CustomProvider)
-        provider = FuturesDataFactory.get_historical_provider("custom", symbol="AG2604")
-        assert isinstance(provider, CustomProvider)
-
-    def test_get_provider_by_name(self):
-        """测试通过名称获取数据提供商"""
-        from akshare_one.modules.futures.factory import FuturesDataFactory
-
-        provider = FuturesDataFactory.get_historical_provider("sina", symbol="AG2604")
-        assert provider is not None
-        assert provider.symbol == "AG"
-
-    def test_get_realtime_provider(self):
-        """测试获取实时数据提供商"""
-        from akshare_one.modules.futures.factory import FuturesDataFactory
-
-        provider = FuturesDataFactory.get_realtime_provider("sina", symbol="AG2604")
-        assert provider is not None
-        assert provider.symbol == "AG"
+        with pytest.raises(ValueError, match="Unknown futures provider"):
+            get_futures_realtime_data(symbol="CU", source="invalid")  # type: ignore[arg-type]

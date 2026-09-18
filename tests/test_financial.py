@@ -9,6 +9,7 @@ from akshare_one import (
 
 
 class TestBalanceSheet:
+    @pytest.mark.network
     def test_basic_balance_sheet(self):
         """测试基本资产负债表获取功能"""
         df = get_balance_sheet(symbol="600600")
@@ -25,6 +26,7 @@ class TestBalanceSheet:
         }
         assert required_columns.issubset(df.columns)
 
+    @pytest.mark.network
     def test_invalid_symbol(self):
         """测试无效股票代码"""
         with pytest.raises((ValueError, KeyError)):
@@ -32,6 +34,7 @@ class TestBalanceSheet:
 
 
 class TestIncomeStatement:
+    @pytest.mark.network
     def test_basic_income_statement(self):
         """测试基本利润表获取功能"""
         df = get_income_statement(symbol="600600")
@@ -47,6 +50,7 @@ class TestIncomeStatement:
         }
         assert required_columns.issubset(df.columns)
 
+    @pytest.mark.network
     def test_multiple_periods(self):
         """测试多期数据获取"""
         df = get_income_statement(symbol="600600")
@@ -54,6 +58,7 @@ class TestIncomeStatement:
 
 
 class TestCashFlow:
+    @pytest.mark.network
     def test_basic_cash_flow(self):
         """测试基本现金流量表获取功能"""
         df = get_cash_flow(symbol="600600")
@@ -68,19 +73,18 @@ class TestCashFlow:
         }
         assert required_columns.issubset(df.columns)
 
-    def test_unsupported_source(self):
+    @pytest.mark.parametrize(
+        "fetch",
+        [get_balance_sheet, get_income_statement, get_cash_flow, get_financial_metrics],
+    )
+    def test_unsupported_source(self, fetch):
         """测试不支持的来源"""
-        with pytest.raises(ValueError):
-            get_balance_sheet(symbol="600600", source="invalid")  # type: ignore[arg-type]
-        with pytest.raises(ValueError):
-            get_income_statement(symbol="600600", source="invalid")  # type: ignore[arg-type]
-        with pytest.raises(ValueError):
-            get_cash_flow(symbol="600600", source="invalid")  # type: ignore[arg-type]
-        with pytest.raises(ValueError):
-            get_financial_metrics(symbol="600600", source="invalid")  # type: ignore[arg-type]
+        with pytest.raises(ValueError, match="Unknown financial provider"):
+            fetch(symbol="600600", source="invalid")
 
 
 class TestFinancialMetrics:
+    @pytest.mark.network
     def test_basic_financial_metrics(self):
         """测试基本财务指标获取功能"""
         df = get_financial_metrics(symbol="600600")

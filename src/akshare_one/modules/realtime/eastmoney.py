@@ -5,9 +5,11 @@ from akshare_one.eastmoney.client import EastMoneyClient
 from akshare_one.eastmoney.utils import parse_realtime_data
 
 from ..cache import cache
+from ..registry import provider
 from .base import RealtimeDataProvider
 
 
+@provider("realtime", "eastmoney")
 class EastmoneyRealtime(RealtimeDataProvider):
     """Realtime A-share quotes.
 
@@ -16,7 +18,7 @@ class EastmoneyRealtime(RealtimeDataProvider):
     given, because it downloads ~5,500 rows across dozens of paged requests.
     """
 
-    def __init__(self, symbol: str) -> None:
+    def __init__(self, symbol: str | None) -> None:
         super().__init__(symbol)
         self.client = EastMoneyClient()
 

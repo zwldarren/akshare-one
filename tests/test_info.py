@@ -3,6 +3,7 @@ import time
 import unittest
 
 import pandas as pd
+import pytest
 from cachetools import TTLCache
 
 from akshare_one import get_basic_info
@@ -10,6 +11,7 @@ from akshare_one.modules.cache import CACHE_CONFIG
 
 
 class TestInfo(unittest.TestCase):
+    @pytest.mark.network
     def test_get_info(self):
         """测试获取股票基本信息"""
         df = get_basic_info("600405")
@@ -34,6 +36,7 @@ class TestInfo(unittest.TestCase):
         self.assertEqual(df["symbol"].iloc[0], "600405")
         self.assertIsInstance(df["listing_date"].iloc[0], pd.Timestamp)
 
+    @pytest.mark.network
     def test_cache(self):
         """测试缓存功能是否生效"""
         cache = CACHE_CONFIG["info_cache"]

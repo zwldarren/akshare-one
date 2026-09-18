@@ -2,9 +2,11 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cache
+from ..registry import provider
 from .base import FinancialDataProvider
 
 
+@provider("financial", "sina")
 class SinaFinancialReport(FinancialDataProvider):
     """Financial data provider for Sina finance reports.
 
