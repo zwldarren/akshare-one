@@ -74,11 +74,7 @@ print(df.head())
 ```python
 # 获取前复权日线数据
 df = get_hist_data(
-    symbol="600000",
-    interval="day",
-    adjust="qfq",
-    start_date="2024-01-01",
-    end_date="2024-03-31"
+    symbol="600000", interval="day", adjust="qfq", start_date="2024-01-01", end_date="2024-03-31"
 )
 print(f"数据条数: {len(df)}")
 print(df.head())
@@ -89,10 +85,7 @@ print(df.head())
 ```python
 # 获取5分钟线数据（仅当前交易日）
 df = get_hist_data(
-    symbol="600000",
-    interval="minute",
-    interval_multiplier=5,
-    source="eastmoney_direct"
+    symbol="600000", interval="minute", interval_multiplier=5, source="eastmoney_direct"
 )
 print(df.tail())
 ```
@@ -102,10 +95,7 @@ print(df.tail())
 ```python
 # 获取腾讯控股港股数据
 df = get_hist_data(
-    symbol="00700",
-    interval="day",
-    source="eastmoney_direct",
-    start_date="2024-01-01"
+    symbol="00700", interval="day", source="eastmoney_direct", start_date="2024-01-01"
 )
 print(df.head())
 ```
@@ -114,11 +104,6 @@ print(df.head())
 
 ```python
 # 获取周线数据
-df = get_hist_data(
-    symbol="600000",
-    interval="week",
-    start_date="2023-01-01",
-    end_date="2024-01-01"
-)
+df = get_hist_data(symbol="600000", interval="week", start_date="2023-01-01", end_date="2024-01-01")
 print(df.head())
 ```

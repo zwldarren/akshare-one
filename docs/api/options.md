@@ -191,10 +191,6 @@ def get_options_hist(
 from akshare_one import get_options_hist
 
 # 获取期权历史数据
-df = get_options_hist(
-    symbol="10004005",
-    start_date="2024-01-01",
-    end_date="2024-02-01"
-)
+df = get_options_hist(symbol="10004005", start_date="2024-01-01", end_date="2024-02-01")
 print(df.head())
 ```

@@ -59,9 +59,9 @@ from akshare_one import get_news_data
 ```python
 from akshare_one import (
     get_balance_sheet,
-    get_income_statement, 
+    get_income_statement,
     get_cash_flow,
-    get_financial_metrics
+    get_financial_metrics,
 )
 ```
 
@@ -69,11 +69,7 @@ from akshare_one import (
 获取期货的历史和实时行情数据。
 
 ```python
-from akshare_one import (
-    get_futures_hist_data,
-    get_futures_realtime_data,
-    get_futures_main_contracts
-)
+from akshare_one import get_futures_hist_data, get_futures_realtime_data, get_futures_main_contracts
 ```
 
 ### 期权数据模块
@@ -84,7 +80,7 @@ from akshare_one import (
     get_options_chain,
     get_options_realtime,
     get_options_expirations,
-    get_options_hist
+    get_options_hist,
 )
 ```
 
@@ -100,8 +96,12 @@ from akshare_one import get_inner_trade_data
 
 ```python
 from akshare_one.indicators import (
-    get_sma, get_ema, get_rsi, get_macd, 
-    get_bollinger_bands, get_stoch
+    get_sma,
+    get_ema,
+    get_rsi,
+    get_macd,
+    get_bollinger_bands,
+    get_stoch,
 )
 ```
 

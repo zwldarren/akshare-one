@@ -42,11 +42,7 @@ from akshare_one import get_hist_data
 from akshare_one.indicators import get_sma
 
 # Get historical data
-df = get_hist_data(
-    symbol="600000",
-    interval="day",
-    adjust="hfq"
-)
+df = get_hist_data(symbol="600000", interval="day", adjust="hfq")
 
 # Calculate 20-day Simple Moving Average
 df_sma = get_sma(df, window=20)

@@ -54,11 +54,7 @@ from akshare_one import get_hist_data
 
 # 获取浦发银行前复权日线数据
 df = get_hist_data(
-    symbol="600000",
-    interval="day",
-    adjust="qfq",
-    start_date="2024-01-01",
-    end_date="2024-03-31"
+    symbol="600000", interval="day", adjust="qfq", start_date="2024-01-01", end_date="2024-03-31"
 )
 print(df.head())
 ```

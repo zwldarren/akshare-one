@@ -30,23 +30,17 @@ from akshare_one import (
     get_income_statement,
     get_cash_flow,
     get_financial_metrics,
-    get_inner_trade_data
+    get_inner_trade_data,
 )
 
-from akshare_one.indicators import (
-    get_sma, get_ema, get_rsi, get_macd, get_bollinger_bands
-)
+from akshare_one.indicators import get_sma, get_ema, get_rsi, get_macd, get_bollinger_bands
 ```
 
 ### 获取历史数据
 ```python
 # 获取浦发银行前复权日线数据
 df = get_hist_data(
-    symbol="600000",
-    interval="day",
-    adjust="qfq",
-    start_date="2024-01-01",
-    end_date="2024-03-31"
+    symbol="600000", interval="day", adjust="qfq", start_date="2024-01-01", end_date="2024-03-31"
 )
 print(df.head())
 ```

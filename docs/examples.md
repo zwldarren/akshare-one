@@ -8,6 +8,7 @@
 import pandas as pd
 from akshare_one import get_realtime_data
 
+
 def get_batch_realtime_data(symbols):
     """
     批量获取多只股票的实时行情数据
@@ -20,11 +21,12 @@ def get_batch_realtime_data(symbols):
                 all_data.append(df)
         except Exception as e:
             print(f"获取 {symbol} 数据失败: {e}")
-    
+
     if not all_data:
         return pd.DataFrame()
-        
+
     return pd.concat(all_data, ignore_index=True)
+
 
 # 股票列表
 stock_list = ["600000", "000001", "600519", "000858", "300750"]
@@ -54,14 +56,14 @@ if not hist_df.empty:
 
     # 绘制图表
     plt.figure(figsize=(15, 8))
-    plt.plot(hist_df['timestamp'], hist_df['close'], label='Close Price')
-    plt.plot(hist_df['timestamp'], sma_5, label='SMA 5')
-    plt.plot(hist_df['timestamp'], sma_20, label='SMA 20')
-    plt.plot(hist_df['timestamp'], sma_60, label='SMA 60')
+    plt.plot(hist_df["timestamp"], hist_df["close"], label="Close Price")
+    plt.plot(hist_df["timestamp"], sma_5, label="SMA 5")
+    plt.plot(hist_df["timestamp"], sma_20, label="SMA 20")
+    plt.plot(hist_df["timestamp"], sma_60, label="SMA 60")
 
-    plt.title(f'{symbol} - Moving Averages')
-    plt.xlabel('Date')
-    plt.ylabel('Price')
+    plt.title(f"{symbol} - Moving Averages")
+    plt.xlabel("Date")
+    plt.ylabel("Price")
     plt.legend()
     plt.grid(True)
     plt.show()

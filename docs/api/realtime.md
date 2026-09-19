@@ -76,10 +76,7 @@ if not df_single.empty:
 
 ```python
 # 获取腾讯控股港股实时数据
-df_hk = get_realtime_data(
-    symbol="00700", 
-    source="eastmoney_direct"
-)
+df_hk = get_realtime_data(symbol="00700", source="eastmoney_direct")
 print(df_hk)
 ```
 
@@ -99,6 +96,7 @@ for symbol in symbols:
 # 合并所有数据
 if realtime_data:
     import pandas as pd
+
     combined_df = pd.concat(realtime_data, ignore_index=True)
     print(combined_df[["symbol", "price", "pct_change"]])
 ```

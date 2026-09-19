@@ -61,10 +61,7 @@ print(df.head())
 
 # 获取白银2602合约5分钟线数据
 df_5min = get_futures_hist_data(
-    symbol="AG",
-    contract="2602",
-    interval="minute",
-    interval_multiplier=5
+    symbol="AG", contract="2602", interval="minute", interval_multiplier=5
 )
 print(df_5min.head())
 ```

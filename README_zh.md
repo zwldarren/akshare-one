@@ -42,11 +42,7 @@ from akshare_one import get_hist_data
 from akshare_one.indicators import get_sma
 
 # 获取历史数据
-df = get_hist_data(
-    symbol="600000",
-    interval="day",
-    adjust="hfq"
-)
+df = get_hist_data(symbol="600000", interval="day", adjust="hfq")
 
 # 计算20日简单移动平均
 df_sma = get_sma(df, window=20)
