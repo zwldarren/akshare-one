@@ -82,20 +82,3 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-
-  github-release:
-    needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist/
-
-      - name: Create GitHub release
-        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes
-        env:
-          GH_TOKEN: ${{ github.token }}
