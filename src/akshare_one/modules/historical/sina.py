@@ -4,6 +4,7 @@ import pandas as pd
 from ..cache import cached
 from ..registry import provider
 from ..schema import normalize
+from ..utils import to_market_symbol
 from .base import HistoricalDataProvider
 from .schema import COLUMNS
 
@@ -28,11 +29,7 @@ class SinaHistorical(HistoricalDataProvider):
         self._validate_interval_params(self.interval, self.interval_multiplier)
 
         try:
-            stock = (
-                f"sh{self.symbol}"
-                if not self.symbol.startswith(("sh", "sz", "bj"))
-                else self.symbol
-            )
+            stock = to_market_symbol(self.symbol)
 
             if self.interval == "minute":
                 df = self._get_minute_data(stock)

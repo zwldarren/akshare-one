@@ -4,8 +4,32 @@ import pandas as pd
 from ..cache import cached
 from ..registry import provider
 from ..schema import normalize
+from ..utils import to_market_symbol
 from .base import FinancialDataProvider
 from .schema import BALANCE_COLUMNS, CASH_FLOW_COLUMNS, INCOME_COLUMNS, METRICS_COLUMNS
+
+#: Sina serves banks with a different balance-sheet template: no
+#: current/non-current split, and different names for a handful of rows. Each
+#: alias is applied only when the standard column is absent, so a template
+#: carrying both names is unaffected.
+_BALANCE_ALIASES = {
+    # Banks' plain 股东权益 column is an empty section header; the populated
+    # subtotal is the parent-attributable equity.
+    "归属于母公司股东的权益": "shareholders_equity",
+    "股本": "outstanding_shares",
+    "递延税款借项": "tax_assets",
+    "客户存款(吸收存款)": "deposit_liabilities",
+    "预付账款": "prepayments",
+    "现金及存放中央银行款项": "cash_and_equivalents",
+    "固定资产净额": "property_plant_and_equipment",
+}
+
+
+def _numeric_column(df: pd.DataFrame, column: str) -> pd.Series:
+    """Return ``column`` coerced to floats, or an all-NaN series when absent."""
+    if column in df.columns:
+        return pd.to_numeric(df[column], errors="coerce")
+    return pd.Series(float("nan"), index=df.index, dtype="float64")
 
 
 @provider("financial", "sina")
@@ -18,7 +42,7 @@ class SinaFinancialReport(FinancialDataProvider):
 
     def __init__(self, symbol: str) -> None:
         super().__init__(symbol)
-        self.stock = f"sh{symbol}" if not symbol.startswith(("sh", "sz", "bj")) else symbol
+        self.stock = to_market_symbol(symbol)
 
     @cached("financial")
     def get_balance_sheet(self) -> pd.DataFrame:
@@ -182,34 +206,39 @@ class SinaFinancialReport(FinancialDataProvider):
             }
         )
 
-        # Calculate financial ratios using vectorized operations
-        cols = ["current_debt", "non_current_debt"]
-        raw_df[cols] = raw_df[cols].apply(pd.to_numeric, errors="coerce")
-        raw_df["total_debt"] = raw_df[cols].fillna(0).sum(axis=1)
-
-        # Pre-calculate denominator conditions
-        valid_current_liab = raw_df["current_liabilities"].ne(0)
-        valid_total_assets = raw_df["total_assets"].ne(0)
-
-        # Calculate ratios in one operation
-        ratios = pd.DataFrame(
-            {
-                "current_ratio": raw_df["current_assets"] / raw_df["current_liabilities"],
-                "cash_ratio": raw_df["cash_and_equivalents"] / raw_df["current_liabilities"],
-                "debt_to_assets": raw_df["total_debt"] / raw_df["total_assets"],
+        raw_df = raw_df.rename(
+            columns={
+                src: target
+                for src, target in _BALANCE_ALIASES.items()
+                if target not in raw_df.columns
             }
         )
 
-        # Apply conditions
-        cond = pd.DataFrame(
+        # Calculate financial ratios. Every input is read defensively: a bank
+        # has no current_assets/current_liabilities, so those ratios come back
+        # NaN instead of raising KeyError on the missing column.
+        debts = [col for col in ("current_debt", "non_current_debt") if col in raw_df.columns]
+        if debts:
+            # min_count keeps an all-NaN row NaN rather than reporting debt of 0
+            # (banks have no 短期借款/长期借款 rows in recent reports).
+            raw_df["total_debt"] = (
+                raw_df[debts].apply(pd.to_numeric, errors="coerce").sum(axis=1, min_count=1)
+            )
+
+        current_liabilities = _numeric_column(raw_df, "current_liabilities")
+        total_assets = _numeric_column(raw_df, "total_assets")
+        valid_current_liab = current_liabilities.where(current_liabilities.ne(0))
+        valid_total_assets = total_assets.where(total_assets.ne(0))
+
+        ratios = pd.DataFrame(
             {
-                "current_ratio": valid_current_liab,
-                "cash_ratio": valid_current_liab,
-                "debt_to_assets": valid_total_assets,
+                "current_ratio": _numeric_column(raw_df, "current_assets") / valid_current_liab,
+                "cash_ratio": _numeric_column(raw_df, "cash_and_equivalents") / valid_current_liab,
+                "debt_to_assets": _numeric_column(raw_df, "total_debt") / valid_total_assets,
             },
-            index=ratios.index,
+            index=raw_df.index,
         )
-        raw_df = raw_df.join(ratios.where(cond))
+        raw_df = raw_df.join(ratios)
 
         return normalize(raw_df, BALANCE_COLUMNS)
 

@@ -4,6 +4,7 @@ import pandas as pd
 from ..cache import cached
 from ..registry import provider
 from ..schema import normalize
+from ..utils import to_market_symbol
 from .base import HistoricalDataProvider
 from .schema import COLUMNS
 
@@ -235,10 +236,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
 
     def _get_etf_data(self, start_date: str, end_date: str) -> pd.DataFrame:
         """Fetch ETF data using akshare's fund_etf_hist_sina function"""
-        # Determine market prefix based on the first digit
-        market_prefix = "sh" if self.symbol.startswith("5") else "sh"
-
-        etf_symbol = f"{market_prefix}{self.symbol}"
+        etf_symbol = to_market_symbol(self.symbol)
 
         raw_df: pd.DataFrame = ak.fund_etf_hist_sina(symbol=etf_symbol)
 
