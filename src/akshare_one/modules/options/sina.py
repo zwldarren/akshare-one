@@ -1,3 +1,5 @@
+from typing import Any
+
 import akshare as ak
 import pandas as pd
 
@@ -262,7 +264,9 @@ class SinaOptionsProvider(OptionsDataProvider):
         }
 
         # Extract and rename fields
-        result = {}
+        # Sina returns one raw string per field; the coercions below read and
+        # write mixed types, so the dict is heterogeneous by design.
+        result: dict[str, Any] = {}
         for chinese_field, english_field in field_map.items():
             value = data_dict.get(chinese_field)
             result[english_field] = value

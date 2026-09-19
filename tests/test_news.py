@@ -61,4 +61,4 @@ class TestNewsData:
     def test_unsupported_source(self):
         """测试不支持的来源"""
         with pytest.raises(ValueError, match="Unknown news provider"):
-            get_news_data(symbol="300059", source="invalid")  # type: ignore[arg-type]
+            get_news_data(symbol="300059", source="invalid")  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]

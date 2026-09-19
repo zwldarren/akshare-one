@@ -168,7 +168,7 @@ class TestRealtimeData:
     def test_invalid_source(self):
         """测试无效数据源"""
         with pytest.raises(ValueError, match="Unknown realtime provider"):
-            get_realtime_data(symbol="600000", source="invalid")  # type: ignore[arg-type]
+            get_realtime_data(symbol="600000", source="invalid")  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
     @pytest.mark.network
     def test_b_share_daily_data(self):

@@ -26,11 +26,12 @@ import functools
 import inspect
 import os
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 from cachetools import TTLCache
 
-F = TypeVar("F", bound=Callable[..., Any])
+P = ParamSpec("P")
+R = TypeVar("R")
 
 #: ``namespace -> (maxsize, ttl seconds)``. The only place cache policy lives.
 NAMESPACES: dict[str, tuple[int, int]] = {
@@ -69,7 +70,7 @@ def clear(namespace: str | None = None) -> None:
     _CACHES[namespace].clear()
 
 
-def cached(namespace: str) -> Callable[[F], F]:
+def cached(namespace: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Cache calls to the decorated method or function.
 
     Args:
@@ -87,16 +88,17 @@ def cached(namespace: str) -> Callable[[F], F]:
 
     cache = _CACHES[namespace]
 
-    def decorator(func: F) -> F:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
         takes_receiver = next(iter(inspect.signature(func).parameters), None) == "self"
+        func_qualname = getattr(func, "__qualname__", repr(func))
 
         @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             if not enabled():
                 return func(*args, **kwargs)
 
             key = (
-                func.__qualname__,
+                func_qualname,
                 _declared_params(args) if takes_receiver else (),
                 args[1:] if takes_receiver else args,
                 tuple(sorted(kwargs.items())),
@@ -108,7 +110,7 @@ def cached(namespace: str) -> Callable[[F], F]:
                 cache[key] = value
                 return value
 
-        return wrapper  # type: ignore[return-value]
+        return wrapper
 
     return decorator
 

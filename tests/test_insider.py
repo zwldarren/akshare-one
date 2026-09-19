@@ -56,7 +56,7 @@ class TestInnerTradeData:
     def test_invalid_source(self):
         """测试无效数据源"""
         with pytest.raises(ValueError, match="Unknown insider provider"):
-            get_inner_trade_data("600405", source="invalid")  # type: ignore[arg-type]
+            get_inner_trade_data("600405", source="invalid")  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
     def test_api_error_handling(self):
         """测试API错误处理"""

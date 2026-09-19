@@ -7,6 +7,7 @@ Everything here is mocked -- no network access. These cover:
 - single-symbol realtime using one request instead of the full A-share snapshot.
 """
 
+from typing import Any, cast
 from unittest.mock import patch
 
 import pandas as pd
@@ -66,14 +67,14 @@ class TestHostFallback:
     def test_falls_back_on_502(self):
         calls = []
 
-        def fake_get(url, params=None, timeout=None):
+        def fake_get(url: Any, params: Any = None, timeout: Any = None) -> _Response:
             calls.append(url)
             if "push2.eastmoney.com" in url or "82.push2" in url:
                 return _Response(status=502)
             return _Response(payload={"rc": 0, "data": {"f57": "600000"}})
 
         client = EastMoneyClient()
-        client.session.get = fake_get
+        client.session.get = cast(Any, fake_get)
         result = client.fetch_realtime_quote("600000")
 
         assert result["rc"] == 0
@@ -83,7 +84,7 @@ class TestHostFallback:
     def test_falls_back_on_html_200(self):
         calls = []
 
-        def fake_get(url, params=None, timeout=None):
+        def fake_get(url: Any, params: Any = None, timeout: Any = None) -> _Response:
             calls.append(url)
             if "push2delay" not in url:
                 # 200 OK but the body is a gateway error page.
@@ -91,7 +92,7 @@ class TestHostFallback:
             return _Response(payload={"rc": 0, "data": {"f57": "600000"}})
 
         client = EastMoneyClient()
-        client.session.get = fake_get
+        client.session.get = cast(Any, fake_get)
         result = client.fetch_realtime_quote("600000")
 
         assert result["rc"] == 0
@@ -99,7 +100,7 @@ class TestHostFallback:
 
     def test_raises_when_every_host_fails(self):
         client = EastMoneyClient()
-        client.session.get = lambda *a, **k: _Response(status=502)
+        client.session.get = cast(Any, lambda *a, **k: _Response(status=502))
         with pytest.raises(ConnectionError, match="All EastMoney hosts failed"):
             client.fetch_realtime_quote("600000")
 
@@ -229,12 +230,12 @@ class TestDatacenterReport:
     def _client(self, payload=None, error=None):
         client = EastMoneyClient()
 
-        def fake_get(url, params=None, timeout=None):
+        def fake_get(url: Any, params: Any = None, timeout: Any = None) -> _Response:
             if error is not None:
                 raise error
             return _Response(payload=payload)
 
-        client.session.get = fake_get
+        client.session.get = cast(Any, fake_get)
         return client
 
     def test_returns_the_rows(self):
@@ -271,14 +272,14 @@ class TestFinancialDirectProvider:
     def _provider(self, requests_seen=None, error=None):
         provider = EastMoneyDirectFinancialReport("600000")
 
-        def fake_get(url, params=None, timeout=None):
+        def fake_get(url: Any, params: Any = None, timeout: Any = None) -> _Response:
             if requests_seen is not None:
                 requests_seen.append(params)
             if error is not None:
                 raise error
             return _Response(payload={"result": {"data": self._ROWS[params["reportName"]]}})
 
-        provider.client.session.get = fake_get
+        provider.client.session.get = cast(Any, fake_get)
         return provider
 
     def test_statement_is_renamed_and_projected(self):

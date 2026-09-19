@@ -14,7 +14,7 @@ Example:
     >>> df = get_realtime_data(symbol="600000")
 """
 
-from typing import Literal
+from typing import Any, Literal
 
 import pandas as pd
 
@@ -73,7 +73,7 @@ def get_hist_data(
         - close: 收盘价
         - volume: 成交量
     """
-    kwargs = {
+    kwargs: dict[str, Any] = {
         "symbol": symbol,
         "interval": interval,
         "interval_multiplier": interval_multiplier,
@@ -247,7 +247,7 @@ def get_futures_hist_data(
         - open_interest: 持仓量
         - settlement: 结算价
     """
-    kwargs = {
+    kwargs: dict[str, Any] = {
         "symbol": symbol,
         "contract": contract,
         "interval": interval,

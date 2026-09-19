@@ -145,4 +145,4 @@ class TestFuturesRealtimeData:
     def test_invalid_source(self):
         """测试无效数据源"""
         with pytest.raises(ValueError, match="Unknown futures provider"):
-            get_futures_realtime_data(symbol="CU", source="invalid")  # type: ignore[arg-type]
+            get_futures_realtime_data(symbol="CU", source="invalid")  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
