@@ -8,7 +8,7 @@ Glossary for akshare-one. Terms only — no implementation, no decisions.
 realtime, info, news, financial, insider, futures, options.
 
 **Source** — the upstream service a caller selects by name to serve a domain:
-`eastmoney`, `eastmoney_direct`, `sina`, `xueqiu`.
+`eastmoney`, `eastmoney_direct`, `sina`, `xueqiu`, `ths`.
 
 **Provider** — the adapter that implements a domain's interface for one source.
 
@@ -28,5 +28,6 @@ domain: no source, no network, no schema of its own.
 provider, populated by providers declaring themselves.
 
 **Public surface** — `akshare_one` and `akshare_one.indicators`. Everything
-under `akshare_one.modules` is internal to the package, including the registry
-and the provider base classes.
+else is internal to the package — `akshare_one.modules`, the registry and the
+provider base classes, and the per-source clients `akshare_one.eastmoney` and
+`akshare_one.ths`.

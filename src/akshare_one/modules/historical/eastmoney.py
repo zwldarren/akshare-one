@@ -26,7 +26,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
                 - close
                 - volume
         """
-        self._validate_interval_params(self.interval, self.interval_multiplier)
+        self._validate_interval_params()
 
         try:
             if self.interval in ["minute", "hour"]:
@@ -97,14 +97,6 @@ class EastMoneyHistorical(HistoricalDataProvider):
             raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
 
         return self._clean_data(raw_df)
-
-    def _validate_interval_params(self, interval: str, multiplier: int) -> None:
-        """Validates the validity of interval and multiplier"""
-        if interval not in self.get_supported_intervals():
-            raise ValueError(f"Unsupported interval parameter: {interval}")
-
-        if interval in ["minute", "hour"] and multiplier < 1:
-            raise ValueError(f"interval_multiplier for {interval} level must be ≥ 1")
 
     def _ensure_time_format(self, date_str: str, default_time: str) -> str:
         """Ensures the date string includes the time part"""

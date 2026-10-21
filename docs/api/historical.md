@@ -26,7 +26,7 @@ def get_hist_data(
 | `start_date` | str | 否 | "1970-01-01" | 开始日期 (YYYY-MM-DD) |
 | `end_date` | str | 否 | "2030-12-31" | 结束日期 (YYYY-MM-DD) |
 | `adjust` | str | 否 | "none" | 复权类型 ("none", "qfq", "hfq") |
-| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "sina") |
+| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "sina", "ths") |
 
 !!! note "时间间隔说明"
     如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线
@@ -34,7 +34,15 @@ def get_hist_data(
 !!! tip "数据源特性"
     - `eastmoney_direct` 数据源支持港股，如 "00700" 表示腾讯控股
     - `eastmoney_direct` 数据源的小时和分钟级数据只支持当前交易日
+    - `ths` 数据源的成交量由上游的“股”换算为“手”，与其它数据源一致
     - 不同数据源的数据覆盖范围可能有所差异
+
+!!! warning "同花顺 (`ths`) 数据源说明"
+    - 日线历史较长（可回溯到 2001 年），但上游按年份分片返回，取全量历史需要多次请求
+    - 分钟线只保留最近约 140 根，且上游的粗周期序列重建较慢，可能落后于最新成交
+    - 上游没有 15 分钟线，该周期由 5 分钟线重采样得到
+    - 上证综指在同花顺以 `1A0001` 表示；传 `sh000001` 会自动映射为该代码
+    - 同花顺的日线/周线/月线/年线以“区间结束日”标记，与其它数据源的标记方式不同
 
 ## 返回值
 
@@ -97,6 +105,14 @@ print(df.tail())
 df = get_hist_data(
     symbol="00700", interval="day", source="eastmoney_direct", start_date="2024-01-01"
 )
+print(df.head())
+```
+
+### 使用同花顺数据源
+
+```python
+# 同花顺的日线历史可以回溯到 2001 年
+df = get_hist_data(symbol="600519", interval="day", source="ths", start_date="2020-01-01")
 print(df.head())
 ```
 

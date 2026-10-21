@@ -57,9 +57,9 @@ https://zwldarren.github.io/akshare-one/
 ## 🧪 Testing
 
 Tests run fully offline by default. Test modules that call live upstream data
-providers (EastMoney, Sina, XueQiu, the exchanges) are skipped unless you opt
-in, because those endpoints apply aggressive rate limits and a full run can get
-your IP temporarily blocked:
+providers (EastMoney, Sina, XueQiu, Tonghuashun, the exchanges) are skipped
+unless you opt in, because those endpoints apply aggressive rate limits and a
+full run can get your IP temporarily blocked:
 
 ```bash
 pytest                    # offline unit tests only
@@ -69,8 +69,9 @@ pytest --run-network      # include live-provider tests
 ## 🧩 Public interface
 
 The public surface is `akshare_one` and `akshare_one.indicators`. Everything
-under `akshare_one.modules` is internal and may change without a deprecation
-cycle.
+else is internal and may change without a deprecation cycle — that includes
+`akshare_one.modules`, and the per-source clients `akshare_one.eastmoney` and
+`akshare_one.ths`.
 
 Each domain's output columns are declared in exactly one place,
 `akshare_one.modules.<domain>.schema`. Every provider's frame is projected onto
@@ -84,6 +85,12 @@ selected source cannot supply it — and always in the documented order.
   outside mainland China).
 - `xueqiu` realtime quotes need an `xq_a_token` cookie that XueQiu no longer
   hands to anonymous clients, and XueQiu returns `418` once rate-limited.
+- `ths` talks to Tonghuashun's public HTTP endpoints, which need no login. It
+  serves one security per request, so realtime quotes need a `symbol`; its
+  daily history is long but arrives one year per request, and its intraday
+  series keeps only a short window. Realtime quotes carry the upstream quote
+  time, and the SSE Composite is addressed as `1A0001` (`sh000001` is mapped
+  to it).
 - `get_options_chain` returns the option contract list with the market-data
   columns left empty; use `get_options_realtime` / `get_options_hist` for
   prices.

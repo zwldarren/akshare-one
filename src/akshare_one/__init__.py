@@ -21,12 +21,12 @@ import pandas as pd
 from .modules.registry import resolve
 
 
-def get_basic_info(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd.DataFrame:
+def get_basic_info(symbol: str, source: Literal["eastmoney", "ths"] = "eastmoney") -> pd.DataFrame:
     """获取股票基础信息
 
     Args:
         symbol: 股票代码 (e.g. '600000')
-        source: 数据源 ('eastmoney')
+        source: 数据源 ('eastmoney', 'ths')
 
     Returns:
         pd.DataFrame:
@@ -51,7 +51,7 @@ def get_hist_data(
     start_date: str = "1970-01-01",
     end_date: str = "2030-12-31",
     adjust: Literal["none", "qfq", "hfq"] = "none",
-    source: Literal["eastmoney", "eastmoney_direct", "sina"] = "eastmoney_direct",
+    source: Literal["eastmoney", "eastmoney_direct", "sina", "ths"] = "eastmoney_direct",
 ) -> pd.DataFrame:
     """Get historical market data
 
@@ -62,7 +62,7 @@ def get_hist_data(
         start_date: 开始日期 (YYYY-MM-DD)
         end_date: 结束日期 (YYYY-MM-DD)
         adjust: 复权类型 ('none','qfq','hfq')
-        source: 数据源 ('eastmoney', 'eastmoney_direct', 'sina')
+        source: 数据源 ('eastmoney', 'eastmoney_direct', 'sina', 'ths')
 
     Returns:
         pd.DataFrame:
@@ -87,13 +87,13 @@ def get_hist_data(
 
 def get_realtime_data(
     symbol: str | None = None,
-    source: Literal["eastmoney", "eastmoney_direct", "xueqiu"] = "eastmoney_direct",
+    source: Literal["eastmoney", "eastmoney_direct", "xueqiu", "ths"] = "eastmoney_direct",
 ) -> pd.DataFrame:
     """Get real-time market quotes
 
     Args:
         symbol: 股票代码 (如 "600000")
-        source: 数据源 ('eastmoney', 'eastmoney_direct', 'xueqiu')
+        source: 数据源 ('eastmoney', 'eastmoney_direct', 'xueqiu', 'ths')
 
     Returns:
         pd.DataFrame:
@@ -113,12 +113,12 @@ def get_realtime_data(
     return provider.get_current_data()
 
 
-def get_news_data(symbol: str, source: Literal["eastmoney"] = "eastmoney") -> pd.DataFrame:
+def get_news_data(symbol: str, source: Literal["eastmoney", "ths"] = "eastmoney") -> pd.DataFrame:
     """获取个股新闻数据
 
     Args:
         symbol: 股票代码 (如 "300059")
-        source: 数据源 ('eastmoney')
+        source: 数据源 ('eastmoney', 'ths')
 
     Returns:
         pd.DataFrame:

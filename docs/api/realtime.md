@@ -16,7 +16,7 @@ def get_realtime_data(
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | `symbol` | str | 否 | None | 股票代码 (如: "600000")，不传则返回所有股票 |
-| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "xueqiu") |
+| `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "xueqiu", "ths") |
 
 !!! warning "重要提示"
     使用 `xueqiu` 数据源时，必须提供 `symbol` 参数
@@ -24,6 +24,8 @@ def get_realtime_data(
 !!! tip "数据源特性"
     - `eastmoney_direct` 数据源支持港股，如 "00700" 表示腾讯控股
     - `eastmoney` 数据源会获取所有股票的实时数据，个股请使用 `eastmoney_direct` 或者 `xueqiu`
+    - `ths` 数据源同样必须提供 `symbol` 参数：上游按单个证券返回，没有批量接口
+    - `ths` 数据源的成交量由上游的“股”换算为“手”，与其它数据源一致
 
 ## 返回值
 
@@ -79,6 +81,18 @@ if not df_single.empty:
 df_hk = get_realtime_data(symbol="00700", source="eastmoney_direct")
 print(df_hk)
 ```
+
+### 使用同花顺数据源
+
+```python
+# 同花顺按单个证券返回实时快照
+df = get_realtime_data(symbol="600519", source="ths")
+print(df)
+```
+
+!!! note "同花顺 (`ths`) 的时间戳"
+    `ths` 的 `timestamp` 列是上游最后一次报价的时间，而不是发起请求的时间；
+    因此它可能比调用时刻早（例如收盘后调用）。
 
 ### 批量获取多只股票数据
 

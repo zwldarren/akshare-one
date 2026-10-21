@@ -56,7 +56,7 @@ https://zwldarren.github.io/akshare-one/
 
 ## 🧪 测试
 
-默认情况下测试完全离线运行。会访问在线数据源（东方财富、新浪、雪球、各交易所）
+默认情况下测试完全离线运行。会访问在线数据源（东方财富、新浪、雪球、同花顺、各交易所）
 的测试模块默认跳过，因为这些接口有严格的速率限制，全量运行可能导致 IP 被临时封禁：
 
 ```bash
@@ -66,8 +66,9 @@ pytest --run-network      # 包含在线数据源测试
 
 ## 🧩 公开接口
 
-对外公开的接口只有 `akshare_one` 与 `akshare_one.indicators`。
-`akshare_one.modules` 下的内容属于内部实现，可能不经过弃用流程直接变更。
+对外公开的接口只有 `akshare_one` 与 `akshare_one.indicators`。其余均为内部实现，
+可能不经过弃用流程直接变更——包括 `akshare_one.modules`，以及按数据源拆分的
+`akshare_one.eastmoney` 与 `akshare_one.ths`。
 
 每个领域的输出列只在 `akshare_one.modules.<domain>.schema` 中声明一次。所有
 数据源返回的 DataFrame 都会投影到这些列上，因此文档中承诺的列始终存在
@@ -79,6 +80,10 @@ pytest --run-network      # 包含在线数据源测试
   `push2.eastmoney.com` 会间歇性返回 `502`（境外访问时尤其明显）。
 - `xueqiu` 实时行情依赖 `xq_a_token` Cookie，而雪球已不再向匿名客户端下发该
   Cookie；触发限流时雪球会返回 `418`。
+- `ths` 直连同花顺的公开 HTTP 接口，无需登录。上游按单个证券返回，因此实时行情
+  必须传入 `symbol`；日线历史很长但按年份分片返回，分钟线只保留较短的窗口。实时
+  行情的 `timestamp` 为上游报价时间；上证综指以 `1A0001` 表示（`sh000001` 会自动
+  映射为该代码）。
 - `get_options_chain` 只返回期权合约列表，行情字段为空；请使用
   `get_options_realtime` / `get_options_hist` 获取价格。
 - `get_futures_main_contracts()` 基于各交易所静态快照，首次调用可能较慢

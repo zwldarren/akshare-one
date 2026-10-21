@@ -16,7 +16,7 @@ def get_basic_info(
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
 | `symbol` | str | 是 | - | 股票代码 (如: "600000") |
-| `source` | str | 否 | "eastmoney" | 数据源 (目前仅支持 "eastmoney") |
+| `source` | str | 否 | "eastmoney" | 数据源 ("eastmoney", "ths") |
 
 ## 返回值
 
@@ -52,3 +52,15 @@ if not df.empty:
     print(f"所属行业: {info['industry']}")
     print(f"总市值: {info['total_market_cap']} 元")
 ```
+
+### 使用同花顺数据源
+
+```python
+# 同花顺的基础信息来自实时快照，上市日期来自 F10 公司概况页
+df = get_basic_info(symbol="600519", source="ths")
+print(df)
+```
+
+!!! note "同花顺 (`ths`) 数据源说明"
+    - 上游快照不提供所属行业，`industry` 列始终为 `NaN`
+    - 上市日期来自 F10 页面；该页读取失败时上市日期为空，其余字段照常返回

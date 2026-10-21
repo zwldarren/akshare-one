@@ -1,9 +1,10 @@
 """Shared pytest configuration.
 
 The default test run is fully offline. Tests that call live upstream data
-providers (EastMoney, Sina, XueQiu, the exchanges) are marked ``network`` and
-skipped unless ``--run-network`` is passed, because those endpoints apply
-aggressive rate limits and a full run can get the caller temporarily blocked.
+providers (EastMoney, Sina, XueQiu, Tonghuashun, the exchanges) are marked
+``network`` and skipped unless ``--run-network`` is passed, because those
+endpoints apply aggressive rate limits and a full run can get the caller
+temporarily blocked.
 
 The marker is per test, not per file, so a test that fakes its upstream still
 runs in the default suite.

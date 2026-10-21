@@ -31,6 +31,13 @@ class HistoricalDataProvider(ABC):
         except ValueError:
             raise ValueError("Invalid date format. Please use YYYY-MM-DD.") from None
 
+    def _validate_interval_params(self) -> None:
+        """Validates the interval and multiplier."""
+        if self.interval not in self.get_supported_intervals():
+            raise ValueError(f"Unsupported interval: {self.interval}")
+        if self.interval in ("minute", "hour") and self.interval_multiplier < 1:
+            raise ValueError("Interval multiplier must be >= 1 for minute/hour.")
+
     @classmethod
     def get_supported_intervals(cls) -> list[str]:
         return ["minute", "hour", "day", "week", "month", "year"]
