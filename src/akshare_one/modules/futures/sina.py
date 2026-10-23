@@ -275,14 +275,14 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         cached for 24 hours. An exchange that errors or returns an unexpected
         shape is skipped with a warning instead of failing the whole call.
 
-        ``contract`` is a placeholder equal to ``symbol``: resolving the actual
-        front-month contract requires one request per variety via akshare/sina,
-        which is too expensive to do here.
+        ``contract`` is a placeholder equal to ``symbol``, and so is ``name``:
+        resolving the actual front-month contract requires one request per
+        variety via akshare/sina, which is too expensive to do here.
 
         Returns:
             pd.DataFrame:
             - symbol: 期货品种代码
-            - name: 期货品种名称
+            - name: 期货品种代码 (placeholder, currently == symbol)
             - contract: 主力合约代码 (placeholder, currently == symbol)
             - exchange: 交易所
         """

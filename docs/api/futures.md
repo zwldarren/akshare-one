@@ -132,7 +132,8 @@ print(df_cf2405)
 
 ## 获取期货主力合约
 
-`get_futures_main_contracts()` 函数用于获取当前市场上各期货品种的主力合约列表。
+`get_futures_main_contracts()` 函数用于获取当前市场上的各期货品种列表；受上游接口限制，
+`contract` 目前是等于 `symbol` 的占位值。
 
 ### 函数签名
 
@@ -155,16 +156,21 @@ def get_futures_main_contracts(
 | 列名 | 类型 | 描述 |
 |------|------|------|
 | `symbol` | str | 期货品种代码 |
-| `name` | str | 期货名称 |
-| `contract` | str | 主力合约代码 |
+| `name` | str | 期货品种代码（占位值，当前与 `symbol` 相同） |
+| `contract` | str | 主力合约代码（占位符，当前与 `symbol` 相同） |
 | `exchange` | str | 交易所 |
+
+!!! note "主力合约字段"
+    当前实现从各交易所的合约列表推导品种，`name` 与 `contract` 都是占位值
+    （等于 `symbol`），不是真正的主力合约代码。该结果基于静态快照，
+    首次调用可能较慢（中金所），并会缓存 24 小时。
 
 ### 使用示例
 
 ```python
 from akshare_one import get_futures_main_contracts
 
-# 获取主力合约列表
+# 获取期货品种列表（contract/name 为占位值）
 df = get_futures_main_contracts()
 print(df.head())
 ```

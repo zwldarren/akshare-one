@@ -29,7 +29,8 @@ def get_hist_data(
 | `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "sina", "ths") |
 
 !!! note "时间间隔说明"
-    如果 `interval` 为 'minute'，则 `interval_multiplier` 表示分钟数，如 5 表示 5 分钟线
+    如果 `interval` 为 'minute' 或 'hour'，`interval_multiplier` 表示分钟数或
+    小时数，如 5 表示 5 分钟线 / 5 小时线。
 
 !!! tip "数据源特性"
     - `eastmoney_direct` 数据源支持港股，如 "00700" 表示腾讯控股
@@ -43,6 +44,12 @@ def get_hist_data(
     - 上游没有 15 分钟线，该周期由 5 分钟线重采样得到
     - 上证综指在同花顺以 `1A0001` 表示；传 `sh000001` 会自动映射为该代码
     - 同花顺的日线/周线/月线/年线以“区间结束日”标记，与其它数据源的标记方式不同
+
+!!! note "股票代码与交易所"
+    `sina` 与 `eastmoney` 数据源会按规则为裸 6 位代码补全交易所前缀
+    （600/688/900 等为 `sh`，000/001/002/300 等为 `sz`，4/8 开头为 `bj`）。
+    指数需要显式传入带前缀的代码，例如上证综指传 `sh000001`；
+    `eastmoney_direct` 还支持直接传入港股代码（如 `00700`）。
 
 ## 返回值
 

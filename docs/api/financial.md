@@ -14,6 +14,10 @@ AKShare One 提供多个函数用于获取上市公司财务数据：
 | `symbol` | str | 是 | - | 股票代码 (如: "600000") |
 | `source` | str | 否 | 见各函数签名 | 数据源 ("sina", "eastmoney_direct")；三张报表默认 `sina`，`get_financial_metrics` 默认 `eastmoney_direct` |
 
+!!! note "数据源覆盖范围"
+    下方列出的字段是财务数据的完整契约。单个数据源只填充其上游接口能提供的
+    字段，其余字段返回 `NaN`；例如 `eastmoney_direct` 只提供主要科目。
+
 ## 资产负债表
 
 `get_balance_sheet()` 函数用于获取资产负债表数据。
@@ -67,6 +71,10 @@ def get_balance_sheet(
 | `current_ratio` | 流动比率 |
 | `debt_to_assets` | 资产负债率 |
 | `minority_interest` | 少数股东权益 |
+
+!!! note "银行资产负债表"
+    `sina` 对银行使用另一套资产负债表模板（没有流动/非流动划分）。因此
+    `current_ratio` 等依赖流动科目的指标会返回 `NaN`，其余科目照常填充。
 
 ## 利润表
 

@@ -44,7 +44,8 @@ from akshare_one.indicators import (
 ```
 
 !!! note "注意事项"
-    - 大部分指标函数支持 `calculator_type` 参数，可以是 `talib` 或 `simple`，默认值为 `simple`。
+    - 所有指标函数都支持 `calculator_type` 参数，可选 `"talib"` 或 `"simple"`，默认值为 `"talib"`。
+    - 未安装 TA-Lib 时，`"talib"` 会自动回退到 `"simple"`，不会报错。
     - `simple` 使用 Python 实现，不需要额外依赖。
     - `talib` 需要额外安装 [TA-Lib](https://ta-lib.org/install/) 依赖并使用 `pip install akshare-one[talib]` 安装。
 

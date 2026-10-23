@@ -31,6 +31,13 @@ from akshare_one import (
     get_cash_flow,
     get_financial_metrics,
     get_inner_trade_data,
+    get_futures_hist_data,
+    get_futures_realtime_data,
+    get_futures_main_contracts,
+    get_options_chain,
+    get_options_realtime,
+    get_options_expirations,
+    get_options_hist,
 )
 
 from akshare_one.indicators import get_sma, get_ema, get_rsi, get_macd, get_bollinger_bands
@@ -62,6 +69,20 @@ income_statement = get_income_statement(symbol="600000")
 
 # 获取现金流量表
 cash_flow = get_cash_flow(symbol="600000")
+```
+
+### 获取期货与期权数据
+```python
+# 获取白银主力合约日线数据
+futures_df = get_futures_hist_data(symbol="AG", interval="day")
+
+# 获取期货品种与主力合约列表
+contracts_df = get_futures_main_contracts()
+
+# 获取 300ETF 期权链、实时行情和到期日
+chain_df = get_options_chain(underlying_symbol="510300")
+quotes_df = get_options_realtime(underlying_symbol="510300")
+expirations = get_options_expirations(underlying_symbol="510300")
 ```
 
 ### 计算技术指标

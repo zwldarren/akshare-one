@@ -39,6 +39,11 @@ def get_options_chain(
 | `open_interest` | int | 持仓量 |
 | `implied_volatility` | float | 隐含波动率 |
 
+!!! note "期权链只包含合约信息"
+    该函数返回期权合约列表；`name`、`strike` 以及行情字段（`price`、`change`、
+    `pct_change`、`volume`、`open_interest`、`implied_volatility`）为空。
+    价格请使用 `get_options_realtime()` / `get_options_hist()` 获取。
+
 ### 使用示例
 
 ```python

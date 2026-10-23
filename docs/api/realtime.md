@@ -15,15 +15,15 @@ def get_realtime_data(
 
 | 参数名 | 类型 | 必填 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-| `symbol` | str | 否 | None | 股票代码 (如: "600000")，不传则返回所有股票 |
+| `symbol` | str | 否 | None | 股票代码 (如: "600000")；不传时仅 `eastmoney` 返回全市场快照，其余数据源必须提供 |
 | `source` | str | 否 | "eastmoney_direct" | 数据源 ("eastmoney", "eastmoney_direct", "xueqiu", "ths") |
 
 !!! warning "重要提示"
-    使用 `xueqiu` 数据源时，必须提供 `symbol` 参数
+    只有 `eastmoney` 数据源支持不传 `symbol` 返回全市场快照；`eastmoney_direct`、`xueqiu`、`ths` 都需要提供 `symbol`。
 
 !!! tip "数据源特性"
     - `eastmoney_direct` 数据源支持港股，如 "00700" 表示腾讯控股
-    - `eastmoney` 数据源会获取所有股票的实时数据，个股请使用 `eastmoney_direct` 或者 `xueqiu`
+    - `eastmoney` 数据源不传 `symbol` 时返回全市场快照，传入时只请求该股票
     - `ths` 数据源同样必须提供 `symbol` 参数：上游按单个证券返回，没有批量接口
     - `ths` 数据源的成交量由上游的“股”换算为“手”，与其它数据源一致
 

@@ -25,6 +25,10 @@
 | 财务数据 | [`get_income_statement()`](api/financial.md#利润表) | 获取利润表数据 |
 | 财务数据 | [`get_cash_flow()`](api/financial.md#现金流量表) | 获取现金流量表数据 |
 | 财务数据 | [`get_financial_metrics()`](api/financial.md#财务关键指标) | 获取财务关键指标 |
+| 期货数据 | [`get_futures_hist_data()`](api/futures.md) / [`get_futures_realtime_data()`](api/futures.md) | 获取期货历史与实时行情 |
+| 期货主力合约 | [`get_futures_main_contracts()`](api/futures.md#获取期货主力合约) | 获取期货品种与主力合约列表 |
+| 期权数据 | [`get_options_chain()`](api/options.md) / [`get_options_realtime()`](api/options.md) / [`get_options_hist()`](api/options.md) | 获取期权链、实时与历史行情 |
+| 期权到期日 | [`get_options_expirations()`](api/options.md#获取期权到期日) | 获取期权可用到期日 |
 | 内部交易 | [`get_inner_trade_data()`](api/insider.md) | 获取内部交易数据 |
 | 技术指标 | [indicators 模块](api/indicators.md) | 丰富的技术分析指标 |
 

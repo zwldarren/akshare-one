@@ -27,12 +27,15 @@ def get_basic_info(
 | `price` | float | 最新价 |
 | `symbol` | str | 股票代码 |
 | `name` | str | 股票简称 |
-| `total_shares` | float | 总股本 (万股) |
-| `float_shares` | float | 流通股 (万股) |
-| `total_market_cap` | float | 总市值 (亿元) |
-| `float_market_cap` | float | 流通市值 (亿元) |
+| `total_shares` | float | 总股本 (股) |
+| `float_shares` | float | 流通股 (股) |
+| `total_market_cap` | float | 总市值 (元) |
+| `float_market_cap` | float | 流通市值 (元) |
 | `industry` | str | 所属行业 |
 | `listing_date` | datetime | 上市日期 |
+
+!!! note "数值单位"
+    股本与市值均为上游接口的原始单位（股、元），未换算为万股或亿元。
 
 ## 使用示例
 

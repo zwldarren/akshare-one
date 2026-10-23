@@ -304,7 +304,7 @@ def get_futures_main_contracts(
     Returns:
         pd.DataFrame:
         - symbol: 期货品种代码
-        - name: 期货品种名称
+        - name: 期货品种代码（当前与 symbol 相同）
         - contract: 主力合约代码 (占位符，目前与 symbol 相同)
         - exchange: 交易所
     """
