@@ -2,6 +2,7 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cached
+from ..compat import ak_function
 from ..registry import provider
 from ..schema import normalize
 from ..utils import to_market_symbol
@@ -82,7 +83,7 @@ class EastMoneyHistorical(HistoricalDataProvider):
         if self._is_etf_code(self.symbol):
             raw_df = self._get_etf_data(start_date, end_date)
         else:
-            raw_df = ak.stock_zh_a_hist(
+            raw_df = ak_function("stock_zh_a_hist")(
                 symbol=self.symbol,
                 period=period,
                 start_date=start_date,

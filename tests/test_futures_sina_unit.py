@@ -98,12 +98,9 @@ class TestHistoricalDateFilter:
 
 
 class TestRealtimeSpot:
-    def test_get_current_data_subscribes_to_requested_contract(self):
+    def test_get_current_data_subscribes_to_requested_contract(self, patch_ak):
         provider = SinaFuturesRealtime(symbol="CF")
-        with patch(
-            "akshare_one.modules.futures.sina.ak.futures_zh_spot",
-            return_value=_spot_frame(),
-        ) as mock_spot:
+        with patch_ak("futures_zh_spot", return_value=_spot_frame()) as mock_spot:
             result = provider.get_current_data()
 
         assert mock_spot.call_args.kwargs["symbol"] == "CF0"
@@ -120,23 +117,19 @@ class TestRealtimeSpot:
         assert row["change"] == pytest.approx(-175.0)
         assert row["pct_change"] == pytest.approx(-1.09, abs=0.01)
 
-    def test_specific_contract_uses_full_code(self):
+    def test_specific_contract_uses_full_code(self, patch_ak):
         provider = SinaFuturesRealtime(symbol="AG2604")
-        with patch(
-            "akshare_one.modules.futures.sina.ak.futures_zh_spot",
-            return_value=_spot_frame("白银2604"),
-        ) as mock_spot:
+        with patch_ak("futures_zh_spot", return_value=_spot_frame("白银2604")) as mock_spot:
             result = provider.get_current_data()
 
         assert mock_spot.call_args.kwargs["symbol"] == "AG2604"
         assert result.iloc[0]["symbol"] == "AG2604"
         assert result.iloc[0]["contract"] == "2604"
 
-    def test_cffex_uses_financial_layout(self):
+    def test_cffex_uses_financial_layout(self, patch_ak):
         provider = SinaFuturesRealtime(symbol="IF")
-        with patch(
-            "akshare_one.modules.futures.sina.ak.futures_zh_spot",
-            return_value=_spot_frame("沪深300指数期货连续"),
+        with patch_ak(
+            "futures_zh_spot", return_value=_spot_frame("沪深300指数期货连续")
         ) as mock_spot:
             provider.get_current_data()
 
@@ -144,7 +137,7 @@ class TestRealtimeSpot:
 
 
 class TestAllQuotes:
-    def test_get_all_quotes_maps_names_back_to_codes(self):
+    def test_get_all_quotes_maps_names_back_to_codes(self, patch_ak):
         table = pd.DataFrame(
             {
                 "symbol": ["CF0", "AG0", "IF0"],
@@ -158,10 +151,7 @@ class TestAllQuotes:
                 "akshare_one.modules.futures.sina.ak.futures_display_main_sina",
                 return_value=table,
             ),
-            patch(
-                "akshare_one.modules.futures.sina.ak.futures_zh_spot",
-                return_value=spot,
-            ) as mock_spot,
+            patch_ak("futures_zh_spot", return_value=spot) as mock_spot,
         ):
             provider = SinaFuturesRealtime()
             result = provider.get_all_quotes()

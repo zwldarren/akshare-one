@@ -1,7 +1,7 @@
-import akshare as ak
 import pandas as pd
 
 from ..cache import cached
+from ..compat import ak_function
 from ..registry import provider
 from ..schema import normalize
 from ..utils import to_market_symbol
@@ -44,7 +44,7 @@ class SinaHistorical(HistoricalDataProvider):
 
     def _get_minute_data(self, stock: str) -> pd.DataFrame:
         """Fetches minute level data"""
-        raw_df = ak.stock_zh_a_minute(
+        raw_df = ak_function("stock_zh_a_minute")(
             symbol=stock,
             period="1",
             adjust=self._map_adjust_param(self.adjust),
@@ -72,7 +72,7 @@ class SinaHistorical(HistoricalDataProvider):
         if self.interval_multiplier < 1:
             raise ValueError("Hour interval multiplier must be >= 1")
 
-        raw_df = ak.stock_zh_a_minute(
+        raw_df = ak_function("stock_zh_a_minute")(
             symbol=stock,
             period="60",
             adjust=self._map_adjust_param(self.adjust),
@@ -102,7 +102,7 @@ class SinaHistorical(HistoricalDataProvider):
 
         if self.interval in ["minute", "hour"]:
             period = "1" if self.interval == "minute" else "60"
-            raw_df = ak.stock_zh_b_minute(
+            raw_df = ak_function("stock_zh_b_minute")(
                 symbol=stock,
                 period=period,
                 adjust=self._map_adjust_param(self.adjust),
@@ -113,7 +113,7 @@ class SinaHistorical(HistoricalDataProvider):
             if self.interval_multiplier > 1:
                 raw_df = self._resample_data(raw_df, self.interval, self.interval_multiplier)
         else:
-            raw_df = ak.stock_zh_b_daily(
+            raw_df = ak_function("stock_zh_b_daily")(
                 symbol=stock,
                 start_date=start_date,
                 end_date=end_date,
@@ -133,7 +133,7 @@ class SinaHistorical(HistoricalDataProvider):
         start_date = self._convert_date_format(self.start_date)
         end_date = self._convert_date_format(self.end_date)
 
-        raw_df = ak.stock_zh_a_daily(
+        raw_df = ak_function("stock_zh_a_daily")(
             symbol=stock,
             start_date=start_date,
             end_date=end_date,

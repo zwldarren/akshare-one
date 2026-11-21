@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10.1.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
 
@@ -28,3 +28,47 @@ jobs:
       # (see tests/conftest.py) because upstream endpoints rate-limit runners.
       - name: Run tests
         run: uv run pytest --no-cov
+
+  # The lock pins one akshare release, but pyproject claims a range and users
+  # install whatever is newest. akshare renames interfaces in patch releases with
+  # no deprecation window, and each of these shipped as a broken install because
+  # nothing ran the suite against a release the lock did not name:
+  #   1.20.46 removed every historical interface akshare-one called;
+  #   1.20.52 swapped stock_financial_report_sina's keyword names;
+  #   1.20.65 changed option_sse_list_sina's return type.
+  # akshare_one.modules.compat exists to absorb the drift; this job is what keeps
+  # it honest. Two points, not every version: 1.18.88 is the oldest release the
+  # lock resolves (for Python 3.10, where newer akshare does not install), and
+  # "latest" is whatever exists today.
+  akshare-range:
+    name: akshare ${{ matrix.akshare }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - akshare: "1.18.88"
+            spec: "akshare==1.18.88"
+          - akshare: "latest"
+            spec: "akshare"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Install the locked environment
+        run: uv sync --locked
+
+      # Overrides only akshare inside the synced venv; everything else stays as
+      # the lock pinned it, so a failure is attributable to akshare alone.
+      - name: Move akshare to the version under test
+        run: uv pip install --python .venv --upgrade "${{ matrix.spec }}"
+
+      - name: Report the version under test
+        run: uv run --no-sync python -c "import akshare; print('akshare', akshare.__version__)"
+
+      - name: Run tests
+        run: uv run --no-sync pytest --no-cov

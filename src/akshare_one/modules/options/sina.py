@@ -4,6 +4,7 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cached
+from ..compat import ak_function, option_expirations
 from ..registry import provider
 from ..schema import normalize
 from .base import OptionsDataProvider
@@ -17,7 +18,8 @@ class SinaOptionsProvider(OptionsDataProvider):
     Note: Options data from akshare uses multiple API calls:
     - option_sse_list_sina: Get expiration dates
     - option_sse_codes_sina: Get option codes for a specific expiration
-    - option_sse_spot_price_sina: Get realtime data for a specific option
+    - option_sse_realtime_sina (was option_sse_spot_price_sina): Get realtime
+      data for a specific option
     - option_sse_daily_sina: Get historical data for a specific option
     """
 
@@ -42,7 +44,9 @@ class SinaOptionsProvider(OptionsDataProvider):
         """
         try:
             # Get expiration dates
-            expirations = ak.option_sse_list_sina(symbol=self.underlying_symbol, exchange="null")
+            expirations = option_expirations(
+                ak.option_sse_list_sina(symbol=self.underlying_symbol, exchange="null")
+            )
 
             if not expirations:
                 raise ValueError(
@@ -137,7 +141,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                 all_realtime = []
                 for option_symbol in chain_df["symbol"].tolist():
                     try:
-                        raw_df = ak.option_sse_spot_price_sina(symbol=option_symbol)
+                        raw_df = ak_function("option_sse_spot_price_sina")(symbol=option_symbol)
                         if not raw_df.empty:
                             realtime_df = self._clean_single_option(raw_df, option_symbol)
                             all_realtime.append(realtime_df)
@@ -151,7 +155,7 @@ class SinaOptionsProvider(OptionsDataProvider):
                 return pd.concat(all_realtime, ignore_index=True)
 
             # Get specific option data
-            raw_df = ak.option_sse_spot_price_sina(symbol=self.symbol)
+            raw_df = ak_function("option_sse_spot_price_sina")(symbol=self.symbol)
 
             if raw_df.empty:
                 return normalize(pd.DataFrame(), REALTIME_COLUMNS)
@@ -168,7 +172,9 @@ class SinaOptionsProvider(OptionsDataProvider):
         """
         try:
             underlying_symbol = self.underlying_symbol
-            expirations = ak.option_sse_list_sina(symbol=underlying_symbol, exchange="null")
+            expirations = option_expirations(
+                ak.option_sse_list_sina(symbol=underlying_symbol, exchange="null")
+            )
             if not expirations:
                 raise ValueError(f"No options found for underlying symbol: {underlying_symbol}")
 
@@ -237,7 +243,8 @@ class SinaOptionsProvider(OptionsDataProvider):
     def _clean_single_option(self, raw_df: pd.DataFrame, symbol: str) -> pd.DataFrame:
         """Cleans and standardizes single option data
 
-        The data from option_sse_spot_price_sina is in a key-value format:
+        The data from option_sse_realtime_sina (option_sse_spot_price_sina
+        before 1.20.44) is in a key-value format:
         - Column '字段' contains field names
         - Column '值' contains field values
 
