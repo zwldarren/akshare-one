@@ -4,6 +4,7 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cached
+from ..compat import ak_function
 from ..registry import provider
 from ..schema import normalize
 from .base import HistoricalFuturesDataProvider, RealtimeFuturesDataProvider
@@ -57,7 +58,7 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
 
     def _get_intraday_data(self) -> pd.DataFrame:
         """Fetches intraday data at minute or hour intervals"""
-        raw_df = ak.futures_zh_minute_sina(symbol=self._normalize_contract())
+        raw_df = ak_function("futures_zh_minute_sina")(symbol=self._normalize_contract())
 
         if raw_df.empty:
             raise ValueError(f"No intraday data found for futures {self.symbol}:{self.contract}")
@@ -380,7 +381,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
             return self.get_all_quotes()
 
         contract = self._requested_contract()
-        raw_df = ak.futures_zh_spot(
+        raw_df = ak_function("futures_zh_spot")(
             symbol=contract,
             market=_market_for(self.symbol),
             adjust="0",
@@ -409,7 +410,7 @@ class SinaFuturesRealtime(RealtimeFuturesDataProvider):
         if not commodities:
             return normalize(pd.DataFrame(), REALTIME_COLUMNS)
 
-        raw_df = ak.futures_zh_spot(
+        raw_df = ak_function("futures_zh_spot")(
             symbol=",".join(commodities),
             market="CF",
             adjust="0",

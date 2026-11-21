@@ -15,7 +15,33 @@ runs in the default suite.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
+
+
+@pytest.fixture
+def patch_ak():
+    """Patch an akshare interface by the name akshare-one knows it by.
+
+    akshare renames interfaces without a deprecation window (see
+    :mod:`akshare_one.modules.compat`), so a test that patches
+    ``akshare.futures_zh_spot`` stops being able to patch at all the release that
+    renames it -- and then it fails with ``AttributeError`` from mock rather than
+    testing anything. Resolving the name first keeps the test measuring this
+    package instead of measuring which akshare is installed.
+
+        def test_x(patch_ak):
+            with patch_ak("futures_zh_spot", return_value=frame) as mock:
+                ...
+    """
+    from akshare_one.modules.compat import available_candidate
+
+    def _patch(family: str, **kwargs):
+        name = available_candidate(family) or family
+        return patch(f"akshare.{name}", **kwargs)
+
+    return _patch
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

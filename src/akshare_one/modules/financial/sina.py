@@ -2,6 +2,7 @@ import akshare as ak
 import pandas as pd
 
 from ..cache import cached
+from ..compat import financial_report_kwargs
 from ..registry import provider
 from ..schema import normalize
 from ..utils import to_market_symbol
@@ -55,7 +56,9 @@ class SinaFinancialReport(FinancialDataProvider):
             Standardized DataFrame with balance sheet data
         """
         try:
-            raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="资产负债表")
+            raw_df = ak.stock_financial_report_sina(
+                **financial_report_kwargs(ak.stock_financial_report_sina, self.stock, "资产负债表")
+            )
             if raw_df is None or raw_df.empty:
                 raise ValueError(f"Invalid stock symbol: {self.symbol}")
             return self._clean_balance_data(raw_df)
@@ -75,7 +78,9 @@ class SinaFinancialReport(FinancialDataProvider):
             Standardized DataFrame with income statement data
         """
         try:
-            raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="利润表")
+            raw_df = ak.stock_financial_report_sina(
+                **financial_report_kwargs(ak.stock_financial_report_sina, self.stock, "利润表")
+            )
             if raw_df is None or raw_df.empty:
                 raise ValueError(f"Invalid stock symbol: {self.symbol}")
             return self._clean_income_data(raw_df)
@@ -95,7 +100,9 @@ class SinaFinancialReport(FinancialDataProvider):
             Standardized DataFrame with cash flow data
         """
         try:
-            raw_df = ak.stock_financial_report_sina(stock=self.stock, symbol="现金流量表")
+            raw_df = ak.stock_financial_report_sina(
+                **financial_report_kwargs(ak.stock_financial_report_sina, self.stock, "现金流量表")
+            )
             if raw_df is None or raw_df.empty:
                 raise ValueError(f"Invalid stock symbol: {self.symbol}")
             return self._clean_cash_data(raw_df)
