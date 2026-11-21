@@ -11,6 +11,15 @@ permissions:
   pages: write
   contents: write
 
+# Every push to main deploys. When several land within a few seconds — a batch of
+# dependabot merges, for instance — the runs race and the losers fail in
+# deploy-pages with "Found 0 artifact(s)", which reads like a broken docs build
+# when the build itself was fine. Deploy one at a time, newest last so the final
+# state of main is what gets published.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
