@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -29,7 +29,7 @@ class TestNewsData:
     def test_news_data_time_range(self):
         """测试新闻数据时间范围"""
         df = get_news_data(symbol="300059")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         one_year_ago = now - timedelta(days=365)
 
         # 验证新闻发布时间在合理范围内
