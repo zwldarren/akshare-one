@@ -119,8 +119,10 @@ class SinaFuturesHistorical(HistoricalFuturesDataProvider):
         dates = pd.to_datetime(df[date_col], errors="coerce")
         start_dt = pd.to_datetime(self.start_date)
         # Half-open upper bound so the whole end day is included but the next
-        # day is not.
-        end_dt = pd.to_datetime(self.end_date) + pd.Timedelta(days=1)
+        # day is not. ``DateOffset`` rather than ``Timedelta(days=1)``: on pandas
+        # 2.3.x the Timedelta addition goes through NumPy's generic timedelta
+        # unit, which warns and is slated to become an error.
+        end_dt = pd.to_datetime(self.end_date) + pd.DateOffset(days=1)
         mask = ((dates >= start_dt) & (dates < end_dt)).to_numpy()
         return df.loc[mask]
 

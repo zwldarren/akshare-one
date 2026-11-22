@@ -1,10 +1,14 @@
+# Revisions track what CI actually runs, so a local `pre-commit run` and a PR
+# check cannot disagree: `uv-lock` matches the uv that writes uv.lock, and ruff
+# matches the ruff the lock pins. Both drifted for months (0.8.17 and v0.16.8)
+# while CI was on 0.13.x and 0.17.5.
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.17
+    rev: 0.13.9
     hooks:
       - id: uv-lock
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.8
+    rev: v0.17.5
     hooks:
       - id: ruff
         args: [ --fix ]

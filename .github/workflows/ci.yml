@@ -24,6 +24,13 @@ jobs:
           uv run ruff check .
           uv run ruff format --check .
 
+      # ty is what checks types here; a [tool.mypy] block claiming `strict = true`
+      # used to sit in pyproject.toml with mypy neither installed nor invoked, so
+      # it checked nothing. talib is an optional extra and is skipped by the
+      # override in [tool.ty].
+      - name: Type check
+        run: uv run ty check src
+
       # The default suite is fully offline; live-provider tests are skipped
       # (see tests/conftest.py) because upstream endpoints rate-limit runners.
       - name: Run tests
@@ -37,9 +44,9 @@ jobs:
   #   1.20.52 swapped stock_financial_report_sina's keyword names;
   #   1.20.65 changed option_sse_list_sina's return type.
   # akshare_one.modules.compat exists to absorb the drift; this job is what keeps
-  # it honest. Two points, not every version: 1.18.88 is the oldest release the
-  # lock resolves (for Python 3.10, where newer akshare does not install), and
-  # "latest" is whatever exists today.
+  # it honest. Two points, not every version: 1.18.1 is the real floor (the first
+  # release PyPI has in the 1.18 line, and the oldest the declared range admits),
+  # and "latest" is whatever exists today.
   akshare-range:
     name: akshare ${{ matrix.akshare }}
     runs-on: ubuntu-latest
@@ -47,8 +54,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - akshare: "1.18.88"
-            spec: "akshare==1.18.88"
+          - akshare: "1.18.1"
+            spec: "akshare==1.18.1"
           - akshare: "latest"
             spec: "akshare"
     steps:

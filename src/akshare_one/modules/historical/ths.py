@@ -165,7 +165,12 @@ class ThsHistorical(HistoricalDataProvider):
         if frame.empty:
             return frame
         start = pd.Timestamp(self.start_date).tz_localize("Asia/Shanghai")
-        end = pd.Timestamp(self.end_date).tz_localize("Asia/Shanghai") + pd.Timedelta(days=1)
+        # ``pd.DateOffset`` rather than ``pd.Timedelta(days=1)``: adding a
+        # Timedelta to a tz-aware Timestamp goes through NumPy's generic
+        # timedelta unit on pandas 2.3.x, which emits a DeprecationWarning that
+        # NumPy has announced will become an error. A DateOffset sidesteps that
+        # path and gives the same instant.
+        end = pd.Timestamp(self.end_date).tz_localize("Asia/Shanghai") + pd.DateOffset(days=1)
         return frame[(frame["timestamp"] >= start) & (frame["timestamp"] < end)]
 
     def _in_beijing_time(self, frame: pd.DataFrame, daily: bool) -> pd.DataFrame:

@@ -227,7 +227,10 @@ def resample_intraday(frame: pd.DataFrame, spacing: int, target: int) -> pd.Data
     if frame.empty or target <= spacing:
         return frame
 
-    starts = frame["timestamp"] - pd.Timedelta(minutes=spacing)
+    # ``to_timedelta`` rather than ``Timedelta(minutes=...)``: subtracting a
+    # Timedelta from a Series goes through NumPy's generic timedelta unit on
+    # pandas 2.3.x, which warns and is slated to become an error.
+    starts = frame["timestamp"] - pd.to_timedelta(spacing, unit="m")
     offsets = _trading_minutes(starts)
     bucket = (offsets // target) * target
     ends = bucket + target

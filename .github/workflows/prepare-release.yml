@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10.1.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
 
@@ -35,31 +35,39 @@ jobs:
       - name: Run tests
         run: uv run pytest --no-cov
 
+      # The input reaches the shell through the environment rather than being
+      # interpolated into the script text, so a crafted value cannot run commands
+      # before this validation gets a chance to reject it.
       - name: Validate version input
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::version must be X.Y.Z, got '${{ inputs.version }}'"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be X.Y.Z, got '$VERSION'"
             exit 1
           fi
-          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
-            echo "::error::tag v${{ inputs.version }} already exists"
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::tag v$VERSION already exists"
             exit 1
           fi
 
       - name: Commit and tag
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          uv version "${{ inputs.version }}"
+          uv version "$VERSION"
           git add pyproject.toml uv.lock
-          git commit -m "chore(release): bump version to ${{ inputs.version }}"
-          git tag "v${{ inputs.version }}"
-          git push origin HEAD:"${GITHUB_REF_NAME}" "v${{ inputs.version }}"
+          git commit -m "chore(release): bump version to $VERSION"
+          git tag "v$VERSION"
+          git push origin HEAD:"${GITHUB_REF_NAME}" "v$VERSION"
 
       - name: Trigger release workflow
-        run: |
-          gh workflow run release.yml --ref "v${{ inputs.version }}"
-          sleep 5
-          gh run list --workflow=release.yml --limit 1
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh workflow run release.yml --ref "v$VERSION"
+          sleep 5
+          gh run list --workflow=release.yml --limit 1
