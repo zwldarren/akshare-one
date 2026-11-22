@@ -23,9 +23,10 @@ Resolution happens on every call rather than at import: that keeps the newest
 name from being frozen in at import time, and it means a test can patch either
 the resolved name or the older one on :mod:`akshare` and still be seen.
 
-The floor stays at the oldest akshare this package ever supported. akshare
-1.20.65 requires Python >= 3.11.5 while this package supports >= 3.10, so
-pinning the floor forward would drop 3.10 support to fix a 3.11+ problem.
+The floor stays at the oldest akshare this package ever supported. Moving it to
+1.18.1 (the first release the 1.18 line has on PyPI) keeps the widest range
+working, because the compat layer already absorbs every rename between the floor
+and today.
 """
 
 from __future__ import annotations

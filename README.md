@@ -35,6 +35,11 @@
 pip install akshare-one
 ```
 
+Requires Python 3.11.5 or newer. 3.10 was dropped: the security fix for
+`soupsieve` (a transitive dependency of `akshare`) publishes as `>=3.11.5`, so a
+3.10 install could only ever resolve the vulnerable release. Stay on 0.6.1 if you
+still need 3.10, which reached end of life on 2026-10-01.
+
 ## 💻 Usage Example
 
 ```python
