@@ -84,8 +84,19 @@ select = [
     "I",
 ]
 
-[tool.mypy]
-strict = true
-
 [tool.pyright]
 typeCheckingMode = "standard"
+
+# ty is the type checker this project actually runs in CI. The mypy config that
+# used to sit here claimed `strict = true` while mypy was neither installed nor
+# invoked anywhere, so it checked nothing and 34 errors had accumulated behind
+# it.
+[tool.ty]
+# Importing talib is the point of this module: factory.py tries the import and
+# falls back to the pure-pandas calculators when it fails. It lives in an
+# optional extra, so a plain `uv sync` leaves it uninstalled and ty cannot
+# resolve it.
+[[tool.ty.overrides]]
+include = ["src/akshare_one/modules/indicators/talib.py"]
+[tool.ty.overrides.rules]
+import-not-found = "ignore"
