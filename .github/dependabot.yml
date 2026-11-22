@@ -9,3 +9,11 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+
+  # Keeps the action pins in .github/workflows/ current. Without this the pins
+  # drift apart: ci.yml moved to setup-uv v10.3.3 while prepare-release.yml and
+  # release.yml stayed on v10.1.0, and no PR ever arrived to notice.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
